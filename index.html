@@ -196,13 +196,17 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .combo.hot{background:linear-gradient(135deg,#D6478F,#7B5BE0)}
 .combo.bump{animation:bump .3s}
 @keyframes bump{40%{transform:scale(1.25) rotate(-4deg)}}
+.hud-spacer{display:none}
 .iconbtn{border:0;background:var(--soft);border-radius:12px;width:42px;height:42px;font-size:19px;flex:none}
 @media (max-width:560px){
   .hud{gap:8px;padding:8px 10px;border-radius:14px;margin-bottom:14px}
-  .hud{flex-wrap:nowrap}
-  .xpbox{min-width:0;flex:1 1 auto}
+  .hud{flex-wrap:wrap;row-gap:6px}
+  .hud-spacer{display:block;flex:1}
+  .xpbox{order:5;flex:1 1 100%;min-width:0}
+  .xprow{margin-bottom:3px;font-size:12px}
   .xprow span{display:none}
   .xprow b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .xpbar{height:6px}
   .hud .lvl,.hud .lvl svg{width:44px;height:44px}
   .iconbtn{width:36px;height:36px;font-size:16px}
   .combo{position:absolute;right:8px;top:calc(100% + 6px);font-size:16px;padding:6px 10px}
@@ -348,6 +352,7 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
     <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="xpGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7B5BE0"/><stop offset=".55" stop-color="#D6478F"/><stop offset="1" stop-color="#F39A3C"/></linearGradient></defs></svg>
     <button class="lvl" id="hudLvl" aria-label="Your level. Open trophies"><svg viewBox="0 0 50 50"><circle class="ring-bg" cx="25" cy="25" r="20"/><circle class="ring-fg" id="hudLvlRing" cx="25" cy="25" r="20" stroke-dasharray="125.7" stroke-dashoffset="125.7"/></svg><b id="hudLvlNum">1</b><small>LVL</small></button>
     <div class="xpbox"><div class="xprow"><b id="rankName">Lab Rat</b><span id="xpText"></span></div><div class="xpbar"><i id="xpFill"></i></div></div>
+    <span class="hud-spacer" aria-hidden="true"></span>
     <div class="hud-stat" id="hudStreak"><span class="ico">🔥</span><span><span id="hudStreakN">0</span><span class="lab">streak</span></span></div>
     <button class="hud-stat" id="hudGoal" aria-label="Today's goal. Open trophies"><svg class="goalring" viewBox="0 0 30 30"><circle class="ring-bg" cx="15" cy="15" r="12" style="stroke-width:4"/><circle class="ring-fg" id="hudGoalRing" cx="15" cy="15" r="12" style="stroke-width:4" stroke-dasharray="75.4" stroke-dashoffset="75.4"/></svg><span><span id="hudGoalN">0/30</span><span class="lab">today</span></span></button>
     <div class="combo" id="combo" aria-live="polite"></div>
@@ -836,7 +841,7 @@ store.g = Object.assign({}, GDEF, store.g||{}); store.g.st = Object.assign({}, G
 const G = store.g;
 let combo = 0;
 
-const RANKS = [[1,"Lab Rat"],[2,"Wakefield Minion"],[4,"Curious Participant"],[6,"Research Assistant"],[8,"Wakefield's Favourite (Allegedly)"],[10,"Undergraduate"],[13,"Wakefield's Teacher's Pet"],[16,"Graduate Researcher"],[20,"Doctor of Psychology"],[25,"Professor"],[30,"Head of Department"],[35,"Guardian of the Fount"],[40,"Grand Master of the Mind"],[45,"Keeper of the Sacred Mark Scheme"],[50,"Dedicated Wakefield Stan"]];
+const RANKS = [[1,"Lab Rat"],[2,"Wakefield Minion"],[3,"Confused Participant"],[4,"Professional Guesser"],[5,"Short-Term Memory Loss"],[6,"Chunking Champion"],[7,"Wakefield's Seat Warmer"],[8,"Placebo Effect"],[9,"Highlighter Addict"],[10,"Certified Overthinker"],[11,"Wakefield's Favourite (Allegedly)"],[12,"Baby Freud"],[13,"Wakefield's Teacher's Pet"],[14,"Neuron Whisperer"],[15,"Conformity Rebel"],[16,"Research Assistant"],[17,"Fount Sipper"],[18,"Brain Cell Collector"],[19,"Bystander (Not Helping)"],[20,"Agentic State Survivor"],[21,"Wakefield's Homework Hero"],[22,"Mind Palace Builder"],[23,"Serial Position Specialist"],[24,"Fount Paddler"],[25,"Schema Smasher"],[26,"Synapse Surfer"],[27,"Wakefield's Right-Hand Pupil"],[28,"Shockingly Obedient"],[29,"Undergraduate"],[30,"Walking Visual Illusion"],[31,"Top-Down Thinker"],[32,"Wakefield's Lab Partner"],[33,"Graduate Researcher"],[34,"Myelin Sheath Enthusiast"],[35,"Fount Swimmer"],[36,"Piaget's Problem Child"],[37,"Wakefield's Favourite (Confirmed)"],[38,"Doctor of Psychology"],[39,"Ethical Guidelines Enforcer"],[40,"Professor"],[41,"Wakefield's Deputy"],[42,"Freud's Worst Nightmare"],[43,"Head of Department"],[44,"Hippocampus Hero"],[45,"Wakefield Whisperer"],[46,"Guardian of the Fount"],[47,"Mark Scheme Mind-Reader"],[48,"Wakefield's Successor (In Training)"],[49,"Grand Master of the Mind"],[50,"Keeper of the Sacred Mark Scheme"],[51,"Wakefield Cardboard Cutout Owner"],[52,"Walking Revision Guide"],[53,"Fount Overlord"],[54,"Examiner's Nightmare"],[55,"Wakefield Fan Club President"],[56,"Living Legend"],[57,"Psychology Final Boss"],[58,"Wakefield's Mini-Me"],[59,"One Step From Stan"],[60,"Dedicated Wakefield Stan"]];
 const lvlStart = n => 50*(n-1)*n;           // XP needed to reach level n
 function lvlFor(xp){ let n=1; while(xp>=lvlStart(n+1)) n++; return n; }
 function rankFor(n){ let r=RANKS[0][1]; RANKS.forEach(([l,name])=>{ if(n>=l) r=name; }); return r; }
@@ -1008,7 +1013,7 @@ const BADGES = [
   ["l10","🌟","Shining","Reach level 10",()=>lvlFor(G.xp)>=10],
   ["l20","🏆","Elite","Reach level 20",()=>lvlFor(G.xp)>=20],
   ["l2","🫡","Wakefield Minion","Reach level 2 and join the ranks",()=>lvlFor(G.xp)>=2],
-  ["l50","💘","Dedicated Wakefield Stan","Reach level 50. True devotion",()=>lvlFor(G.xp)>=50],
+  ["l60","💘","Dedicated Wakefield Stan","Reach level 60. True devotion",()=>lvlFor(G.xp)>=60],
   ["gold1","✨","Lucky find","Get a golden card right",()=>G.st.gold>=1, true],
   ["gold10","💰","Gold digger","Get 10 golden cards right",()=>G.st.gold>=10, true],
   ["weekend","🛋️","Weekend warrior","Revise on a Saturday or Sunday",()=>[0,6].includes(new Date().getDay()) && G.st.cards>0, true],
