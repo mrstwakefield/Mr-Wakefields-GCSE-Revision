@@ -658,7 +658,7 @@ store.g = Object.assign({}, GDEF, store.g||{}); store.g.st = Object.assign({}, G
 const G = store.g;
 let combo = 0;
 
-const RANKS = [[1,"Lab Rat"],[3,"Curious Participant"],[5,"Research Assistant"],[8,"Undergraduate"],[12,"Graduate Researcher"],[16,"Doctor of Psychology"],[20,"Professor"],[25,"Head of Department"],[30,"Grand Master of the Mind"]];
+const RANKS = [[1,"Lab Rat"],[2,"Wakefield Minion"],[4,"Curious Participant"],[6,"Research Assistant"],[8,"Wakefield's Favourite (Allegedly)"],[10,"Undergraduate"],[13,"Teacher's Pet"],[16,"Graduate Researcher"],[20,"Doctor of Psychology"],[25,"Professor"],[30,"Head of Department"],[35,"Guardian of the Fount"],[40,"Grand Master of the Mind"],[45,"Keeper of the Sacred Mark Scheme"],[50,"Dedicated Wakefield Stan"]];
 const lvlStart = n => 50*(n-1)*n;           // XP needed to reach level n
 function lvlFor(xp){ let n=1; while(xp>=lvlStart(n+1)) n++; return n; }
 function rankFor(n){ let r=RANKS[0][1]; RANKS.forEach(([l,name])=>{ if(n>=l) r=name; }); return r; }
@@ -737,11 +737,9 @@ function levelUp(n){
 /* ---- XP + streak core ---- */
 function addXP(n, el, label){
   if(n<=0) return;
-  const before=lvlFor(G.xp); G.xp+=n;
+  G.xp+=n;
   if(el!==false) floater(label||("+"+n+" XP"), el, n>=40?"big":"");
-  const after=lvlFor(G.xp);
   renderHud();
-  if(after>before) setTimeout(()=>levelUp(after), 450);
 }
 function checkStreak(){
   if(!G.last) return;
@@ -794,7 +792,7 @@ function bumpCombo(ok){
 }
 /* called from mark() when a card becomes known */
 function onKnown(id, prevPct){
-  if(!G.ever[id]){ G.ever[id]=1; G.xp+=5; }
+  if(!G.ever[id]){ G.ever[id]=1; G.xp+=5; renderHud(); }
   const d=BY_ID[id], t=TMAP[d.t], items=DATA.filter(x=>x.t===d.t);
   const pct=items.filter(x=>status(x.id)==="k").length/items.length;
   [[1,"🥇","mastered! Every card known"],[.8,"🥈","silver medal: 80% known"],[.5,"🥉","bronze medal: 50% known"]].some(([th,ic,txt])=>{
@@ -827,6 +825,8 @@ const BADGES = [
   ["l5","⭐","Rising star","Reach level 5",()=>lvlFor(G.xp)>=5],
   ["l10","🌟","Shining","Reach level 10",()=>lvlFor(G.xp)>=10],
   ["l20","🏆","Elite","Reach level 20",()=>lvlFor(G.xp)>=20],
+  ["l2","🫡","Wakefield Minion","Reach level 2 and join the ranks",()=>lvlFor(G.xp)>=2],
+  ["l50","💘","Dedicated Wakefield Stan","Reach level 50. True devotion",()=>lvlFor(G.xp)>=50],
   ["gold1","✨","Lucky find","Get a golden card right",()=>G.st.gold>=1, true],
   ["gold10","💰","Gold digger","Get 10 golden cards right",()=>G.st.gold>=10, true],
   ["weekend","🛋️","Weekend warrior","Revise on a Saturday or Sunday",()=>[0,6].includes(new Date().getDay()) && G.st.cards>0, true],
@@ -843,8 +843,11 @@ function checkBadges(){
 
 /* ---- HUD ---- */
 function ring(r,frac){ const c=2*Math.PI*r; return `stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${(c*(1-Math.min(1,frac))).toFixed(1)}"`; }
+let shownLvl = lvlFor(G.xp);
 function renderHud(){
-  const n=lvlFor(G.xp), s=lvlStart(n), e=lvlStart(n+1), frac=(G.xp-s)/(e-s), t=today(), done=G.hist[t]||0;
+  const n=lvlFor(G.xp);
+  if(n>shownLvl){ shownLvl=n; setTimeout(()=>levelUp(n), 450); }
+  const s=lvlStart(n), e=lvlStart(n+1), frac=(G.xp-s)/(e-s), t=today(), done=G.hist[t]||0;
   const live = G.last===t || (G.last && dayNum(t)-dayNum(G.last)===1) ? G.streak : 0;
   $("#hudLvlNum").textContent=n;
   $("#hudLvlRing").setAttribute("stroke-dashoffset", (2*Math.PI*20*(1-frac)).toFixed(1));
