@@ -658,7 +658,7 @@ store.g = Object.assign({}, GDEF, store.g||{}); store.g.st = Object.assign({}, G
 const G = store.g;
 let combo = 0;
 
-const RANKS = [[1,"Lab Rat"],[2,"Wakefield Minion"],[4,"Curious Participant"],[6,"Research Assistant"],[8,"Wakefield's Favourite (Allegedly)"],[10,"Undergraduate"],[13,"Teacher's Pet"],[16,"Graduate Researcher"],[20,"Doctor of Psychology"],[25,"Professor"],[30,"Head of Department"],[35,"Guardian of the Fount"],[40,"Grand Master of the Mind"],[45,"Keeper of the Sacred Mark Scheme"],[50,"Dedicated Wakefield Stan"]];
+const RANKS = [[1,"Lab Rat"],[2,"Wakefield Minion"],[4,"Curious Participant"],[6,"Research Assistant"],[8,"Wakefield's Favourite (Allegedly)"],[10,"Undergraduate"],[13,"Wakefield's Teacher's Pet"],[16,"Graduate Researcher"],[20,"Doctor of Psychology"],[25,"Professor"],[30,"Head of Department"],[35,"Guardian of the Fount"],[40,"Grand Master of the Mind"],[45,"Keeper of the Sacred Mark Scheme"],[50,"Dedicated Wakefield Stan"]];
 const lvlStart = n => 50*(n-1)*n;           // XP needed to reach level n
 function lvlFor(xp){ let n=1; while(xp>=lvlStart(n+1)) n++; return n; }
 function rankFor(n){ let r=RANKS[0][1]; RANKS.forEach(([l,name])=>{ if(n>=l) r=name; }); return r; }
