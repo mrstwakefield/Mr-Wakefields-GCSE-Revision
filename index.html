@@ -389,6 +389,23 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
   body{background:#fff}
   .box,.tile{break-inside:avoid}
 }
+
+/* today's plan */
+.plan{display:flex;flex-direction:column;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:0 0 16px}
+.plan:empty{display:none}
+.plan-count{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:17px}
+.plan-count > span{flex:1;min-width:200px}
+.plan-days{font-family:var(--display);font-size:24px}
+.plan-btn{padding:6px 12px;font-size:14px}
+.plan-tasks{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.plan-h{font-family:var(--display);font-size:16px;margin-right:4px}
+.task{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:6px 10px;font-size:15px;text-align:left}
+.task.done{background:var(--good-bg);border-color:transparent;color:var(--ink)}
+.task.done span:last-child{text-decoration:line-through;text-decoration-color:var(--good)}
+.task:disabled{cursor:default;opacity:1}
+.plan-bonus{font-size:14px;color:var(--muted);margin-left:auto}
+.plan-bonus.got{color:var(--good);font-weight:700}
+@media (max-width:560px){.plan{padding:10px 12px}.task{width:100%}.plan-bonus{margin-left:0}}
 /* trophies */
 .profile{display:flex;gap:22px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;margin-bottom:14px}
 .profile .bigring{position:relative;width:110px;height:110px;flex:none}
@@ -462,6 +479,8 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
     <button class="iconbtn" id="soundBtn" aria-label="Mute sounds">🔊</button>
   </div>
 
+  <div class="plan" id="plan" aria-live="polite"></div>
+
   <div class="tabs" role="tablist" aria-label="Revision mode">
     <button role="tab" aria-selected="true" data-tab="cards" id="tab-cards" aria-controls="p-cards">Flashcards</button>
     <button role="tab" aria-selected="false" data-tab="quiz" id="tab-quiz" aria-controls="p-quiz">Quiz</button>
@@ -473,7 +492,7 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
   <section class="topics" aria-labelledby="topicsTitle">
     <div class="topics-head">
       <h2 id="topicsTitle">Topics to revise</h2>
-      <div><button class="linkbtn" id="allTopics">Select all</button><button class="linkbtn" id="noTopics">Clear</button></div>
+      <div><button class="linkbtn" id="mockTopics">🎯 Mock topics</button><button class="linkbtn" id="allTopics">Select all</button><button class="linkbtn" id="noTopics">Clear</button></div>
     </div>
     <div class="chips" id="chips"></div>
   </section>
@@ -838,7 +857,7 @@ function flip(){
   if(hadFocus) $(flipped?"#gotBtn":"#flipBtn").focus({preventScroll:true});
 }
 function rate(s){ const id=deck[pos], wasDue=isDue(id); sessionRes[id]=s; mark(id,s);
-  deckXP+=answer({ok:s==="k", el:$(s==="k"?"#gotBtn":"#learnBtn"), mode:"cards", gold:golds.has(id), review:wasDue&&s==="k"});
+  deckXP+=answer({ok:s==="k", el:$(s==="k"?"#gotBtn":"#learnBtn"), mode:"cards", gold:golds.has(id), review:wasDue&&s==="k", topic:BY_ID[id].t});
   deckCombo = s==="k" ? deckCombo+1 : 0; if(deckCombo>deckBest) deckBest=deckCombo;
   pos++; flipped=false; renderCard(); const b=$("#flipBtn"); if(b) b.focus({preventScroll:true}); }
 document.addEventListener("keydown",e=>{
@@ -885,7 +904,7 @@ function renderQuiz(){
       <p style="text-align:right;margin-top:10px"><button class="linkbtn" id="qQuit">Quit quiz</button></p>`;
     $("#qQuit").onclick=()=>{quiz.phase="setup";renderQuiz();};
     if(quiz.shown){
-      const next=ok=>{ quiz.marks[quiz.i]=ok; const wasDue=isDue(d.id); mark(d.id, ok?"k":"l"); answer({ok, el:$(ok?"#qYes":"#qNo"), mode:"quiz", review:wasDue&&ok}); quiz.i++; quiz.shown=false; if(quiz.i>=quiz.items.length){ quiz.phase="done"; quizDone(); } renderQuiz(); const ta=$("#qAns"); if(ta) ta.focus(); };
+      const next=ok=>{ quiz.marks[quiz.i]=ok; const wasDue=isDue(d.id); mark(d.id, ok?"k":"l"); answer({ok, el:$(ok?"#qYes":"#qNo"), mode:"quiz", review:wasDue&&ok, topic:d.t}); quiz.i++; quiz.shown=false; if(quiz.i>=quiz.items.length){ quiz.phase="done"; quizDone(); } renderQuiz(); const ta=$("#qAns"); if(ta) ta.focus(); };
       $("#qYes").onclick=()=>next(true); $("#qNo").onclick=()=>next(false);
       $("#qYes").focus({preventScroll:true});
     } else {
@@ -1065,7 +1084,7 @@ function goalMet(){
   addXP(50,false);
   if(G.streak%7===0 && G.freeze<2){ G.freeze++; setTimeout(()=>toast("🧊","Streak freeze earned","It saves your streak if you miss a day."),1200); }
 }
-function answer({ok, el, mode, gold, x2, review}){
+function answer({ok, el, mode, gold, x2, review, topic}){
   checkStreak();
   const t=today();
   G.st.cards++; if(ok) G.st.right++;
@@ -1075,6 +1094,7 @@ function answer({ok, el, mode, gold, x2, review}){
   if(gold && ok){ mult*=5; G.st.gold++; }
   const xp=Math.round(base*mult)+(review?5:0);
   G.hist[t]=(G.hist[t]||0)+1;
+  if(topic){ if(!G.tday || G.tday.d!==t) G.tday={d:t, c:{}}; G.tday.c[topic]=(G.tday.c[topic]||0)+1; }
   if(gold && ok){ sfx("gold"); confetti(70); } else sfx(ok?"ok":"no");
   addXP(xp, el, "+"+xp+" XP"+(mult>1?"  ×"+mult:""));
   if(!ok) floater("+"+xp+" XP for honesty", el, "meh");
@@ -1131,6 +1151,7 @@ const BADGES = [
   ["boss1","⚔️","Boss slayer","Defeat your first boss",()=>Object.values(G.bosses).some(b=>b.won)],
   ["flawless","👑","Flawless victory","Defeat a boss without losing a life",()=>Object.values(G.bosses).some(b=>b.flawless)],
   ["bossall","🐉","Dungeon cleared","Defeat every boss",()=>Object.keys(BOSSES).every(k=>G.bosses[k]&&G.bosses[k].won)],
+  ["plan7","🗒️","Planner","Complete Today's plan on 7 days",()=>(G.st.plans||0)>=7],
   ["l5","⭐","Rising star","Reach level 5",()=>lvlFor(G.xp)>=5],
   ["l10","🌟","Shining","Reach level 10",()=>lvlFor(G.xp)>=10],
   ["l20","🏆","Elite","Reach level 20",()=>lvlFor(G.xp)>=20],
@@ -1185,6 +1206,7 @@ function renderHud(){
   $("#hudGoalRing").setAttribute("stroke-dashoffset", (2*Math.PI*12*(1-Math.min(1,done/G.goal))).toFixed(1));
   $("#soundBtn").textContent=G.sound?"🔊":"🔇";
   $("#soundBtn").setAttribute("aria-label", G.sound?"Mute sounds":"Turn sounds on");
+  if(typeof renderPlan==="function") renderPlan();
 }
 $("#soundBtn").onclick=()=>{ G.sound=!G.sound; save(); renderHud(); if(G.sound) sfx("ok"); };
 $("#hudLvl").onclick=()=>goTab("trophies");
@@ -1409,7 +1431,7 @@ function logResult(d, ok, el){
   if(arc.mode==="daily"){ const dd=G.daily[today()]; if(dd){ dd.log=arc.items.map((x,j)=>arc.log[j]?arc.log[j].ok:false); dd.score=dd.log.filter(Boolean).length; dd.time=Date.now()-arc.t0; } }
   if(ok && d.kind==="maths") G.st.maths++;
   if(ok && d.t==="Exam skills") G.st.examR++;
-  arc.xp += answer({ok, el, mode:"arcade", x2: arc.mode==="exam" || (d.t==="Exam skills")});
+  arc.xp += answer({ok, el, mode:"arcade", x2: arc.mode==="exam" || (d.t==="Exam skills"), topic:d.t, boss:arc.mode==="boss"});
   if(ok) arc.right++;
   if(!ok && d.id && status(d.id)!=="k") mark(d.id,"l");
 }
@@ -1836,8 +1858,56 @@ function wireReport(){
   };
 }
 
+
+/* ================= TODAY'S PLAN + EXAM COUNTDOWN ================= */
+// Exam dates (edit here). Mocks leave out Language, thought & communication.
+const EXAMS = [
+  {d:"2026-12-04", name:"Paper 1 mock", mock:true},
+  {d:"2026-12-11", name:"Paper 2 mock", mock:true},
+  {d:"2027-05-10", name:"Paper 1"},
+  {d:"2027-05-17", name:"Paper 2"},
+];
+const PLAN_BONUS = 40;
+const niceDate = s => new Date(s+"T12:00:00").toLocaleDateString("en-GB",{weekday:"short", day:"numeric", month:"short"});
+function weakestTopic(){
+  const cand = mockPeriod() ? MOCK_TOPICS : TOPICS.map(t=>t.key);
+  return topicStats().filter(s=>cand.includes(s.key)).sort((a,b)=>a.k-b.k || a.l-b.l)[0].key;
+}
+function selectTopics(keys){ store.sel=[...keys]; save(); renderChips(); topicsChanged(); }
+function renderPlan(){
+  const el=$("#plan"); if(!el || TEACHER) return;
+  const t=today();
+  if(!G.plan || G.plan.d!==t) G.plan={d:t, weak:weakestTopic(), done:false};
+  const next=EXAMS.find(x=>x.d>=t), weak=G.plan.weak;
+  let count;
+  if(!next) count=`<span>🎓 Exams are done. You smashed it, good luck with results!</span>`;
+  else { const days=dayNum(next.d)-dayNum(t);
+    count = days===0 ? `<span>🍀 <b>Today: ${esc(next.name)}.</b> Good luck!</span>`
+      : `<span><b class="plan-days">${next.mock?"🎯":"⏳"} ${days}</b> day${days===1?"":"s"} to your <b>${esc(next.name)}</b> <span class="muted">(${niceDate(next.d)})</span></span>`;
+    if(next.mock) count+=`<button class="btn ghost plan-btn" id="planMock">Revise mock topics</button>`;
+  }
+  const dueAll=DATA.filter(d=>isDue(d.id)).length, dd=G.daily[t], weakN=(G.tday&&G.tday.d===t&&G.tday.c[weak])||0;
+  const tasks=[
+    {id:"planDue", done:dueAll===0, txt: dueAll? `Clear today's ${dueAll} due review${dueAll===1?"":"s"}` : "Due reviews all done"},
+    {id:"planDaily", done:!!(dd&&dd.done), txt:"Play the Daily 10"},
+    {id:"planWeak", done:weakN>=10, txt:`10 cards on ${esc(TMAP[weak].name)} <span class="muted">(${Math.min(weakN,10)}/10)</span>`},
+  ];
+  const all=tasks.every(x=>x.done);
+  if(all && !G.plan.done){ G.plan.done=true; G.st.plans=(G.st.plans||0)+1; save();
+    setTimeout(()=>{ toast("🗒️",`Today's plan complete! +${PLAN_BONUS} XP`,"See you tomorrow."); confetti(160); sfx("badge"); addXP(PLAN_BONUS,false); checkBadges(); save(); },600); }
+  el.innerHTML=`<div class="plan-count">${count}</div>
+    <div class="plan-tasks"><b class="plan-h">Today's plan</b>${tasks.map(x=>`<button class="task ${x.done?"done":""}" id="${x.id}" ${x.done&&x.id==="planDaily"?"disabled":""}><span class="tick">${x.done?"✅":"⬜"}</span><span>${x.txt}</span></button>`).join("")}
+    <span class="plan-bonus ${all?"got":""}">${all?`✓ +${PLAN_BONUS} XP earned`:`All 3 = +${PLAN_BONUS} XP`}</span></div>`;
+  const m=$("#planMock"); if(m) m.onclick=()=>{ selectTopics(MOCK_TOPICS); toast("🎯","Mock topics selected","Everything except Language, thought & communication."); };
+  $("#planDue").onclick=()=>{ if(!dueAll) return; selectTopics(TOPICS.map(x=>x.key)); goTab("cards"); setFilter("due"); };
+  $("#planDaily").onclick=()=>{ goTab("arcade"); startArc("daily"); };
+  $("#planWeak").onclick=()=>{ selectTopics([weak]); goTab("cards"); setFilter("notknown"); $("#cardArea").scrollIntoView({behavior:reduced()?"auto":"smooth", block:"center"}); };
+}
+$("#mockTopics").onclick=()=>selectTopics(MOCK_TOPICS);
+if(!mockPeriod()) $("#mockTopics").hidden=true;
+
 if(TEACHER){ startTeacher(); }
-else { checkStreak(); checkBadges(); save(); renderMeter(); renderChips(); newDeck(); renderQuiz(); renderHud(); renderArcade(); }
+else { checkStreak(); checkBadges(); save(); renderMeter(); renderChips(); newDeck(); renderQuiz(); renderHud(); renderArcade(); renderPlan(); }
 </script>
 </body>
 </html>
