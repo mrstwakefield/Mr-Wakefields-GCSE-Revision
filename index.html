@@ -417,7 +417,16 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 @media (max-width:560px){.plan{padding:10px 12px}.task{width:100%}.plan-bonus{margin-left:0}}
 
 /* 9-mark practice */
-#extArea[hidden],#quizArea[hidden],#skillArea[hidden],#mockArea[hidden]{display:none}
+#extArea[hidden],#quizArea[hidden],#skillArea[hidden],#mockArea[hidden],#parentArea[hidden]{display:none}
+.parent-box h4{margin:16px 0 8px}
+.parent-box h4 small{font-weight:400}
+.parent-how{margin:0 0 6px;padding-left:22px;line-height:1.6}
+.parent-topics{display:flex;flex-wrap:wrap;gap:6px}
+.parent-q .q{font-size:24px;line-height:1.35}
+.parent-ans{background:var(--good-bg);border-radius:12px;padding:12px 14px;margin-top:12px;display:flex;flex-direction:column;gap:4px}
+.parent-ans b{font-size:20px;line-height:1.4}
+.parent-rate{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media (max-width:560px){.parent-rate{grid-template-columns:1fr}}
 .seg{flex-wrap:wrap}
 .mock-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:12px}
 .mock-resume{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-left:6px solid #1C8A5E}
@@ -742,11 +751,12 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 
   <!-- QUIZ -->
   <section class="panel" id="p-quiz" role="tabpanel" aria-labelledby="tab-quiz" hidden>
-    <div class="bar-row"><div class="seg" role="group" aria-label="Quiz type"><button aria-pressed="true" data-qm="quick">⚡ Quick quiz</button><button aria-pressed="false" data-qm="ext">✍️ 9-mark practice <span class="x2">2× XP</span></button><button aria-pressed="false" data-qm="skills">🧩 Exam skills <span class="x2">2× XP</span></button><button aria-pressed="false" data-qm="mock">📝 Mock papers</button></div></div>
+    <div class="bar-row"><div class="seg" role="group" aria-label="Quiz type"><button aria-pressed="true" data-qm="quick">⚡ Quick quiz</button><button aria-pressed="false" data-qm="ext">✍️ 9-mark practice <span class="x2">2× XP</span></button><button aria-pressed="false" data-qm="skills">🧩 Exam skills <span class="x2">2× XP</span></button><button aria-pressed="false" data-qm="mock">📝 Mock papers</button><button aria-pressed="false" data-qm="parent">👪 Parent mode</button></div></div>
     <div id="quizArea"></div>
     <div id="extArea" hidden></div>
     <div id="skillArea" hidden></div>
     <div id="mockArea" hidden></div>
+    <div id="parentArea" hidden></div>
   </section>
 
   <!-- ARCADE -->
@@ -770,7 +780,7 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
   </section>
 
   <footer class="foot">
-    <span>Your progress is saved in this browser only. <button class="linkbtn" id="backupLink" style="padding:0">Back it up</button></span>
+    <span>Your progress is saved in this browser only. <button class="linkbtn" id="backupLink" style="padding:0">Back it up</button> · <button class="linkbtn" id="parentLink" style="padding:0">👪 Parent mode</button></span>
     <button class="btn ghost install-btn" id="installBtn" hidden>📲 Install as an app</button>
     <button class="linkbtn" id="resetBtn">Reset my progress</button>
   </footer>
@@ -1580,6 +1590,7 @@ const BADGES = [
   ["match45","🔗","Speed matcher","Finish the Study Matcher in under 45 seconds",()=>(G.st.matchBest||999)<45],
   ["mock1","📝","Exam conditions","Finish a mock paper",()=>Object.keys((G.mocks||{}).done||{}).length>=1],
   ["mock4","🏅","Mock marathon","Finish all four mock papers",()=>Object.keys((G.mocks||{}).done||{}).length>=4],
+  ["parent3","👪","Family quiz night","Get tested by a parent or carer 3 times",()=>(G.st.parent||0)>=3],
   ["focus5","🎯","Deep focus","Complete 5 focus sessions",()=>(G.st.focus||0)>=5],
   ["flaw14","🔍","Flaw finder","Score 14+ in Spot the Flaw",()=>(G.st.flawBest||0)>=14],
   ["order15","🔢","Sequence master","Score 15+ in Put it in Order",()=>(G.st.orderBest||0)>=15],
@@ -2944,7 +2955,8 @@ const ext = {phase:"list", filter: mockPeriod() ? "mock" : "all", cur:null, time
 G.ext = G.ext || {done:{}, drafts:{}};
 function setQuizMode(m){
   document.querySelectorAll("[data-qm]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.qm===m));
-  $("#quizArea").hidden = m!=="quick"; $("#extArea").hidden = m!=="ext"; $("#skillArea").hidden = m!=="skills"; $("#mockArea").hidden = m!=="mock";
+  $("#quizArea").hidden = m!=="quick"; $("#extArea").hidden = m!=="ext"; $("#skillArea").hidden = m!=="skills"; $("#mockArea").hidden = m!=="mock"; $("#parentArea").hidden = m!=="parent";
+  if(m==="parent") renderParent();
   if(m==="mock") renderMocks();
   if(m==="ext") renderExt();
   if(m==="skills") renderSkills();
@@ -3280,6 +3292,76 @@ function mockResultsHTML(){
   $("#mList").onclick=()=>{ mkp.phase="list"; renderMocks(); };
 }
 
+
+/* ================= PARENT MODE ================= */
+const pm = {phase:"setup", items:[], i:0, shown:false, res:[], topics:null, n:10, kind:"mix"};
+function pmPickTopics(){ const W=weakData().filter(w=>w.t.key!=="Exam skills"); const started=W.filter(w=>w.seen).sort((a,b)=>a.strength-b.strength); return (started.length?started:W).slice(0,3).map(w=>w.t.key); }
+function pmBuild(){
+  const topics=pm.topics, prio=d=>status(d.id)==="l"?0:G.mistakes[d.id]!==undefined?0:isDue(d.id)?1:status(d.id)===""?2:3;
+  let qs=[];
+  if(pm.kind!=="terms") qs=qs.concat(DATA.filter(d=>topics.includes(d.t) && d.id<5000 && d.a.length<=160).map(d=>({id:d.id, t:d.t, q:d.q, a:d.a, kind:"q"})));
+  if(pm.kind!=="qs") qs=qs.concat(TERMS.filter(x=>topics.includes(x.t)).map(x=>({id:x.id, t:x.t, q:`What is the key term for this? “${x.def}”`, a:x.term, kind:"term"})));
+  qs=shuffle(qs).sort((a,b)=>prio(a)-prio(b));
+  const seen=new Set(); pm.items=qs.filter(x=>!seen.has(x.id) && seen.add(x.id)).slice(0,pm.n);
+}
+function renderParent(){
+  const area=$("#parentArea");
+  if(pm.phase==="setup"){
+    if(!pm.topics) pm.topics=pmPickTopics();
+    area.innerHTML=`<div class="box parent-box"><h3 style="margin-top:0">👪 Parent mode <small>Test your child, no psychology knowledge needed</small></h3>
+      <ol class="parent-how"><li>Read each question out loud.</li><li>Let your child answer in their own words.</li><li>Tap <b>Show answer</b> and compare. Close enough counts: it doesn't need to be word for word.</li><li>Tap how they did. Their progress and XP update automatically.</li></ol>
+      <h4>Topics <small class="muted">${!pm.topics.length?"Pick at least one":weakData().some(w=>w.seen)?"We've picked their weakest topics. Change them if you like.":"Pick the topics they're revising."}</small></h4>
+      <div class="parent-topics">${TOPICS.filter(t=>t.key!=="Exam skills").map(t=>`<button class="extf" style="--c:${t.c}" aria-pressed="${pm.topics.includes(t.key)}" data-pt="${esc(t.key)}">${esc(t.name)}</button>`).join("")}</div>
+      <h4>Type of question</h4>
+      <div class="seg" role="group" aria-label="Type of question">${[["mix","A mix"],["qs","Questions"],["terms","Key terms"]].map(([k,l])=>`<button aria-pressed="${pm.kind===k}" data-pk="${k}">${l}</button>`).join("")}</div>
+      <h4>How many?</h4>
+      <div class="seg" role="group" aria-label="Number of questions">${[5,10,20].map(n=>`<button aria-pressed="${pm.n===n}" data-pn="${n}">${n} questions</button>`).join("")}</div>
+      <div class="card-actions"><button class="btn" id="pmGo" ${pm.topics.length?"":"disabled"}>Start testing</button></div>
+      <p class="muted" style="font-size:14px;margin:8px 0 0">Questions they find hardest come up first: ones they're still learning, have got wrong before, or are due to review.</p></div>`;
+    area.querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>{ const k=b.dataset.pt; pm.topics=pm.topics.includes(k)?pm.topics.filter(x=>x!==k):[...pm.topics,k]; renderParent(); });
+    area.querySelectorAll("[data-pk]").forEach(b=>b.onclick=()=>{ pm.kind=b.dataset.pk; renderParent(); });
+    area.querySelectorAll("[data-pn]").forEach(b=>b.onclick=()=>{ pm.n=+b.dataset.pn; renderParent(); });
+    $("#pmGo").onclick=()=>{ pmBuild(); if(!pm.items.length) return toast("👪","No questions found for those topics","",true); pm.i=0; pm.res=[]; pm.shown=false; pm.phase="run"; resetCombo(); renderParent(); area.scrollIntoView({behavior:reduced()?"auto":"smooth"}); };
+    return;
+  }
+  if(pm.phase==="run"){
+    const d=pm.items[pm.i], t=TMAP[d.t];
+    area.innerHTML=`<div class="arc-top"><span class="big">👪 Parent mode</span><span class="spacer"></span><span class="big">${pm.i+1}/${pm.items.length}</span></div>
+      <div class="progressline"><i style="width:${pm.i/pm.items.length*100}%"></i></div>
+      <div class="quiz-q parent-q" style="--c:${t.c}"><div class="tag">${esc(t.name)} <span class="muted">${d.kind==="term"?"Key term":"Question"} · read it out loud</span></div>
+        <div class="q">${esc(d.q)}</div>
+        ${pm.shown?`<div class="parent-ans"><span class="muted">Answer</span><b>${esc(d.a)}</b></div>
+          <p class="muted" style="margin:6px 0 10px;font-size:15px">How did they do?</p>
+          <div class="parent-rate"><button class="btn good" data-pr="k">✅ Got it</button><button class="btn ghost" data-pr="h">🟨 Partly</button><button class="btn ghost" data-pr="l">❌ Not yet</button></div>`
+        :`<div class="card-actions"><button class="btn" id="pmShow">Show answer</button></div>`}</div>
+      <p style="text-align:right;margin-top:10px"><button class="linkbtn" id="pmStop">Finish early</button></p>`;
+    const sh=$("#pmShow"); if(sh){ sh.onclick=()=>{ pm.shown=true; renderParent(); }; sh.focus({preventScroll:true}); }
+    area.querySelectorAll("[data-pr]").forEach(b=>b.onclick=()=>pmRate(b.dataset.pr, b));
+    $("#pmStop").onclick=()=>{ pm.phase="done"; renderParent(); };
+    return;
+  }
+  // done
+  const got=pm.res.filter(r=>r.r==="k").length, part=pm.res.filter(r=>r.r==="h").length, n=pm.res.length;
+  const revisit=pm.res.filter(r=>r.r!=="k");
+  const msg = !n ? "No questions answered this time." : got/n>=.8 ? "Brilliant! They really know this." : got/n>=.5 ? "Good effort. A few to go over again." : "These topics need more practice. Little and often is best.";
+  if(n && !pm.claimed){ pm.claimed=true; const bonus=10+got*3; addXP(bonus,false); G.st.parent=(G.st.parent||0)+1; checkBadges(); save(); }
+  area.innerHTML=`<div class="empty"><h3>👪 Parent quiz complete</h3><p class="score">${got}/${n}</p><p class="muted">${part?`${part} partly right · `:""}${msg}</p>
+    <button class="btn" id="pmAgain">Test again</button> <button class="btn ghost" id="pmBack">Change topics</button></div>
+    ${revisit.length?`<div class="box"><h3 style="margin-top:0">To go over together</h3><ul class="results">${revisit.map(r=>`<li class="no"><b>${esc(r.d.q)}</b><div class="ans">${esc(r.d.a)}</div></li>`).join("")}</ul>
+      <p class="muted" style="font-size:14px">These have been added to your child's "still learning" pile and their 🩹 Fix my mistakes list, so the site will bring them back.</p></div>`:""}`;
+  $("#pmAgain").onclick=()=>{ pmBuild(); pm.i=0; pm.res=[]; pm.shown=false; pm.claimed=false; pm.phase="run"; renderParent(); };
+  $("#pmBack").onclick=()=>{ pm.phase="setup"; pm.claimed=false; renderParent(); };
+}
+function pmRate(r, el){
+  const d=pm.items[pm.i]; pm.res.push({d, r});
+  const ok=r==="k";
+  if(BY_ID[d.id]){ if(ok) mark(d.id,"k"); else if(status(d.id)!=="k" || r==="l") mark(d.id,"l"); trackMistake(d.id, ok); }
+  answer({ok, el, mode:"cards", topic:d.t});
+  pm.i++; pm.shown=false;
+  if(pm.i>=pm.items.length){ pm.phase="done"; pm.claimed=false; }
+  renderParent();
+}
+
 /* ================= PRINTABLE CERTIFICATES ================= */
 const CERT_LEVELS = [5,10,20,30,40,50,60];
 function certList(){
@@ -3453,6 +3535,8 @@ else { if(G.cardMode==="gap"){ cardMode="gap"; document.querySelectorAll("[data-
   dateEggs(); checkStreak(); checkBadges(); save(); renderMeter(); renderChips(); newDeck(); renderQuiz(); renderHud(); renderArcade(); renderPlan(); renderEvents(); }
 
 $("#focusBtn").onclick=focusClick; if(G.focus && G.focus.end){ if(Date.now()>=G.focus.end) focusEnd(true); else { focusTimer=setInterval(focusTick,1000); focusBtnRender(); } }
+$("#parentLink").onclick=()=>{ goTab("quiz"); setQuizMode("parent"); $("#parentArea").scrollIntoView({behavior:reduced()?"auto":"smooth"}); };
+if(!TEACHER && /(^|[?&#])parent\b/i.test(location.search+location.hash)){ goTab("quiz"); setQuizMode("parent"); }
 </script>
 </body>
 </html>
