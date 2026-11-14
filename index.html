@@ -3569,9 +3569,10 @@ function showScroll(s, first){
 function scrollBoxHTML(){
   const n=SECRET_SCROLLS.filter(s=>G.scrolls[s.id]).length;
   return `<div class="box"><h3>📜 Secret scrolls <small>${n} of ${SECRET_SCROLLS.length} found${n===SECRET_SCROLLS.length?" · Wakefield Mode unlocked ✦":""}</small></h3>
+    <p class="sk-watch" style="margin:0 0 12px">🎨 Every scroll unlocks its own secret theme, and finding all ${SECRET_SCROLLS.length} unlocks ✦ Wakefield Mode.</p>
     <div class="scrolls">${SECRET_SCROLLS.map(s=>G.scrolls[s.id]
       ? `<button class="scrollcard got" data-scroll="${s.id}"><span class="si">📜</span><b>${esc(s.title)}</b><span>Tap to read again</span></button>`
-      : `<div class="scrollcard"><span class="si">🔒</span><b>Sealed scroll</b><span>“${esc(s.hint)}”</span>${THEMES.some(t=>t.scroll===s.id)?'<span class="scroll-bonus">🎨 Unlocks a secret theme</span>':""}</div>`).join("")}</div>
+      : `<div class="scrollcard"><span class="si">🔒</span><b>Sealed scroll</b><span>“${esc(s.hint)}”</span></div>`).join("")}</div>
     ${THEMES.filter(t=>t.scroll && G.scrolls[t.scroll]).map(t=>`<p class="muted" style="margin:12px 0 0;font-size:15px">🎨 You unlocked the <b>${esc(t.name)}</b> theme. Switch it on in the Themes tab.</p>`).join("")}</div>`;
 }
 // easter-egg triggers
