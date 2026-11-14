@@ -601,6 +601,21 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .sticky small{font-family:var(--body);font-size:11px;font-weight:700;margin-top:2px}
 .sticky.sm{position:absolute;top:-10px;right:-6px;margin:0;font-size:12px;padding:4px 6px;transform:rotate(6deg);z-index:1}
 .sticky.sm::before{width:20px;height:8px;top:-4px}
+.tp-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px;padding:5px;background:var(--soft);border-radius:14px}
+.tp-tabs button{flex:1 1 auto;border:0;background:transparent;border-radius:10px;padding:9px 12px;font-weight:700;font-size:15px;color:var(--muted)}
+.tp-tabs button[aria-selected="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.tp-n{font-size:12px;font-weight:700;background:var(--line);border-radius:99px;padding:1px 7px;margin-left:4px}
+.tp-h{font-family:var(--display);font-size:18px;margin:18px 0 8px}
+.weak-list{display:grid;gap:10px}
+.weak-row{border-left:6px solid var(--c);margin:0}
+.weak-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.weak-head .spacer{flex:1}
+.weak-tag{color:#fff;font-size:12px;font-weight:800;border-radius:99px;padding:2px 9px}
+.weak-pct{font-family:var(--display);font-size:20px}
+.weak-bar{height:10px;background:var(--soft);border-radius:99px;overflow:hidden;margin:8px 0}
+.weak-bar i{display:block;height:100%}
+.weak-stats{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted)}
+.weak-stats b{color:var(--ink)}
 /* trophies */
 .profile{display:flex;gap:22px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;margin-bottom:14px}
 .profile .bigring{position:relative;width:110px;height:110px;flex:none}
@@ -1493,6 +1508,7 @@ function answer({ok, el, mode, gold, x2, review, topic, boss}){
   if(gold && ok){ mult*=5; G.st.gold++; }
   const xp=Math.round(base*mult)+(review?5:0);
   G.hist[t]=(G.hist[t]||0)+1;
+  if(topic && TMAP[topic]){ G.tacc=G.tacc||{}; const ta=G.tacc[topic]=G.tacc[topic]||[0,0]; ta[1]++; if(ok) ta[0]++; }   // per-topic accuracy for Weak spots
   if(topic){ if(!G.tday || G.tday.d!==t) G.tday={d:t, c:{}}; G.tday.c[topic]=(G.tday.c[topic]||0)+1; }
   if(gold && ok){ sfx("gold"); confetti(70); } else sfx(ok?"ok":"no");
   addXP(xp, el, "+"+xp+" XP"+(mult>1?"  ×"+mult:""));
@@ -2257,44 +2273,61 @@ function renderTrophies(){
     const l= v===0?"": v<G.goal/2?"l1": v<G.goal?"l2":"l3";
     cells+=`<i class="${l} ${k===t?"today":""}" ${future?'style="visibility:hidden"':""} title="${k}: ${v} answered"></i>`;
   }
-  $("#trophyArea").innerHTML=`
-    <div class="profile"><div class="bigring"><svg viewBox="0 0 110 110"><circle class="ring-bg" cx="55" cy="55" r="48" style="stroke-width:9"/><circle class="ring-fg" cx="55" cy="55" r="48" style="stroke-width:9" ${ring(48,frac)}/></svg><b>${n}</b></div>
+  const tp=G.tpage||"progress";
+  const TP=[["progress","📈 Progress"],["weak","🎯 Weak spots"],["badges",`🏅 Badges <span class="tp-n">${got}/${BADGES.length}</span>`],["looks","🎨 Themes & secrets"],["save","💾 Save & reports"]];
+  const pages={
+    progress:`<div class="profile"><div class="bigring"><svg viewBox="0 0 110 110"><circle class="ring-bg" cx="55" cy="55" r="48" style="stroke-width:9"/><circle class="ring-fg" cx="55" cy="55" r="48" style="stroke-width:9" ${ring(48,frac)}/></svg><b>${n}</b></div>
       <div><h2>${esc(rankFor(n))}</h2><p>Level ${n} · ${G.xp.toLocaleString()} XP total · ${e-G.xp} XP to level ${n+1}</p>
       <p>${(()=>{const nx=RANKS.find(r=>r[0]>n); return nx?`Next rank: <b>${esc(nx[1])}</b> at level ${nx[0]}`:"You've reached the top rank. Legend."})()}</p></div></div>
-    <div class="tiles">
-      <div class="tile"><b>🔥 ${G.last===t||(G.last&&dayNum(t)-dayNum(G.last)===1)?G.streak:0}</b><span>Day streak (best ${G.best})</span></div>
+    <h3 class="tp-h">Your stats</h3><div class="tiles"><div class="tile"><b>🔥 ${G.last===t||(G.last&&dayNum(t)-dayNum(G.last)===1)?G.streak:0}</b><span>Day streak (best ${G.best})</span></div>
       <div class="tile"><b>🧊 ${G.freeze}</b><span>Streak freezes (earn one every 7 days)</span></div>
       <div class="tile"><b>${knownTotal()}</b><span>Cards known of ${DATA.length}</span></div>
       <div class="tile"><b>${G.st.cards.toLocaleString()}</b><span>Questions answered</span></div>
       <div class="tile"><b>${acc}%</b><span>Accuracy</span></div>
       <div class="tile"><b>${G.st.combo}</b><span>Best combo</span></div>
-      <div class="tile"><b>${G.st.blitz.toLocaleString()}</b><span>Blitz best</span></div>
+      <div class="tile"><b>${G.st.reviews}</b><span>Spaced reviews done</span></div></div>
+    <h3 class="tp-h">Personal bests</h3><div class="tiles"><div class="tile"><b>${G.st.blitz.toLocaleString()}</b><span>Blitz best</span></div>
       <div class="tile"><b>${G.st.surv}</b><span>Survival best</span></div>
       <div class="tile"><b>${G.st.exam}/10</b><span>Exam Skills best</span></div>
       <div class="tile"><b>${G.st.terms}/30</b><span>Key Terms best</span></div>
       <div class="tile"><b>${G.st.mathsBest}/10</b><span>RM Maths best</span></div>
       <div class="tile"><b>${Object.values(G.bosses).filter(b=>b.won).length}/${Object.keys(BOSSES).length}</b><span>Bosses defeated</span></div>
-      <div class="tile"><b>${G.st.reviews}</b><span>Spaced reviews done</span></div>
-    </div>
-    <div class="box"><h3>Daily goal <small>Answer this many questions a day to keep your streak</small></h3>
-      <div class="seg" role="group" aria-label="Daily goal">${[[15,"Chill"],[30,"Steady"],[50,"Serious"],[100,"Beast mode"]].map(([v,l])=>`<button aria-pressed="${G.goal===v}" data-goal="${v}">${l} · ${v}</button>`).join("")}</div></div>
+      <div class="tile"><b>${G.st.flawBest||0}/16</b><span>Spot the Flaw best</span></div>
+      <div class="tile"><b>${G.st.orderBest||0}/18</b><span>Put it in Order best</span></div>
+      <div class="tile"><b>${G.st.matchBest?G.st.matchBest+"s":"–"}</b><span>Study Matcher fastest</span></div>
+      <div class="tile"><b>${Object.keys((G.mocks||{}).done||{}).length}/4</b><span>Mock papers done</span></div>
+      <div class="tile"><b>${Object.keys((G.skills||{}).done||{}).length}</b><span>Exam-skills questions done</span></div>
+      <div class="tile"><b>${Object.keys((G.ext||{}).done||{}).length}</b><span>9-mark answers done</span></div>
+      <div class="tile"><b>${G.st.focus||0}</b><span>Focus sessions</span></div></div>
     <div class="box"><h3>Last 12 weeks <small>Darker = closer to your goal</small></h3><div class="heat">${cells}</div></div>
-    <div class="box"><h3>Themes <small>Unlock new looks as you level up</small></h3><div class="themes">${THEMES.filter(th=>!th.secret||themeOpen(th)).map(th=>{ const open=themeOpen(th), on=(G.skin||"")===th.k;
+    <div class="box"><h3>Daily goal <small>Answer this many questions a day to keep your streak</small></h3>
+      <div class="seg" role="group" aria-label="Daily goal">${[[15,"Chill"],[30,"Steady"],[50,"Serious"],[100,"Beast mode"]].map(([v,l])=>`<button aria-pressed="${G.goal===v}" data-goal="${v}">${l} · ${v}</button>`).join("")}</div></div>`,
+    weak: weakHTML(),
+    badges:`<div class="box"><h3>Badges <small>${got} of ${BADGES.length} unlocked</small></h3>
+      <div class="xpbar" style="margin:0 0 12px"><i style="width:${got/BADGES.length*100}%"></i></div>
+      <div class="seg" role="group" aria-label="Show badges" style="margin-bottom:12px">${[["all","All"],["got","Unlocked"],["locked","Still to get"]].map(([k,l])=>`<button aria-pressed="${(G.bfilter||"all")===k}" data-bf="${k}">${l}</button>`).join("")}</div>
+      <div class="badges">${BADGES.slice().sort((x,y)=>(G.badges[y[0]]?1:0)-(G.badges[x[0]]?1:0)).filter(b=>{ const f=G.bfilter||"all"; return f==="all" || (f==="got") === !!G.badges[b[0]]; }).map(([id,ic,name,desc,,secret])=>{
+      const has=G.badges[id]; if(!has && secret) return `<div class="badge locked secret"><div class="bi">❓</div><b>Secret badge</b><span>“${esc(typeof secret==="string"?secret:"Keep revising to find it")}”</span></div>`;
+      return `<div class="badge ${has?"got":"locked"}"><div class="bi">${ic}</div><b>${esc(name)}</b><span>${esc(desc)}</span></div>`; }).join("")}</div></div>`,
+    looks:`<div class="box"><h3>Themes <small>Unlock new looks as you level up</small></h3><div class="themes">${THEMES.filter(th=>!th.secret||themeOpen(th)).map(th=>{ const open=themeOpen(th), on=(G.skin||"")===th.k;
       return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b><span>${open?(on?"In use":"Tap to use"):"🔒 Level "+th.lvl}</span></button>`; }).join("")}</div></div>
-    ${certBoxHTML()}
-    ${reportBoxHTML()}
-    <div class="box"><h3>Move or back up your progress <small>Your progress only lives in this browser</small></h3>
+    ${scrollBoxHTML()}
+    ${certBoxHTML()}`,
+    save:`<div class="box"><h3>Move or back up your progress <small>Your progress only lives in this browser</small></h3>
       <p class="muted" style="margin:0 0 12px">To carry on using another device (school computer, phone, laptop), copy your save code and paste it there. Keep a copy somewhere safe in case your browser data gets cleared.</p>
       <div class="card-actions" style="margin-top:0"><button class="btn" id="saveCopy">Copy save code</button><button class="btn ghost" id="saveFile">Download backup file</button></div>
       <textarea id="saveIn" placeholder="Paste a save code here to load it on this device" style="min-height:80px;margin-top:14px;font-size:14px"></textarea>
       <div class="card-actions"><button class="btn ghost" id="saveLoad">Load save code</button><label class="btn ghost" style="text-align:center">Load backup file<input type="file" id="saveUp" accept=".txt,.json,text/plain" hidden></label></div>
       <p class="muted" id="saveMsg" style="margin:10px 0 0;font-size:15px" aria-live="polite"></p></div>
-    ${scrollBoxHTML()}
-    <div class="box"><h3>Badges <small>${got} of ${BADGES.length} unlocked</small></h3><div class="badges">${BADGES.map(([id,ic,name,desc,,secret])=>{
-      const has=G.badges[id]; if(!has && secret) return `<div class="badge locked secret"><div class="bi">❓</div><b>Secret badge</b><span>“${esc(typeof secret==="string"?secret:"Keep revising to find it")}”</span></div>`;
-      return `<div class="badge ${has?"got":"locked"}"><div class="bi">${ic}</div><b>${esc(name)}</b><span>${esc(desc)}</span></div>`; }).join("")}</div></div>`;
+    ${reportBoxHTML()}`,
+  };
+  $("#trophyArea").innerHTML=`<div class="tp-tabs" role="tablist" aria-label="Trophies sections">${TP.map(([k,l])=>`<button role="tab" aria-selected="${tp===k}" data-tp="${k}">${l}</button>`).join("")}</div>`+pages[tp];
+  document.querySelectorAll("[data-tp]").forEach(b=>b.onclick=()=>{ G.tpage=b.dataset.tp; save(); renderTrophies(); });
+  document.querySelectorAll("[data-wrev]").forEach(b=>b.onclick=()=>{ selectTopics([b.dataset.wrev]); goTab("cards"); });
+  document.querySelectorAll("[data-wboss]").forEach(b=>b.onclick=()=>{ goTab("arcade"); startBoss(b.dataset.wboss); });
+  document.querySelectorAll("[data-bf]").forEach(b=>b.onclick=()=>{ G.bfilter=b.dataset.bf; save(); renderTrophies(); });
   document.querySelectorAll(".theme").forEach(b=>b.onclick=()=>{ G.skin=b.dataset.skin; G.skinsTried[G.skin||"classic"]=1; save(); applySkin(); checkBadges(); renderTrophies(); });
-  wireSave(); wireReport();
+  if(tp==="save"){ wireSave(); wireReport(); }
   document.querySelectorAll("[data-cert]").forEach(b=>b.onclick=()=>openCert(b.dataset.cert));
   document.querySelectorAll("[data-scroll]").forEach(b=>b.onclick=()=>showScroll(SECRET_SCROLLS.find(s=>s.id===b.dataset.scroll), false));
   document.querySelectorAll("[data-goal]").forEach(b=>b.onclick=()=>{ G.goal=+b.dataset.goal; if((G.hist[t]||0)>=G.goal && G.last!==t) goalMet(); save(); renderHud(); renderTrophies(); });
@@ -2304,13 +2337,45 @@ document.addEventListener("keydown",e=>{
   if(tab!=="arcade" || arc.phase!=="play" || arc.mode==="terms" || e.target.matches("input,textarea") || e.metaKey||e.ctrlKey||e.altKey) return;
   if(["1","2","3","4"].includes(e.key)){ e.preventDefault(); arcPick(+e.key-1); }
 });
-$("#backupLink").onclick=()=>{ goTab("trophies"); setTimeout(()=>$("#saveCopy").scrollIntoView({behavior:"smooth",block:"center"}),50); };
+$("#backupLink").onclick=()=>{ G.tpage="save"; goTab("trophies"); setTimeout(()=>$("#saveCopy").scrollIntoView({behavior:"smooth",block:"center"}),50); };
 
 /* ================= SHARED: mock dates ================= */
 const MOCK_TOPICS = TOPICS.map(t=>t.key).filter(k=>k!=="Language, thought & communication");
 const MOCK_END = "2026-12-11";
 const mockPeriod = () => today() <= MOCK_END;
 const liveStreak = () => { const t=today(); return (G.last===t || (G.last && dayNum(t)-dayNum(G.last)===1)) ? G.streak : 0; };
+function weakData(){
+  return TOPICS.map(t=>{ const it=DATA.filter(d=>d.t===t.key), n=it.length||1;
+    const k=it.filter(d=>status(d.id)==="k").length, l=it.filter(d=>status(d.id)==="l").length;
+    const acc=(G.tacc||{})[t.key]||[0,0], mist=it.filter(d=>G.mistakes[d.id]!==undefined).length;
+    const ex=EXT.filter(x=>x.t===t.key), exDone=ex.filter(x=>G.ext.done[x.id]).length;
+    const mockT=((G.mocks||{}).topic||{})[t.key], boss=G.bosses[t.key]||{};
+    const parts=[k/n*100]; if(acc[1]>=10) parts.push(acc[0]/acc[1]*100); if(mockT&&mockT[1]) parts.push(mockT[0]/mockT[1]*100);
+    const seen=k+l>0 || acc[1]>0;
+    return {t, n, k, l, acc, mist, ex:ex.length, exDone, mockT, boss, seen, strength:Math.round(parts.reduce((a,b)=>a+b,0)/parts.length)};
+  });
+}
+function weakHTML(){
+  const W=weakData().sort((a,b)=>a.strength-b.strength), pct=(a,b)=>b?Math.round(a/b*100):0;
+  const lab=s=>s<40?["Weak spot","#C2410C"]:s<70?["Getting there","#B7791F"]:["Strong","#1C8A5E"];
+  const weakest=W.filter(w=>w.seen&&w.strength<70).slice(0,3);
+  return `<div class="box"><h3>🎯 Weak spots <small>Every topic, weakest first</small></h3>
+    <p class="muted" style="margin:0 0 6px">Strength combines how many cards you know, your accuracy (once you've answered 10+ questions on a topic) and your latest mock paper score.</p>
+    ${weakest.length?`<p class="sk-watch" style="margin:8px 0 0"><b>Focus on next:</b> ${weakest.map(w=>esc(w.t.name)).join(", ")}.</p>`:""}</div>
+    <div class="weak-list">${W.map(w=>{ const [L,c]=w.seen?lab(w.strength):["Not started","#64748B"];
+      return `<div class="box weak-row" style="--c:${w.t.c}"><div class="weak-head"><b>${esc(w.t.name)}</b><span class="weak-tag" style="background:${c}">${L}</span><span class="spacer"></span><b class="weak-pct">${w.strength}%</b></div>
+        <div class="weak-bar"><i style="width:${w.strength}%;background:${w.t.c}"></i></div>
+        <div class="weak-stats">
+          <span>📚 Known <b>${w.k}/${w.n}</b></span>
+          <span>🟠 Still learning <b>${w.l}</b></span>
+          <span>🎯 Accuracy <b>${w.acc[1]?pct(w.acc[0],w.acc[1])+"%":"–"}</b>${w.acc[1]?` <span class="muted">(${w.acc[1]} answered)</span>`:""}</span>
+          <span>🩹 Mistakes to fix <b>${w.mist}</b></span>
+          ${w.ex?`<span>✍️ 9-markers <b>${w.exDone}/${w.ex}</b></span>`:""}
+          ${w.mockT?`<span>📝 Last mock <b>${w.mockT[0]}/${w.mockT[1]}</b></span>`:""}
+          <span>🐉 Boss <b>${w.boss.flawless?"👑 Flawless":w.boss.won?"✓ Defeated":w.boss.tries?"Not yet":"Not tried"}</b></span>
+        </div>
+        <div class="card-actions" style="margin-top:8px"><button class="btn ghost" data-wrev="${esc(w.t.key)}">📚 Revise this topic</button>${BOSSES[w.t.key]?`<button class="btn ghost" data-wboss="${esc(w.t.key)}">🐉 Fight the boss</button>`:""}</div></div>`; }).join("")}</div>`;
+}
 function topicStats(){
   return TOPICS.map(t=>{ const it=DATA.filter(d=>d.t===t.key), n=it.length||1;
     return {key:t.key, k:Math.round(it.filter(d=>status(d.id)==="k").length/n*100), l:Math.round(it.filter(d=>status(d.id)==="l").length/n*100)}; });
@@ -3187,6 +3252,7 @@ function mockResults(){
   const xp=((prev?20:40)+r.score)*(full?2:1);
   r.d=today(); r.secsDone=cur.secs.length;
   if(!prev || r.score/r.of >= prev.score/prev.of) G.mocks.done[cur.id]={score:r.score, of:r.of, d:r.d};
+  G.mocks.topic=G.mocks.topic||{}; Object.entries(r.secs).forEach(([t,x])=>G.mocks.topic[t]=x);
   G.mocks.last={...r, id:cur.id, xp}; G.mocks.cur=null; G.st.mocks=(G.st.mocks||0)+1; G.hist[today()]=(G.hist[today()]||0)+1;
   addXP(xp,false); sfx("lvl"); if(r.score/r.of>=.7) confetti(200);
   checkBadges(); save(); mkp.phase="results"; renderMocks(); $("#mockArea").scrollIntoView({behavior:reduced()?"auto":"smooth"});
@@ -3302,7 +3368,7 @@ function foundScroll(id){
   showScroll(s, first);
   if(first){
     setTimeout(()=>{ addXP(30,false); toast("📜",`Secret scroll ${Object.keys(G.scrolls).length} of ${SECRET_SCROLLS.length} found`,"+30 XP"); },700);
-    if(SECRET_SCROLLS.every(x=>G.scrolls[x.id])){ G.flags.keeper=1; save(); setTimeout(()=>{ checkBadges(); toast("✦","Wakefield Mode theme unlocked","Find it in Trophies → Themes."); confetti(200,["#E6C35C","#0D2A1E","#F6F0DC"]); },2200); }
+    if(SECRET_SCROLLS.every(x=>G.scrolls[x.id])){ G.flags.keeper=1; save(); setTimeout(()=>{ checkBadges(); toast("✦","Wakefield Mode theme unlocked","Find it in Trophies → Themes & secrets."); confetti(200,["#E6C35C","#0D2A1E","#F6F0DC"]); },2200); }
   }
 }
 function showScroll(s, first){
