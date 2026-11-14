@@ -48,7 +48,7 @@ button{cursor:pointer}
 /* header */
 .top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px}
 h1{font-family:var(--display);font-weight:800;font-size:clamp(34px,6vw,56px);line-height:.95;letter-spacing:-.02em;margin:0}
-h1 span{display:block;font-size:.42em;font-weight:500;letter-spacing:0;color:var(--muted);margin-top:10px;line-height:1.2}
+h1 span:not(.h1t){display:block;font-size:.42em;font-weight:500;letter-spacing:0;color:var(--muted);margin-top:10px;line-height:1.2}
 h1 span b{font-weight:500}
 .meter{min-width:220px;flex:0 1 300px}
 .meter p{margin:0 0 6px;font-size:15px;color:var(--muted)}
@@ -677,7 +677,25 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 :root[data-skin="royale"]{--paper:#1A1033;--card:#251845;--ink:#F7F0FF;--muted:#BBA9DD;--line:#3A2A63;--soft:#2F2056;--good:#4CC896;--good-bg:#173A30;--warn:#FFB86B;--warn-bg:#3E2A1A;color-scheme:dark}
 :root[data-skin="royale"] h1{background:linear-gradient(90deg,#FFD54A,#F7F0FF);-webkit-background-clip:text;background-clip:text;color:transparent}
 :root[data-skin="stan"]{--paper:#FFE9F3;--card:#FFFFFF;--ink:#3D0F2A;--muted:#85506D;--line:#F5C6DC;--soft:#FBD9E8;--good:#1C8A5E;--good-bg:#DDF3E8;--warn:#C2185B;--warn-bg:#FCE0EC;color-scheme:light}
-:root[data-skin="stan"] h1::after{content:" 💘"}
+:root[data-skin="stan"] .h1t::after{content:" 💘"}
+:root[data-skin="examhall"]{--paper:#F2F3F5;--card:#FFFFFF;--ink:#22262E;--muted:#5E6573;--line:#D8DBE1;--soft:#E7E9ED;--good:#1C8A5E;--good-bg:#DDF3E8;--warn:#B4531B;--warn-bg:#FBE7D9;color-scheme:light}
+:root[data-skin="chalk"]{--paper:#1F2E28;--card:#273A32;--ink:#F1F4EE;--muted:#B5C2B9;--line:#38503F;--soft:#304539;--good:#E8D88A;--good-bg:#3A3A22;--warn:#F3A37A;--warn-bg:#40291E;color-scheme:dark}
+:root[data-skin="chalk"] h1{font-family:"Comic Sans MS","Chalkboard SE",var(--display);letter-spacing:.01em}
+:root[data-skin="chalk"] .btn.good{color:#1F2E28}
+:root[data-skin="highlighter"]{--paper:#FFFBE0;--card:#FFFFFF;--ink:#2B2A12;--muted:#6B6840;--line:#EDE6B0;--soft:#FBF4C4;--good:#5E7A08;--good-bg:#EEF6C8;--warn:#B4531B;--warn-bg:#FBE7D9;color-scheme:light}
+:root[data-skin="highlighter"] .h1t{background:linear-gradient(transparent 58%,#F4F048 58%,#F4F048 92%,transparent 92%);-webkit-box-decoration-break:clone;box-decoration-break:clone}
+:root[data-skin="lavender"]{--paper:#F3EFFB;--card:#FFFFFF;--ink:#2A2140;--muted:#6A5F86;--line:#DDD3F2;--soft:#E8E1F7;--good:#1C8A5E;--good-bg:#DDF3E8;--warn:#B4531B;--warn-bg:#FBE7D9;color-scheme:light}
+:root[data-skin="kro"]{--paper:#12308F;--card:#1A3BA6;--ink:#FFFFFF;--muted:#C9D4FF;--line:#2E4FBC;--soft:#2445B0;--good:#FFD23F;--good-bg:#3B4A7A;--warn:#FF9B7A;--warn-bg:#4A2A4A;color-scheme:dark}
+:root[data-skin="kro"] .h1t::after{content:" 💙"}
+:root[data-skin="kro"] .btn.good{color:#12308F}
+:root[data-skin="castle"]{--paper:#F6EBDD;--card:#FFFBF5;--ink:#3B2416;--muted:#7A5A45;--line:#E6D2BC;--soft:#EFDFCB;--good:#1C7A4E;--good-bg:#DCEFE3;--warn:#9A3B1F;--warn-bg:#F6DDD2;color-scheme:light}
+:root[data-skin="castle"] .h1t::after{content:" 🏰"}
+:root[data-skin="pinkpen"]{--paper:#FFF5FA;--card:#FFFFFF;--ink:#2A1530;--muted:#7A5A75;--line:#F6CFE3;--soft:#FCE4F0;--good:#C2006A;--good-bg:#FCE0EE;--warn:#B4531B;--warn-bg:#FBE7D9;color-scheme:light}
+:root[data-skin="pinkpen"] .h1t{text-decoration:underline wavy #E4007C;text-decoration-thickness:3px;text-underline-offset:10px}
+:root[data-skin="pinkpen"] .h1t::after{content:" 🖊️"}
+:root[data-skin="midnight"]{--paper:#0A1020;--card:#121A30;--ink:#E8ECF7;--muted:#98A3BF;--line:#222D4A;--soft:#1A2440;--good:#F5B942;--good-bg:#3A2F14;--warn:#FF8A7A;--warn-bg:#3E1E1E;color-scheme:dark}
+:root[data-skin="midnight"] .btn.good{color:#0A1020}
+:root[data-skin="coral"]{--paper:#FFF1EC;--card:#FFFFFF;--ink:#2E1A16;--muted:#7A5850;--line:#F5D4C8;--soft:#FBE3DA;--good:#0F8F86;--good-bg:#D6F2EF;--warn:#C2410C;--warn-bg:#FDE3D3;color-scheme:light}
 :root[data-skin="neon"] .btn.good{color:#0B0B14}
 
 :root[data-skin="wakefield"]{--paper:#0D2A1E;--card:#123826;--ink:#F6F0DC;--muted:#C8BE98;--line:#24563D;--soft:#1A4630;--good:#E6C35C;--good-bg:#3A3618;--warn:#F39A63;--warn-bg:#3E2616;color-scheme:dark}
@@ -689,7 +707,7 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 <body>
 <div class="wrap">
   <header class="top">
-    <h1>Mr Wakefield's Fount of Knowledge and Wisdom<span>GCSE psychology revision, <b id="totalQ"></b> questions</span></h1>
+    <h1><span class="h1t">Mr Wakefield's Fount of Knowledge and Wisdom</span><span>GCSE psychology revision, <b id="totalQ"></b> questions</span></h1>
     <div class="meter" aria-live="polite">
       <p><b id="knownCount">0</b> known · <span id="learningCount">0</span> still learning</p>
       <div class="stack" id="stack" aria-hidden="true"></div>
@@ -1409,7 +1427,7 @@ const dueCount = () => pool().filter(d=>isDue(d.id)).length;
 Object.keys(store.p).forEach(id=>{ if(store.p[id]==="k" && !G.srs[id]) G.srs[id]={b:1, d:addDays(1+Math.floor(Math.random()*14))}; });
 let combo = 0;
 
-const RANKS = [[1,"Lab Rat"],[2,"Wakefield Minion"],[3,"Naive Participant"],[4,"Professional Guesser"],[5,"Short-Term Memory Loss"],[6,"Chunking Champion"],[7,"Procrastination Survivor"],[8,"Placebo Effect"],[9,"Flashcard Fanatic"],[10,"Certified Overthinker"],[11,"Wakefield's Favourite (Allegedly)"],[12,"Baby Freud"],[13,"Wakefield's Teacher's Pet"],[14,"Neuron Whisperer"],[15,"Mr Wallace"],[16,"Research Assistant"],[17,"Fount Sipper"],[18,"Brain Cell Collector"],[19,"Bystander (Not Helping)"],[20,"Agentic State Survivor"],[21,"Wakefield's Homework Hero"],[22,"Mind Palace Builder"],[23,"Serial Position Specialist"],[24,"Fount Paddler"],[25,"Schema Smasher"],[26,"Synapse Surfer"],[27,"Wakefield's Secret Weapon"],[28,"Shockingly Obedient"],[29,"Pavlov's Star Pupil"],[30,"Walking Visual Illusion"],[31,"Top-Down Thinker"],[32,"Wakefield's Lab Partner"],[33,"Graduate Researcher"],[34,"Myelin Sheath Enthusiast"],[35,"Fount Swimmer"],[36,"Piaget's Problem Child"],[37,"Wakefield's Favourite (Confirmed)"],[38,"Doctor of Psychology"],[39,"Ethical Guidelines Enforcer"],[40,"Professor"],[41,"Wakefield's Deputy"],[42,"Freud's Worst Nightmare"],[43,"Head of Department"],[44,"Hippocampus Hero"],[45,"Wakefield Whisperer"],[46,"Guardian of the Fount"],[47,"Mark Scheme Mind-Reader"],[48,"Wakefield's Successor (In Training)"],[49,"Grand Master of the Mind"],[50,"Keeper of the Sacred Mark Scheme"],[51,"Wakefield Cardboard Cutout Owner"],[52,"Walking Revision Guide"],[53,"Fount Overlord"],[54,"Examiner's Nightmare"],[55,"Wakefield Fan Club President"],[56,"Living Legend"],[57,"Psychology Final Boss"],[58,"Wakefield's Mini-Me"],[59,"Basically Mr Wakefield"],[60,"Dedicated Wakefield Stan"]];
+const RANKS = [[1,"Lab Rat"],[2,"Wakefield Minion"],[3,"Naive Participant"],[4,"Professional Guesser"],[5,"Short-Term Memory Loss"],[6,"Chunking Champion"],[7,"Procrastination Survivor"],[8,"Placebo Effect"],[9,"Flashcard Fanatic"],[10,"Certified Overthinker"],[11,"Wakefield's Favourite (Allegedly)"],[12,"Baby Freud"],[13,"Wakefield's Teacher's Pet"],[14,"Neuron Whisperer"],[15,"Mr Wallace"],[16,"Research Assistant"],[17,"Fount Sipper"],[18,"Brain Cell Collector"],[19,"Bystander (Not Helping)"],[20,"Agentic State Survivor"],[21,"Wakefield's Homework Hero"],[22,"Mind Palace Builder"],[23,"Serial Position Specialist"],[24,"Fount Paddler"],[25,"Schema Smasher"],[26,"Synapse Surfer"],[27,"Wakefield's Wildcard"],[28,"Shockingly Obedient"],[29,"Pavlov's Star Pupil"],[30,"Walking Visual Illusion"],[31,"Top-Down Thinker"],[32,"Wakefield's Lab Partner"],[33,"Graduate Researcher"],[34,"Myelin Sheath Enthusiast"],[35,"Fount Swimmer"],[36,"Piaget's Problem Child"],[37,"Wakefield's Favourite (Confirmed)"],[38,"Doctor of Psychology"],[39,"Ethical Guidelines Enforcer"],[40,"Wakefield's Pink Pen"],[41,"Wakefield's Deputy"],[42,"Freud's Worst Nightmare"],[43,"Head of Department"],[44,"Hippocampus Hero"],[45,"Wakefield Whisperer"],[46,"Guardian of the Fount"],[47,"Mark Scheme Mind-Reader"],[48,"Wakefield's Successor (In Training)"],[49,"Grand Master of the Mind"],[50,"Keeper of the Sacred Mark Scheme"],[51,"Wakefield Cardboard Cutout Owner"],[52,"Walking Revision Guide"],[53,"Fount Overlord"],[54,"Examiner's Nightmare"],[55,"Wakefield Fan Club President"],[56,"Living Legend"],[57,"Psychology Final Boss"],[58,"Wakefield's Mini-Me"],[59,"Basically Mr Wakefield"],[60,"Dedicated Wakefield Stan"]];
 const lvlStart = n => 50*(n-1)*n;           // XP needed to reach level n
 function lvlFor(xp){ let n=1; while(xp>=lvlStart(n+1)) n++; return n; }
 function rankFor(n){ let r=RANKS[0][1]; RANKS.forEach(([l,name])=>{ if(n>=l) r=name; }); return r; }
@@ -1640,12 +1658,21 @@ function checkBadges(){
 const THEMES = [
   {k:"", name:"Classic", lvl:1, sw:["#EEF1F7","#18203A","#7B5BE0"]},
   {k:"night", name:"Night Shift", lvl:3, sw:["#121829","#E9EDF7","#4CC896"]},
+  {k:"examhall", name:"Exam Hall", lvl:5, sw:["#F2F3F5","#22262E","#5B6B82"]},
   {k:"mint", name:"Mint Condition", lvl:6, sw:["#E6F4EE","#12312A","#13805A"]},
+  {k:"chalk", name:"Chalkboard", lvl:8, sw:["#1F2E28","#F1F4EE","#E8D88A"]},
   {k:"sunset", name:"Golden Hour", lvl:10, sw:["#FFF0E6","#3A1F1A","#C2410C"]},
+  {k:"highlighter", name:"Highlighter", lvl:12, sw:["#FFFBE0","#2B2A12","#9BB80F"]},
   {k:"ocean", name:"Deep Ocean", lvl:15, sw:["#E4F0FA","#0F2A44","#2563EB"]},
+  {k:"lavender", name:"Lavender Haze", lvl:18, sw:["#F3EFFB","#2A2140","#7B5BE0"]},
   {k:"forest", name:"Forest Floor", lvl:20, sw:["#0F1F17","#E6F2EA","#4CC896"]},
+  {k:"kro", name:"Keep Right On", lvl:25, sw:["#12308F","#FFFFFF","#FFD23F"]},
   {k:"neon", name:"Neon Synapse", lvl:30, sw:["#0B0B14","#F2F2FF","#39FF9E"]},
+  {k:"castle", name:"Tamworth Castle", lvl:35, sw:["#F6EBDD","#3B2416","#9A3B1F"]},
+  {k:"pinkpen", name:"Wakefield's Pink Pen", lvl:40, sw:["#FFF5FA","#2A1530","#E4007C"]},
   {k:"royale", name:"Wakefield Royale", lvl:45, sw:["#1A1033","#F7F0FF","#FFD54A"]},
+  {k:"midnight", name:"Midnight Revision", lvl:50, sw:["#0A1020","#E8ECF7","#F5B942"]},
+  {k:"coral", name:"Coral Reef", lvl:55, sw:["#FFF1EC","#2E1A16","#0F8F86"]},
   {k:"stan", name:"Stan Mode", lvl:60, sw:["#FFE9F3","#3D0F2A","#E11D74"]},
   {k:"wakefield", name:"✦ Wakefield Mode", lvl:1, secret:true, sw:["#0D2A1E","#F6F0DC","#E6C35C"]},
 ];
@@ -3521,7 +3548,7 @@ function showInstallHelp(){
     ${isIOS?`<ol style="padding-left:1.2em;line-height:1.6"><li>Open this page in <b>Safari</b>.</li><li>Tap the <b>Share</b> button (the square with an arrow).</li><li>Choose <b>Add to Home Screen</b>, then <b>Add</b>.</li></ol>`
       :`<ol style="padding-left:1.2em;line-height:1.6"><li>Open the browser menu (<b>⋮</b> or <b>⋯</b>).</li><li>Choose <b>Install app</b> or <b>Add to Home screen</b>.</li></ol><p class="muted" style="font-size:14px">On a computer, look for the install icon at the right of the address bar.</p>`}
     <p class="muted" style="font-size:14px">It opens full screen like an app and works offline.</p>
-    ${isIOS?`<p style="font-size:14px;background:var(--warn-bg);border-radius:10px;padding:8px 10px">⚠️ On iPhone and iPad the home-screen app keeps its own progress. Before installing, go to <b>Save → Copy save code</b>, then paste it into Trophies in the app.</p>`:`<p class="muted" style="font-size:14px">Your progress comes with you.</p>`}
+    ${isIOS?`<p style="font-size:14px;background:var(--warn-bg);border-radius:10px;padding:8px 10px">⚠️ On iPhone and iPad the home-screen app keeps its own progress. Before installing, go to <b>Save → Copy save code</b>, then paste it into the Save tab in the app.</p>`:`<p class="muted" style="font-size:14px">Your progress comes with you.</p>`}
     <div style="text-align:center"><button class="btn" id="instOk">Got it</button></div></div>`;
   document.body.appendChild(o); o.onclick=e=>{ if(e.target===o||e.target.id==="instOk") o.remove(); }; $("#instOk").focus();
 }
