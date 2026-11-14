@@ -708,6 +708,23 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 :root[data-skin="retro"] .h1t::before{content:"👾 "}
 :root[data-skin="retro"] .btn.good{color:#0A0A12}
 :root[data-skin="retro"] .card,:root[data-skin="retro"] .box{border-radius:4px}
+:root[data-skin="snowdome"]{--paper:#EEF7FD;--card:#FFFFFF;--ink:#14324A;--muted:#557790;--line:#CFE5F3;--soft:#DFF0FA;--good:#1D7FB8;--good-bg:#DCEFFA;--warn:#B4531B;--warn-bg:#FBE7D9;color-scheme:light}
+:root[data-skin="snowdome"] body{background-image:radial-gradient(#fff 1.5px,transparent 1.6px),radial-gradient(#fff 1px,transparent 1.1px);background-size:46px 46px,23px 23px;background-position:0 0,11px 17px}
+:root[data-skin="snowdome"] .h1t::after{content:" ❄️"}
+:root[data-skin="greens"]{--paper:#EEF6E4;--card:#FFFFFF;--ink:#1E3312;--muted:#5A7048;--line:#D3E6C0;--soft:#E2EFD3;--good:#3F8A12;--good-bg:#DDF0CC;--warn:#B4531B;--warn-bg:#FBE7D9;color-scheme:light}
+:root[data-skin="greens"] .h1t::after{content:" 🥦🥕"}
+:root[data-skin="volts"]{--paper:#101014;--card:#1A1A22;--ink:#FFF7D6;--muted:#BDB59A;--line:#2E2E3A;--soft:#23232D;--good:#FFD60A;--good-bg:#3A3410;--warn:#FF6B4A;--warn-bg:#3E1E16;color-scheme:dark}
+:root[data-skin="volts"] .h1t{text-shadow:0 0 18px rgba(255,214,10,.45)}
+:root[data-skin="volts"] .h1t::after{content:" ⚡"}
+:root[data-skin="volts"] .btn.good{color:#101014}
+:root[data-skin="nap"]{--paper:#1A1830;--card:#232140;--ink:#E9E6FA;--muted:#ABA5D0;--line:#35325A;--soft:#2B2850;--good:#A99BFF;--good-bg:#2E2A55;--warn:#FFB38A;--warn-bg:#3E2A22;color-scheme:dark}
+:root[data-skin="nap"] .h1t::after{content:" 💤"}
+:root[data-skin="nap"] .btn.good{color:#1A1830}
+:root[data-skin="pavlov"]{--paper:#FBF3E4;--card:#FFFDF8;--ink:#3A2A14;--muted:#7D6744;--line:#EBDCBF;--soft:#F4E7CF;--good:#9A6A10;--good-bg:#F6E7C4;--warn:#B4531B;--warn-bg:#FBE7D9;color-scheme:light}
+:root[data-skin="pavlov"] .h1t::after{content:" 🔔🐶"}
+:root[data-skin="fool"]{--paper:#FFF6FB;--card:#FFFFFF;--ink:#2B1A3A;--muted:#7A6585;--line:#F3D6E8;--soft:#FBE6F2;--good:#1C8A5E;--good-bg:#DDF3E8;--warn:#C2185B;--warn-bg:#FCE0EC;color-scheme:light}
+:root[data-skin="fool"] .h1t{background:linear-gradient(90deg,#FF4FA3,#FFB627,#2EC4B6,#7B5BE0,#FF4FA3);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-skin="fool"] h1::before{content:"🃏 "}
 </style>
 </head>
 <body>
@@ -1682,6 +1699,12 @@ const THEMES = [
   {k:"stan", name:"Stan Mode", lvl:60, sw:["#FFE9F3","#3D0F2A","#E11D74"]},
   {k:"wakefield", name:"✦ Wakefield Mode", lvl:1, secret:true, sw:["#0D2A1E","#F6F0DC","#E6C35C"]},
   {k:"retro", name:"👾 Retro Arcade", lvl:1, secret:true, scroll:"konami", sw:["#0A0A12","#39FF14","#FF2BD6"]},
+  {k:"snowdome", name:"❄️ Snowdome", lvl:1, secret:true, scroll:"tamworth", sw:["#EEF7FD","#14324A","#3BA7E0"]},
+  {k:"greens", name:"🥦 Eat Your Greens", lvl:1, secret:true, scroll:"wakefield", sw:["#EEF6E4","#1E3312","#4C9A1C"]},
+  {k:"volts", name:"⚡ 450 Volts", lvl:1, secret:true, scroll:"milgram", sw:["#101014","#FFF7D6","#FFD60A"]},
+  {k:"nap", name:"😴 Nap Time", lvl:1, secret:true, scroll:"ring", sw:["#1A1830","#E9E6FA","#A99BFF"]},
+  {k:"pavlov", name:"🔔 Pavlov's Bell", lvl:1, secret:true, scroll:"pavlov", sw:["#FBF3E4","#3A2A14","#C8902A"]},
+  {k:"fool", name:"🃏 April Fool", lvl:1, secret:true, scroll:"april", sw:["#FFF6FB","#2B1A3A","#FF4FA3"]},
 ];
 const themeOpen = th => th.scroll ? !!G.scrolls[th.scroll] : th.secret ? !!G.flags.keeper : lvlFor(G.xp)>=th.lvl;
 function applySkin(){ const k=G.skin||""; const th=THEMES.find(t=>t.k===k); if(k && th && themeOpen(th)) document.documentElement.dataset.skin=k; else delete document.documentElement.dataset.skin; }
