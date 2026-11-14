@@ -558,6 +558,11 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 
 /* secret scrolls */
 .scroll-bonus{display:block;margin-top:6px;font-size:12px;font-weight:800;color:#9A6324}
+.seal{display:flex;flex-direction:column;gap:4px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:13px;font-weight:700;color:var(--muted);width:100%}
+.seal.open{color:var(--good)}
+.seal-bar{height:6px;background:var(--soft);border-radius:99px;overflow:hidden}
+.seal-bar i{display:block;height:100%;background:#9A6324}
+.seal-n{font-weight:600}
 .scrolls{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
 .scrollcard{display:flex;flex-direction:column;gap:4px;text-align:left;border:1px dashed var(--line);background:var(--paper);border-radius:14px;padding:12px}
 .scrollcard .si{font-size:26px}.scrollcard b{font-size:15px}.scrollcard span:last-child{font-size:13px;color:var(--muted);font-style:italic}
@@ -1694,6 +1699,7 @@ const BADGES = [
   ["keeper","📜","Keeper of the Scrolls","Find every secret scroll",()=>!!G.flags.keeper, "Collect them all"],
 ];
 function checkBadges(){
+  checkSeals();
   let delay=0;
   BADGES.forEach(([id,ic,name,desc,test])=>{
     if(G.badges[id]) return;
@@ -1736,7 +1742,28 @@ const THEMES = [
   {k:"pavlov", name:"🔔 Pavlov's Bell", lvl:1, secret:true, scroll:"pavlov", sw:["#FBF3E4","#3A2A14","#C8902A"]},
   {k:"fool", name:"🃏 April Fool", lvl:1, secret:true, scroll:"april", sw:["#FFF6FB","#2B1A3A","#FF4FA3"]},
 ];
-const themeOpen = th => th.scroll ? !!G.scrolls[th.scroll] : th.secret ? !!G.flags.keeper : lvlFor(G.xp)>=th.lvl;
+// scroll themes are found by the scroll, then "sealed" until a piece of revision breaks the seal
+const SEALS = {
+  volts:   {text:"Beat the Social influence boss",        prog:()=>[(G.bosses["Social influence"]||{}).won?1:0,1]},
+  pavlov:  {text:"Score 20+ in Key Terms",                 prog:()=>[Math.min(G.st.terms||0,20),20]},
+  greens:  {text:"Answer 30 questions in one day",         prog:()=>[Math.min(Math.max(0,...Object.values(G.hist||{})),30),30]},
+  nap:     {text:"Reach a 5-day streak",                    prog:()=>[Math.min(G.best||0,5),5]},
+  snowdome:{text:"Finish a mock paper (any sections)",     prog:()=>[Math.min(Object.keys((G.mocks||{}).done||{}).length,1),1]},
+  bullring:{text:"Score 15+ in Spot the Flaw",              prog:()=>[Math.min(G.st.flawBest||0,15),15]},
+  inner:   {text:"Do 5 exam-skills practice questions",     prog:()=>[Math.min(Object.keys((G.skills||{}).done||{}).length,5),5]},
+  lineup:  {text:"Complete a focus session",                prog:()=>[Math.min(G.st.focus||0,1),1]},
+  retro:   {text:"Defeat any 3 bosses",                     prog:()=>[Math.min(Object.values(G.bosses||{}).filter(b=>b.won).length,3),3]},
+  fool:    {text:"Play the Daily 10 on 1 April",            prog:()=>[Object.entries(G.daily||{}).some(([d,v])=>d.slice(5)==="04-01"&&v&&v.done)?1:0,1]},
+};
+const sealDone = k => { const s=SEALS[k]; if(!s) return true; const [a,b]=s.prog(); return a>=b; };
+const themeOpen = th => th.scroll ? !!G.scrolls[th.scroll] && sealDone(th.k) : th.secret ? !!G.flags.keeper : lvlFor(G.xp)>=th.lvl;
+function checkSeals(){
+  if(typeof TEACHER!=="undefined" && TEACHER) return; G.seals=G.seals||{};
+  THEMES.filter(t=>t.scroll && G.scrolls[t.scroll] && !G.seals[t.k] && sealDone(t.k)).forEach((t,i)=>{
+    G.seals[t.k]=today(); save();
+    setTimeout(()=>{ toast("🔓",`Seal broken! ${t.name} unlocked`,"Switch it on in the Themes tab.",true); confetti(160,t.sw); sfx("badge"); },900+i*1400);
+  });
+}
 function applySkin(){ const k=G.skin||""; const th=THEMES.find(t=>t.k===k); if(k && th && themeOpen(th)) document.documentElement.dataset.skin=k; else delete document.documentElement.dataset.skin; }
 applySkin();
 
@@ -2420,8 +2447,8 @@ function renderTrophies(){
       const has=G.badges[id]; if(!has && secret) return `<div class="badge locked secret"><div class="bi">❓</div><b>Secret badge</b><span>“${esc(typeof secret==="string"?secret:"Keep revising to find it")}”</span></div>`;
       return `<div class="badge ${has?"got":"locked"}"><div class="bi">${ic}</div><b>${esc(name)}</b><span>${esc(desc)}</span></div>`; }).join("")}</div></div>`,
     scrolls:`${scrollBoxHTML()}`,
-    looks:`<div class="box"><h3>Themes <small>Unlock new looks as you level up</small></h3><div class="themes">${THEMES.filter(th=>!th.secret||themeOpen(th)).map(th=>{ const open=themeOpen(th), on=(G.skin||"")===th.k;
-      return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b><span>${open?(on?"In use":"Tap to use"):"🔒 Level "+th.lvl}</span></button>`; }).join("")}</div></div>`,
+    looks:`<div class="box"><h3>Themes <small>Level up to unlock new looks. Secret scrolls reveal sealed themes</small></h3><div class="themes">${THEMES.filter(th=>!th.secret||themeOpen(th)||(th.scroll&&G.scrolls[th.scroll])).map(th=>{ const open=themeOpen(th), on=(G.skin||"")===th.k;
+      return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b><span>${open?(on?"In use":"Tap to use"):th.scroll?"🔒 Sealed: "+esc(SEALS[th.k].text):"🔒 Level "+th.lvl}</span></button>`; }).join("")}</div></div>`,
     save:`<div class="box"><h3>Move or back up your progress <small>Your progress only lives in this browser</small></h3>
       <p class="muted" style="margin:0 0 12px">To carry on using another device (school computer, phone, laptop), copy your save code and paste it there. Keep a copy somewhere safe in case your browser data gets cleared.</p>
       <div class="card-actions" style="margin-top:0"><button class="btn" id="saveCopy">Copy save code</button><button class="btn ghost" id="saveFile">Download backup file</button></div>
@@ -3547,7 +3574,7 @@ function foundScroll(id){
   showScroll(s, first);
   if(first){
     setTimeout(()=>{ addXP(30,false); toast("📜",`Secret scroll ${Object.keys(G.scrolls).length} of ${SECRET_SCROLLS.length} found`,"+30 XP"); },700);
-    const sth=THEMES.find(t=>t.scroll===id); if(sth) setTimeout(()=>{ toast("🎨",`${sth.name} theme unlocked!`,"This scroll unlocked a secret theme. Find it in the Themes tab."); confetti(160,sth.sw); },1600);
+    const sth=THEMES.find(t=>t.scroll===id); if(sth) setTimeout(()=>{ if(sealDone(sth.k)){ G.seals=G.seals||{}; G.seals[sth.k]=today(); save(); toast("🎨",`${sth.name} theme unlocked!`,"Switch it on in the Themes tab.",true); confetti(160,sth.sw); } else toast("🔒",`You found the ${sth.name} theme, but it's sealed`,`To break the seal: ${SEALS[sth.k].text}.`,true); },1600);
     if(SECRET_SCROLLS.every(x=>G.scrolls[x.id])){ G.flags.keeper=1; save(); setTimeout(()=>{ checkBadges(); toast("✦","Wakefield Mode theme unlocked","Find it in the Themes tab."); confetti(200,["#E6C35C","#0D2A1E","#F6F0DC"]); },2200); }
   }
 }
@@ -3569,11 +3596,17 @@ function showScroll(s, first){
 function scrollBoxHTML(){
   const n=SECRET_SCROLLS.filter(s=>G.scrolls[s.id]).length;
   return `<div class="box"><h3>📜 Secret scrolls <small>${n} of ${SECRET_SCROLLS.length} found${n===SECRET_SCROLLS.length?" · Wakefield Mode unlocked ✦":""}</small></h3>
-    <p class="sk-watch" style="margin:0 0 12px">🎨 Every scroll unlocks its own secret theme, and finding all ${SECRET_SCROLLS.length} unlocks ✦ Wakefield Mode.</p>
+    <p class="sk-watch" style="margin:0 0 12px">🎨 Every scroll reveals a secret theme, but it arrives <b>sealed</b>. Break the seal with some revision to unlock it. Find all ${SECRET_SCROLLS.length} scrolls for ✦ Wakefield Mode.</p>
     <div class="scrolls">${SECRET_SCROLLS.map(s=>G.scrolls[s.id]
-      ? `<button class="scrollcard got" data-scroll="${s.id}"><span class="si">📜</span><b>${esc(s.title)}</b><span>Tap to read again</span></button>`
+      ? `<button class="scrollcard got" data-scroll="${s.id}"><span class="si">📜</span><b>${esc(s.title)}</b><span>Tap to read again</span>${sealHTML(THEMES.find(t=>t.scroll===s.id))}</button>`
       : `<div class="scrollcard"><span class="si">🔒</span><b>Sealed scroll</b><span>“${esc(s.hint)}”</span></div>`).join("")}</div>
-    ${THEMES.filter(t=>t.scroll && G.scrolls[t.scroll]).map(t=>`<p class="muted" style="margin:12px 0 0;font-size:15px">🎨 You unlocked the <b>${esc(t.name)}</b> theme. Switch it on in the Themes tab.</p>`).join("")}</div>`;
+    </div>`;
+}
+function sealHTML(t){
+  if(!t) return "";
+  if(sealDone(t.k)) return `<span class="seal open">🎨 ${esc(t.name)} unlocked</span>`;
+  const [a,b]=SEALS[t.k].prog();
+  return `<span class="seal"><span>🔒 ${esc(t.name)}: ${esc(SEALS[t.k].text)}</span>${b>1?`<span class="seal-bar"><i style="width:${a/b*100}%"></i></span><span class="seal-n">${a}/${b}</span>`:""}</span>`;
 }
 // easter-egg triggers
 let keyBuf=[];
