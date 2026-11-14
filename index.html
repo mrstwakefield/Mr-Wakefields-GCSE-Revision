@@ -478,6 +478,27 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
   body.printing-cert .cert-tools{display:none}
   body.printing-cert .cert{width:297mm;height:210mm;max-width:none;box-shadow:none;border-radius:0;aspect-ratio:auto;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+
+/* secret scrolls */
+.scrolls{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.scrollcard{display:flex;flex-direction:column;gap:4px;text-align:left;border:1px dashed var(--line);background:var(--paper);border-radius:14px;padding:12px}
+.scrollcard .si{font-size:26px}.scrollcard b{font-size:15px}.scrollcard span:last-child{font-size:13px;color:var(--muted);font-style:italic}
+.scrollcard.got{border:2px solid #C9A227;background:linear-gradient(135deg,#FBF1D3,#F3E2B3);color:#3B2F12}
+.scrollcard.got span:last-child{color:#6B5A2E;font-style:normal}
+.badge.secret span{font-style:italic}
+.scroll{width:min(460px,100%);animation:unroll .7s cubic-bezier(.2,.9,.3,1)}
+@keyframes unroll{from{transform:scaleY(.06);opacity:.4}to{transform:none;opacity:1}}
+.scroll-rod{height:18px;border-radius:9px;background:linear-gradient(#8A5A2B,#C68A4A,#8A5A2B);margin:0 -10px;box-shadow:0 3px 8px rgba(0,0,0,.35)}
+.scroll-body{background:linear-gradient(90deg,#E9D6A6,#F8EBC8 15%,#F8EBC8 85%,#E9D6A6);color:#3B2F12;padding:26px 28px;text-align:center;font-family:Georgia,"Times New Roman",serif}
+.scroll-kick{font-family:var(--display);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:13px;color:#8A6508}
+.scroll-body h3{font-family:var(--display);font-size:28px;margin:8px 0 12px;color:#2A210C}
+.scroll-body p{font-size:18px;line-height:1.55;margin:0 0 20px}
+.scroll-body .btn{background:#3B2F12;border-color:#3B2F12;color:#F8EBC8}
+.scroll.blues .scroll-body{background:linear-gradient(90deg,#1733A6,#1F3FBF 15%,#1F3FBF 85%,#1733A6);color:#fff}
+.scroll.blues h3,.scroll.blues .scroll-kick{color:#fff}
+.scroll.blues .scroll-rod{background:linear-gradient(#DDE4FF,#FFFFFF,#DDE4FF)}
+.scroll.blues .btn{background:#fff;border-color:#fff;color:#1F3FBF}
+@media (prefers-reduced-motion:reduce){.scroll{animation:none}}
 /* trophies */
 .profile{display:flex;gap:22px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;margin-bottom:14px}
 .profile .bigring{position:relative;width:110px;height:110px;flex:none}
@@ -528,6 +549,11 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 :root[data-skin="stan"]{--paper:#FFE9F3;--card:#FFFFFF;--ink:#3D0F2A;--muted:#85506D;--line:#F5C6DC;--soft:#FBD9E8;--good:#1C8A5E;--good-bg:#DDF3E8;--warn:#C2185B;--warn-bg:#FCE0EC;color-scheme:light}
 :root[data-skin="stan"] h1::after{content:" 💘"}
 :root[data-skin="neon"] .btn.good{color:#0B0B14}
+
+:root[data-skin="wakefield"]{--paper:#0D2A1E;--card:#123826;--ink:#F6F0DC;--muted:#C8BE98;--line:#24563D;--soft:#1A4630;--good:#E6C35C;--good-bg:#3A3618;--warn:#F39A63;--warn-bg:#3E2616;color-scheme:dark}
+:root[data-skin="wakefield"] h1{background:linear-gradient(90deg,#E6C35C,#F6F0DC 60%,#E6C35C);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-skin="wakefield"] h1::before{content:"✦ ";-webkit-text-fill-color:#E6C35C}
+:root[data-skin="wakefield"] .btn.good{color:#0D2A1E}
 </style>
 </head>
 <body>
@@ -886,6 +912,7 @@ function renderCard(){
   }
   if(pos>=deck.length){
     const vals=Object.values(sessionRes), k=vals.filter(v=>v==="k").length, l=vals.filter(v=>v==="l").length;
+    checkPal();
     area.innerHTML=`<div class="empty"><h3>Deck finished</h3><p>You marked ${k} as got it and ${l} as still learning.${l?" Go round again on the ones that didn't stick yet.":" Nice work."}</p>
       <p style="font-family:var(--display);font-weight:800;font-size:22px;color:var(--ink)">+${deckXP} XP · best run ${deckBest} 🔥</p>
       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">${l?'<button class="btn" id="againL">Go again: still learning</button>':''}<button class="btn ghost" id="againAll">Shuffle a new deck</button></div></div>`;
@@ -934,7 +961,8 @@ function flip(){
   $("#acts").innerHTML=actionsHTML(); wireActions();
   if(hadFocus) $(flipped?"#gotBtn":"#flipBtn").focus({preventScroll:true});
 }
-function rate(s){ const id=deck[pos], wasDue=isDue(id); sessionRes[id]=s; mark(id,s); trackMistake(id, s==="k");
+function rate(s){ const id=deck[pos], wasDue=isDue(id); sessionRes[id]=s; if(s==="l"){ G.st.learnMarks=(G.st.learnMarks||0)+1; G.lcount[id]=(G.lcount[id]||0)+1; } else if((G.lcount[id]||0)>=3) G.flags.finally=1;
+  mark(id,s); trackMistake(id, s==="k");
   deckXP+=answer({ok:s==="k", el:$(s==="k"?"#gotBtn":"#learnBtn"), mode:"cards", gold:golds.has(id), review:wasDue&&s==="k", topic:BY_ID[id].t});
   deckCombo = s==="k" ? deckCombo+1 : 0; if(deckCombo>deckBest) deckBest=deckCombo;
   pos++; flipped=false; renderCard(); const b=$("#flipBtn"); if(b) b.focus({preventScroll:true}); }
@@ -1001,7 +1029,7 @@ function renderQuiz(){
   $("#qAgain").onclick=()=>{quiz.phase="setup";renderQuiz();};
 }
 
-function quizDone(){ const score=quiz.marks.filter(Boolean).length, n=quiz.items.length; G.st.quizzes++;
+function quizDone(){ const score=quiz.marks.filter(Boolean).length, n=quiz.items.length; G.st.quizzes++; setTimeout(checkPal,50);
   if(score===n){ G.st.perfect++; confetti(220); sfx("lvl"); addXP(50,false); } checkBadges(); save(); }
 
 /* ---------- browse ---------- */
@@ -1047,7 +1075,9 @@ const GDEF = {xp:0, streak:0, best:0, last:"", freeze:0, goal:30, hist:{}, badge
 try{ const s=JSON.parse(localStorage.getItem(KEY)||"null"); if(s && s.g) store.g=s.g; }catch(e){}
 store.g = Object.assign({}, GDEF, store.g||{}); store.g.st = Object.assign({}, GDEF.st, store.g.st||{});
 const G = store.g;
-G.srs=G.srs||{}; G.bosses=G.bosses||{}; G.mistakes=G.mistakes||{};
+G.srs=G.srs||{}; G.bosses=G.bosses||{}; G.mistakes=G.mistakes||{}; G.flags=G.flags||{}; G.scrolls=G.scrolls||{}; G.lcount=G.lcount||{}; G.skinsTried=G.skinsTried||{}; G.bossDays=G.bossDays||{};
+function flag(k){ if(G.flags[k]) return; G.flags[k]=1; checkBadges(); save(); }
+function checkPal(){ const s=String(G.xp); if(s.length>=3 && s===[...s].reverse().join("")) flag("palindrome"); }
 /* ---- mistakes bank: wrong anywhere -> bank; right twice in a row -> fixed ---- */
 const mistakeCount = () => Object.keys(G.mistakes).filter(id=>BY_ID[id]).length;
 function trackMistake(id, ok){
@@ -1097,11 +1127,11 @@ function sfx(k){
 
 /* ---- confetti ---- */
 let parts=[], fxRun=false;
-function confetti(n=140){
+function confetti(n=140, colours){
   if(reduced()) return;
   const cv=$("#fx"), dpr=window.devicePixelRatio||1;
   cv.width=innerWidth*dpr; cv.height=innerHeight*dpr;
-  const cols=TOPICS.map(t=>t.c).concat(["#FFD54A","#4CC896"]);
+  const cols=colours||TOPICS.map(t=>t.c).concat(["#FFD54A","#4CC896"]);
   for(let i=0;i<n;i++){ const side=i%2; parts.push({x:(side?innerWidth*.85:innerWidth*.15), y:innerHeight*.6, vx:(side?-1:1)*(2+Math.random()*7), vy:-(8+Math.random()*9), r:4+Math.random()*5, c:cols[i%cols.length], a:Math.random()*6, va:(Math.random()-.5)*.4, life:0}); }
   if(!fxRun){ fxRun=true; requestAnimationFrame(fxLoop); }
 }
@@ -1176,6 +1206,9 @@ function answer({ok, el, mode, gold, x2, review, topic, boss}){
   checkStreak();
   const t=today();
   G.st.cards++; if(ok) G.st.right++;
+  if(!ok && combo===7) G.flags.miller=1;
+  if(t==="2026-12-03"||t==="2026-12-10") G.flags.nightbefore=1;
+  if(t.slice(5)==="12-25") G.flags.festive=1;
   if(ok){ combo++; if(combo>G.st.combo) G.st.combo=combo; } else combo=0;
   const base = mode==="quiz" ? (ok?15:4) : mode==="arcade" ? (ok?6:1) : (ok?10:3);
   let mult = (ok ? comboMult() : 1) * (x2 ? 2 : 1) * eventMult(topic, boss);
@@ -1247,17 +1280,36 @@ const BADGES = [
   ["l20","🏆","Elite","Reach level 20",()=>lvlFor(G.xp)>=20],
   ["l2","🫡","Wakefield Minion","Reach level 2 and join the ranks",()=>lvlFor(G.xp)>=2],
   ["l60","💘","Dedicated Wakefield Stan","Reach level 60. True devotion",()=>lvlFor(G.xp)>=60],
-  ["gold1","✨","Lucky find","Get a golden card right",()=>G.st.gold>=1, true],
-  ["gold10","💰","Gold digger","Get 10 golden cards right",()=>G.st.gold>=10, true],
-  ["weekend","🛋️","Weekend warrior","Revise on a Saturday or Sunday",()=>[0,6].includes(new Date().getDay()) && G.st.cards>0, true],
-  ["lark","🐦","Early bird","Revise before 7am",()=>new Date().getHours()<7 && G.st.cards>0, true],
+  // ---- secret badges: the last item is the cryptic hint shown while locked ----
+  ["gold1","✨","Lucky find","Get a golden card right",()=>G.st.gold>=1, "Not all cards are created equal…"],
+  ["gold10","💰","Gold digger","Get 10 golden cards right",()=>G.st.gold>=10, "…and some people collect them"],
+  ["weekend","🛋️","Weekend warrior","Revise on a Saturday or Sunday",()=>[0,6].includes(new Date().getDay()) && G.st.cards>0, "Saturday? Sunday? Still here."],
+  ["lark","🐦","Early bird","Revise before 7am",()=>new Date().getHours()<7 && G.st.cards>0, "The early bird catches the… mark scheme"],
+  ["miller","🧠","Miller's magic number","End a run of correct answers at exactly 7",()=>!!G.flags.miller, "7 ± 2"],
+  ["shock450","⚡","Shockingly precise","Score exactly 450 in a Blitz game",()=>!!G.flags.shock450, "How high did the dial go?"],
+  ["comeback","💪","Comeback kid","Defeat a boss with only 1 life left",()=>!!G.flags.comeback, "Hanging on by a thread"],
+  ["ouch","🙈","Ouch","Lose all 3 lives in a boss's first 3 questions",()=>!!G.flags.ouch, "That escalated quickly"],
+  ["finally","🔁","Finally!","Get a card right after marking it still learning 3+ times",()=>!!G.flags.finally, "Fourth time lucky"],
+  ["honest","😇","Honest Abe","Mark 50 cards as still learning",()=>(G.st.learnMarks||0)>=50, "Honesty is the best policy"],
+  ["ragequit","🏃","Rage quit","End an Arcade game within 5 seconds",()=>!!G.flags.ragequit, "Nope. Not today."],
+  ["fashion","🎨","Fashionista","Try 4 different themes",()=>Object.keys(G.skinsTried||{}).length>=4, "Dress for the job you want"],
+  ["backup","💾","Backup buddy","Copy or download a save code",()=>!!G.flags.backup, "Better safe than sorry"],
+  ["stan","🎂","Stan in training","Click the site title 5 times",()=>!!G.flags.stan, "Show the title some love"],
+  ["ring","👆","Ring the bell","Tap the level ring 10 times",()=>!!G.flags.ring, "Is this thing on?"],
+  ["nightbefore","🌙","Night before","Revise the day before a mock",()=>!!G.flags.nightbefore, "Big day tomorrow…"],
+  ["survivor","🎯","Mock survivor","Come back on or after mock day",()=>!!G.flags.survivor, "You made it through"],
+  ["festive","🎄","Festive swot","Revise on Christmas Day",()=>!!G.flags.festive, "Even Santa does revision"],
+  ["bossrush","⚔️","Boss rush","Defeat 3 different bosses in one day",()=>!!G.flags.bossrush, "Three in a day? Brave."],
+  ["palindrome","🔢","Palindrome","Finish with an XP total that reads the same backwards",()=>!!G.flags.palindrome, "Racecar, kayak, 12321"],
+  ["keeper","📜","Keeper of the Scrolls","Find all 10 secret scrolls",()=>!!G.flags.keeper, "Collect them all"],
 ];
 function checkBadges(){
   let delay=0;
   BADGES.forEach(([id,ic,name,desc,test])=>{
     if(G.badges[id]) return;
     let ok=false; try{ ok=test(); }catch(e){}
-    if(ok){ G.badges[id]=today(); setTimeout(()=>{ toast(ic,"Badge unlocked: "+name,desc+" · +25 XP"); sfx("badge"); addXP(25,false); }, 500+delay); delay+=900; }
+    if(ok){ G.badges[id]=today(); const isSecret=typeof BADGES.find(b=>b[0]===id)[5]==="string";
+      setTimeout(()=>{ toast(ic,(isSecret?"Secret badge found: ":"Badge unlocked: ")+name,desc+" · +25 XP"); sfx("badge"); addXP(25,false); if(isSecret) confetti(150); }, 500+delay); delay+=900; }
   });
 }
 
@@ -1272,8 +1324,10 @@ const THEMES = [
   {k:"neon", name:"Neon Synapse", lvl:30, sw:["#0B0B14","#F2F2FF","#39FF9E"]},
   {k:"royale", name:"Wakefield Royale", lvl:45, sw:["#1A1033","#F7F0FF","#FFD54A"]},
   {k:"stan", name:"Stan Mode", lvl:60, sw:["#FFE9F3","#3D0F2A","#E11D74"]},
+  {k:"wakefield", name:"✦ Wakefield Mode", lvl:1, secret:true, sw:["#0D2A1E","#F6F0DC","#E6C35C"]},
 ];
-function applySkin(){ const k=G.skin||""; const th=THEMES.find(t=>t.k===k); if(k && th && lvlFor(G.xp)>=th.lvl) document.documentElement.dataset.skin=k; else delete document.documentElement.dataset.skin; }
+const themeOpen = th => th.secret ? !!G.flags.keeper : lvlFor(G.xp)>=th.lvl;
+function applySkin(){ const k=G.skin||""; const th=THEMES.find(t=>t.k===k); if(k && th && themeOpen(th)) document.documentElement.dataset.skin=k; else delete document.documentElement.dataset.skin; }
 applySkin();
 
 /* ---- HUD ---- */
@@ -1281,7 +1335,7 @@ function ring(r,frac){ const c=2*Math.PI*r; return `stroke-dasharray="${c.toFixe
 let shownLvl = lvlFor(G.xp);
 function renderHud(){
   const n=lvlFor(G.xp);
-  if(n>shownLvl){ shownLvl=n; setTimeout(()=>levelUp(n), 450); }
+  if(n>shownLvl){ shownLvl=n; setTimeout(()=>levelUp(n), 450); if(n>=59) setTimeout(()=>foundScroll("handover"), 2600); }
   const s=lvlStart(n), e=lvlStart(n+1), frac=(G.xp-s)/(e-s), t=today(), done=G.hist[t]||0;
   const live = G.last===t || (G.last && dayNum(t)-dayNum(G.last)===1) ? G.streak : 0;
   $("#hudLvlNum").textContent=n;
@@ -1562,6 +1616,7 @@ function gapHint(){ if(arc.locked) return; const d=arc.items[arc.i], letters=d.t
 function gapCheck(){
   if(arc.locked) return; const inp=$("#gapIn"), d=arc.items[arc.i];
   if(!inp.value.trim()){ inp.focus(); return; }
+  if(normT(inp.value)==="pavlov") setTimeout(()=>foundScroll("pavlov"),900);
   if(termMatch(inp.value,d)) return gapDone(true);
   arc.tries++;
   if(arc.tries>=2) return gapDone(false);
@@ -1603,7 +1658,13 @@ function arcFinish(){
     arc.log=arc.items.map((x,i)=>({item:x, ok:log[i]}));
     bonus=30+score*5; if(score===10) bonus+=50;
   }
-  arc.xp+=bonus; addXP(bonus,false);
+  if(Date.now()-arc.t0<5000) G.flags.ragequit=1;
+  if(arc.mode==="blitz" && arc.score===450) G.flags.shock450=1;
+  if(arc.mode==="boss"){ const win=arc.hp<=0;
+    if(win && arc.lives===1) G.flags.comeback=1;
+    if(!win && arc.lives<=0 && arc.log.length<=3) G.flags.ouch=1;
+    if(win){ const t=today(); G.bossDays={[t]:[...new Set([...(G.bossDays[t]||[]), arc.boss])]}; if(G.bossDays[t].length>=3) G.flags.bossrush=1; } }
+  arc.xp+=bonus; addXP(bonus,false); checkPal();
   if(arc.best || (arc.mode==="daily" && G.daily[today()].score>=8)){ confetti(200); sfx("lvl"); }
   checkBadges(); save(); renderArcade();
 }
@@ -1634,8 +1695,8 @@ async function loadSave(code){
 }
 function wireSave(){
   const msg=$("#saveMsg");
-  $("#saveCopy").onclick=async()=>{ const c=await makeSave(); try{ await navigator.clipboard.writeText(c); msg.textContent=`Save code copied (${c.length.toLocaleString()} characters). Paste it somewhere safe, like an email to yourself or your notes app.`; }catch(e){ $("#saveIn").value=c; $("#saveIn").select(); msg.textContent="Couldn't copy automatically. Your code is in the box: select it all and copy it."; } };
-  $("#saveFile").onclick=async()=>{ const c=await makeSave(), a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([c],{type:"text/plain"})); a.download=`fount-save-level-${lvlFor(G.xp)}-${today()}.txt`; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); msg.textContent="Backup file downloaded."; };
+  $("#saveCopy").onclick=async()=>{ flag("backup"); const c=await makeSave(); try{ await navigator.clipboard.writeText(c); msg.textContent=`Save code copied (${c.length.toLocaleString()} characters). Paste it somewhere safe, like an email to yourself or your notes app.`; }catch(e){ $("#saveIn").value=c; $("#saveIn").select(); msg.textContent="Couldn't copy automatically. Your code is in the box: select it all and copy it."; } };
+  $("#saveFile").onclick=async()=>{ flag("backup"); const c=await makeSave(), a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([c],{type:"text/plain"})); a.download=`fount-save-level-${lvlFor(G.xp)}-${today()}.txt`; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); msg.textContent="Backup file downloaded."; };
   $("#saveLoad").onclick=()=>{ const v=$("#saveIn").value; if(v.trim()) loadSave(v); };
   $("#saveUp").onchange=e=>{ const f=e.target.files[0]; if(f) f.text().then(loadSave); };
 }
@@ -1674,7 +1735,7 @@ function renderTrophies(){
     <div class="box"><h3>Daily goal <small>Answer this many questions a day to keep your streak</small></h3>
       <div class="seg" role="group" aria-label="Daily goal">${[[15,"Chill"],[30,"Steady"],[50,"Serious"],[100,"Beast mode"]].map(([v,l])=>`<button aria-pressed="${G.goal===v}" data-goal="${v}">${l} · ${v}</button>`).join("")}</div></div>
     <div class="box"><h3>Last 12 weeks <small>Darker = closer to your goal</small></h3><div class="heat">${cells}</div></div>
-    <div class="box"><h3>Themes <small>Unlock new looks as you level up</small></h3><div class="themes">${THEMES.map(th=>{ const open=n>=th.lvl, on=(G.skin||"")===th.k;
+    <div class="box"><h3>Themes <small>Unlock new looks as you level up</small></h3><div class="themes">${THEMES.filter(th=>!th.secret||themeOpen(th)).map(th=>{ const open=themeOpen(th), on=(G.skin||"")===th.k;
       return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b><span>${open?(on?"In use":"Tap to use"):"🔒 Level "+th.lvl}</span></button>`; }).join("")}</div></div>
     ${certBoxHTML()}
     ${reportBoxHTML()}
@@ -1684,12 +1745,14 @@ function renderTrophies(){
       <textarea id="saveIn" placeholder="Paste a save code here to load it on this device" style="min-height:80px;margin-top:14px;font-size:14px"></textarea>
       <div class="card-actions"><button class="btn ghost" id="saveLoad">Load save code</button><label class="btn ghost" style="text-align:center">Load backup file<input type="file" id="saveUp" accept=".txt,.json,text/plain" hidden></label></div>
       <p class="muted" id="saveMsg" style="margin:10px 0 0;font-size:15px" aria-live="polite"></p></div>
+    ${scrollBoxHTML()}
     <div class="box"><h3>Badges <small>${got} of ${BADGES.length} unlocked</small></h3><div class="badges">${BADGES.map(([id,ic,name,desc,,secret])=>{
-      const has=G.badges[id]; if(!has && secret) return `<div class="badge locked"><div class="bi">❓</div><b>Secret badge</b><span>Keep revising to find it</span></div>`;
+      const has=G.badges[id]; if(!has && secret) return `<div class="badge locked secret"><div class="bi">❓</div><b>Secret badge</b><span>“${esc(typeof secret==="string"?secret:"Keep revising to find it")}”</span></div>`;
       return `<div class="badge ${has?"got":"locked"}"><div class="bi">${ic}</div><b>${esc(name)}</b><span>${esc(desc)}</span></div>`; }).join("")}</div></div>`;
-  document.querySelectorAll(".theme").forEach(b=>b.onclick=()=>{ G.skin=b.dataset.skin; save(); applySkin(); renderTrophies(); });
+  document.querySelectorAll(".theme").forEach(b=>b.onclick=()=>{ G.skin=b.dataset.skin; G.skinsTried[G.skin||"classic"]=1; save(); applySkin(); checkBadges(); renderTrophies(); });
   wireSave(); wireReport();
   document.querySelectorAll("[data-cert]").forEach(b=>b.onclick=()=>openCert(b.dataset.cert));
+  document.querySelectorAll("[data-scroll]").forEach(b=>b.onclick=()=>showScroll(SECRET_SCROLLS.find(s=>s.id===b.dataset.scroll), false));
   document.querySelectorAll("[data-goal]").forEach(b=>b.onclick=()=>{ G.goal=+b.dataset.goal; if((G.hist[t]||0)>=G.goal && G.last!==t) goalMet(); save(); renderHud(); renderTrophies(); });
 }
 
@@ -2273,8 +2336,88 @@ function eventUntil(e){ if(e.rule==="firstWeekend") return "until Sunday night";
 function renderEvents(){ const el=$("#evbar"); if(!el) return; const a=activeEvents(); el.hidden=!a.length;
   el.innerHTML=a.map(e=>`<span class="ev">${esc(e.banner)} <small>${eventUntil(e)}</small></span>`).join(""); }
 
+/* ================= SECRET SCROLLS (easter eggs) =================
+   Edit the wording here. "trigger" is a note for the teacher; the code that fires each one is underneath. */
+const SECRET_SCROLLS = [
+  {id:"title", trigger:"Click the site title 5 times quickly", title:"Welcome to the inner circle",
+   text:"You clicked my name five times. That's either dedication or a cry for help. Either way, welcome to the inner circle. Tell no one. — Mr W", hint:"Show the title some love"},
+  {id:"ring", trigger:"Tap the level ring 10 times quickly", title:"Wake up!",
+   text:"This is your official reminder that sleeping in my lesson is NOT 'consolidating your memories', however convincingly you argue it. (Sleep does help memory, mind — do it at night.) — Mr W", hint:"Is this thing on?"},
+  {id:"wakefield", trigger:"Type 'wakefield' (not in a text box)", title:"A message from the management",
+   text:"Mr W and Romeo have one message for you: eat your vegetables. Your brain runs on them. No arguments. — Mr W (and Romeo)", hint:"Say my name (keyboard required)"},
+  {id:"milgram", trigger:"Type 'milgram'", title:"450 volts",
+   text:"Please continue. The experiment requires that you continue. It is absolutely essential that you continue… revising. No volts were harmed in the making of this scroll. — Mr W", hint:"A shocking surname (keyboard required)"},
+  {id:"stan", trigger:"Type 'stan'", title:"Classified lore",
+   text:"Only true stans know this: Mr W has never, ever crashed out after a bad line-up. Any eyewitnesses who say otherwise are clearly reconstructing their memories. — Mr W", hint:"What are you? Type it. (keyboard required)"},
+  {id:"konami", trigger:"Konami code: ↑ ↑ ↓ ↓ ← → ← → B A", title:"The rarest scroll",
+   text:"You found the rarest scroll of all. Honestly? Being this deep in a revision website is exactly the kind of effort that gets grades. I'm proud of you. Now go and smash it in May. — Mr W", hint:"Up, up, down, down… (keyboard required)"},
+  {id:"blues", trigger:"Type 'blues' or 'kro'", title:"Keep Right On",
+   text:"Keep right on to the end of the road. It's the Blues anthem and, it turns out, the best revision advice ever written. Up the Blues! 💙 (Villa fans: this scroll is not for you.) — Mr W", hint:"Keep right on… (keyboard required)"},
+  {id:"pavlov", trigger:"Answer a Key Terms gap fill with 'pavlov'", title:"Ding!",
+   text:"Did you just get hungry? That's classical conditioning. Pavlov's dogs drooled at a bell — you drool at XP. We are not so different. — Mr W", hint:"Ring a bell? Try the gap fills."},
+  {id:"april", trigger:"Open the site on 1 April", title:"Insider exam tip",
+   text:"Every answer in this year's exam is C. … April Fool. Please, PLEASE do not put C for everything. — Mr W", hint:"Some days, nothing is what it seems"},
+  {id:"handover", trigger:"Reach level 59", title:"The handover",
+   text:"You are now Basically Mr Wakefield. I have nothing left to teach you. Please don't take my lanyard. One step remains: Dedicated Wakefield Stan. — Mr W", hint:"Become the teacher"},
+];
+function foundScroll(id){
+  if(TEACHER) return; const s=SECRET_SCROLLS.find(x=>x.id===id); if(!s) return;
+  if(document.querySelector(".scroll-overlay")) return;
+  const first=!G.scrolls[id];
+  if(first){ G.scrolls[id]=today(); save(); }
+  showScroll(s, first);
+  if(first){
+    setTimeout(()=>{ addXP(30,false); toast("📜",`Secret scroll ${Object.keys(G.scrolls).length} of ${SECRET_SCROLLS.length} found`,"+30 XP"); },700);
+    if(SECRET_SCROLLS.every(x=>G.scrolls[x.id])){ G.flags.keeper=1; save(); setTimeout(()=>{ checkBadges(); toast("✦","Wakefield Mode theme unlocked","Find it in Trophies → Themes."); confetti(200,["#E6C35C","#0D2A1E","#F6F0DC"]); },2200); }
+  }
+}
+function showScroll(s, first){
+  const blues=s.id==="blues", big=s.id==="konami";
+  const o=document.createElement("div"); o.className="overlay scroll-overlay";
+  o.innerHTML=`<div class="scroll ${blues?"blues":""}" role="dialog" aria-modal="true" aria-label="Secret scroll"><div class="scroll-rod"></div><div class="scroll-body">
+    <div class="scroll-kick">${first?"📜 Secret scroll found!":"📜 Secret scroll"}</div><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p>
+    <button class="btn" id="scrollOk">Roll it up</button></div><div class="scroll-rod"></div></div>`;
+  document.body.appendChild(o);
+  const close=()=>{ o.remove(); document.removeEventListener("keydown",k,true); };
+  const k=e=>{ if(e.key==="Tab") return; e.stopPropagation(); if(["Escape","Enter"," "].includes(e.key)){ e.preventDefault(); close(); } };
+  document.addEventListener("keydown",k,true);
+  o.onclick=e=>{ if(e.target===o||e.target.id==="scrollOk") close(); };
+  $("#scrollOk").focus({preventScroll:true});
+  if(first){ blues ? confetti(180,["#1F3FBF","#FFFFFF","#0000FF","#8FA8FF"]) : confetti(big?320:140); [523,659,784,1047,1319,1568].forEach((f,i)=>tone(f,.3,"sine",i*.08,.05)); }
+  else sfx("badge");
+}
+function scrollBoxHTML(){
+  const n=SECRET_SCROLLS.filter(s=>G.scrolls[s.id]).length;
+  return `<div class="box"><h3>📜 Secret scrolls <small>${n} of ${SECRET_SCROLLS.length} found${n===SECRET_SCROLLS.length?" · Wakefield Mode unlocked ✦":""}</small></h3>
+    <div class="scrolls">${SECRET_SCROLLS.map(s=>G.scrolls[s.id]
+      ? `<button class="scrollcard got" data-scroll="${s.id}"><span class="si">📜</span><b>${esc(s.title)}</b><span>Tap to read again</span></button>`
+      : `<div class="scrollcard"><span class="si">🔒</span><b>Sealed scroll</b><span>“${esc(s.hint)}”</span></div>`).join("")}</div></div>`;
+}
+// easter-egg triggers
+let keyBuf=[];
+const KONAMI=["arrowup","arrowup","arrowdown","arrowdown","arrowleft","arrowright","arrowleft","arrowright","b","a"];
+document.addEventListener("keydown",e=>{
+  if(TEACHER || e.target.matches("input,textarea,select") || e.metaKey||e.ctrlKey||e.altKey || document.querySelector(".scroll-overlay")) return;
+  keyBuf.push(e.key.toLowerCase()); keyBuf=keyBuf.slice(-12);
+  const s="|"+keyBuf.join("|"), ends=seq=>s.endsWith("|"+seq.join("|"));
+  if(ends(KONAMI)) foundScroll("konami");
+  else if(ends([..."wakefield"])) foundScroll("wakefield");
+  else if(ends([..."milgram"])) foundScroll("milgram");
+  else if(ends([..."blues"])||ends([..."kro"])) foundScroll("blues");
+  else if(ends([..."stan"])) foundScroll("stan");
+});
+const tapper=(el, n, ms, fn)=>{ if(!el) return; let ts=[]; el.addEventListener("click",()=>{ const now=Date.now(); ts=ts.filter(x=>now-x<ms); ts.push(now); if(ts.length>=n){ ts=[]; fn(); } }); };
+tapper(document.querySelector(".top h1"), 5, 2500, ()=>{ flag("stan"); foundScroll("title"); });
+tapper($("#hudLvl"), 10, 4000, ()=>{ flag("ring"); setTimeout(()=>foundScroll("ring"),150); });
+function dateEggs(){
+  const t=today();
+  if(t==="2026-12-04"||t==="2026-12-11"||(t>"2026-12-11" && Object.keys(G.hist).some(k=>k<"2026-12-04"))) G.flags.survivor=1;
+  if(t.slice(5)==="04-01") setTimeout(()=>foundScroll("april"),1500);
+  if(lvlFor(G.xp)>=59 && !G.scrolls.handover) setTimeout(()=>foundScroll("handover"),1800);
+}
+
 if(TEACHER){ startTeacher(); }
-else { checkStreak(); checkBadges(); save(); renderMeter(); renderChips(); newDeck(); renderQuiz(); renderHud(); renderArcade(); renderPlan(); renderEvents(); }
+else { dateEggs(); checkStreak(); checkBadges(); save(); renderMeter(); renderChips(); newDeck(); renderQuiz(); renderHud(); renderArcade(); renderPlan(); renderEvents(); }
 </script>
 </body>
 </html>
