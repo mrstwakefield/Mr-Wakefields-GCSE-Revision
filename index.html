@@ -329,6 +329,66 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .theme.on{border-color:var(--ink)}
 .theme:disabled{opacity:.55;cursor:default}
 @media (prefers-reduced-motion:reduce){.boss-ico.hit,#arcArea.hurt{animation:none}}
+
+/* ---------- teacher page + projector ---------- */
+#teacherApp[hidden]{display:none}
+.teacher-mode .wrap,.teacher-mode #toasts{display:none}
+.t-wrap{max-width:1100px;margin:0 auto;padding:24px 20px 60px}
+.t-h{font-family:var(--display);font-weight:800;font-size:clamp(28px,4vw,40px);margin:0;line-height:1.1}
+.t-lock{max-width:380px;margin:12vh auto 0;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px;text-align:center}
+.t-err{color:var(--warn);min-height:1.4em;margin:8px 0 0}
+.t-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.t-top .spacer{flex:1}
+.t-check{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--muted)}
+.t-note{font-size:14px;margin-top:18px}
+.t-weak ol{margin:0;padding-left:1.3em}.t-weak li{margin:6px 0}
+.t-scroll{overflow-x:auto}
+.t-table{border-collapse:collapse;width:100%;font-size:15px;min-width:640px}
+.t-table th,.t-table td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;white-space:nowrap}
+.t-heat td{text-align:center;font-weight:700;font-size:14px}.t-heat td:first-child{text-align:left;font-weight:700}
+.t-table tr.t-avg td{border-top:2px solid var(--ink);font-weight:800}
+.t-table tr.t-inactive td:first-child::after{content:" 😴"}
+.t-sort{border:0;background:none;font-weight:800;padding:0;font-size:14px;color:var(--ink)}
+.proj{max-width:1300px;margin:0 auto;padding:16px 20px 40px;min-height:100vh}
+.proj-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;font-size:20px}
+.proj-bar .spacer{flex:1}
+.proj-topic{color:var(--c);font-weight:800}
+.proj-time{font-family:var(--display);font-weight:800;font-size:36px;min-width:2.5em;text-align:right}
+.proj-setup{display:grid;gap:4px}
+.proj-names{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:12px}
+.proj-names label{display:flex;align-items:center;gap:8px}
+.proj-names label span{font-weight:800;width:1.4em}
+.proj-names input{flex:1;min-width:0}
+.proj-go{font-size:22px;padding:14px 28px}
+.proj-card{background:var(--card);border:1px solid var(--line);border-top:12px solid var(--c);border-radius:24px;padding:clamp(20px,3vw,40px);min-height:44vh;display:flex;flex-direction:column;justify-content:center}
+.proj-sc{font-size:clamp(20px,2.2vw,30px);color:var(--muted);margin-bottom:14px;line-height:1.4}
+.proj-q{font-family:var(--display);font-weight:800;font-size:clamp(32px,4.4vw,64px);line-height:1.12}
+.proj-opts{margin:22px 0 0;padding-left:1.4em;list-style:upper-alpha;font-size:clamp(22px,2.4vw,34px);line-height:1.35}
+.proj-opts li{margin:8px 0;padding:4px 10px;border-radius:12px}
+.proj-opts li.right{background:var(--good-bg);color:var(--good);font-weight:800}
+.proj-opts li.dim{opacity:.35}
+.proj-a{margin-top:24px;padding:18px 22px;border-radius:16px;background:color-mix(in srgb,var(--c) 12%,var(--card))}
+.proj-a .a{font-size:clamp(22px,2.6vw,36px)}
+.proj-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:18px 0}
+.proj-scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.proj-team{display:flex;align-items:center;gap:10px;border:3px solid var(--line);background:var(--card);border-radius:16px;padding:12px 16px;font-size:20px;text-align:left}
+.proj-team b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.proj-team .k{font-weight:800;color:var(--muted);font-size:15px}
+.proj-team .pts{font-family:var(--display);font-weight:800;font-size:36px}
+.proj-team.won{border-color:var(--good);background:var(--good-bg);animation:bump .3s}
+.proj-team:disabled{cursor:default;opacity:1}
+.proj-win{font-family:var(--display);font-weight:800;font-size:clamp(36px,5vw,72px);text-align:center;margin:20px 0}
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:end;max-width:760px;margin:0 auto 20px}
+.pod{text-align:center;font-size:22px}.pod b{display:block;font-family:var(--display);font-size:26px}
+.pod .block{margin-top:8px;border-radius:14px 14px 0 0;color:#fff;font-family:var(--display);font-weight:800;font-size:48px;display:grid;place-items:center}
+.pod.p1 .block{height:220px;background:linear-gradient(#E0A100,#B07E00)}
+.pod.p2 .block{height:160px;background:linear-gradient(#9AA4B5,#6B7487)}
+.pod.p3 .block{height:110px;background:linear-gradient(#C8783A,#9A5422)}
+@media print{
+  .t-noprint,.t-top button,.proj-bar button{display:none!important}
+  body{background:#fff}
+  .box,.tile{break-inside:avoid}
+}
 /* trophies */
 .profile{display:flex;gap:22px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;margin-bottom:14px}
 .profile .bigring{position:relative;width:110px;height:110px;flex:none}
@@ -463,6 +523,7 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
     <button class="linkbtn" id="resetBtn">Reset my progress</button>
   </footer>
 </div>
+<div id="teacherApp" hidden></div>
 <canvas id="fx" aria-hidden="true"></canvas>
 <div id="toasts" aria-live="polite"></div>
 
@@ -642,10 +703,11 @@ const TMAP = Object.fromEntries(TOPICS.map(t=>[t.key,t]));
 const BY_ID = Object.fromEntries(DATA.map(d=>[d.id,d]));
 
 /* ---------- storage ---------- */
+const TEACHER = /(^|[?&#])teacher\b/i.test(location.search+location.hash);
 const KEY = "rr-psych-gcse-v1";
 let store = {p:{}, sel:TOPICS.map(t=>t.key), all:TOPICS.map(t=>t.key)};
 try{ const s = JSON.parse(localStorage.getItem(KEY)||"null"); if(s && s.p){ store.p = s.p; if(Array.isArray(s.sel)){ const seen=new Set(Array.isArray(s.all)?s.all:s.sel.concat([])); store.sel = [...new Set(s.sel.map(k=>k.startsWith("Issues and Debates")?"Issues and Debates part I":k))].filter(k=>TMAP[k]).concat(TOPICS.map(t=>t.key).filter(k=>!seen.has(k))); } } }catch(e){}
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+function save(){ if(TEACHER) return; try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
 const status = id => store.p[id] || "";
 function topicPct(id){ const t=BY_ID[id].t, it=DATA.filter(x=>x.t===t); return it.filter(x=>status(x.id)==="k").length/it.length; }
 function mark(id, s){ const prev=store.p[id], pp=(s==="k"&&prev!=="k")?topicPct(id):0;
@@ -1494,6 +1556,7 @@ function renderTrophies(){
     <div class="box"><h3>Last 12 weeks <small>Darker = closer to your goal</small></h3><div class="heat">${cells}</div></div>
     <div class="box"><h3>Themes <small>Unlock new looks as you level up</small></h3><div class="themes">${THEMES.map(th=>{ const open=n>=th.lvl, on=(G.skin||"")===th.k;
       return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b><span>${open?(on?"In use":"Tap to use"):"🔒 Level "+th.lvl}</span></button>`; }).join("")}</div></div>
+    ${reportBoxHTML()}
     <div class="box"><h3>Move or back up your progress <small>Your progress only lives in this browser</small></h3>
       <p class="muted" style="margin:0 0 12px">To carry on using another device (school computer, phone, laptop), copy your save code and paste it there. Keep a copy somewhere safe in case your browser data gets cleared.</p>
       <div class="card-actions" style="margin-top:0"><button class="btn" id="saveCopy">Copy save code</button><button class="btn ghost" id="saveFile">Download backup file</button></div>
@@ -1504,7 +1567,7 @@ function renderTrophies(){
       const has=G.badges[id]; if(!has && secret) return `<div class="badge locked"><div class="bi">❓</div><b>Secret badge</b><span>Keep revising to find it</span></div>`;
       return `<div class="badge ${has?"got":"locked"}"><div class="bi">${ic}</div><b>${esc(name)}</b><span>${esc(desc)}</span></div>`; }).join("")}</div></div>`;
   document.querySelectorAll(".theme").forEach(b=>b.onclick=()=>{ G.skin=b.dataset.skin; save(); applySkin(); renderTrophies(); });
-  wireSave();
+  wireSave(); wireReport();
   document.querySelectorAll("[data-goal]").forEach(b=>b.onclick=()=>{ G.goal=+b.dataset.goal; if((G.hist[t]||0)>=G.goal && G.last!==t) goalMet(); save(); renderHud(); renderTrophies(); });
 }
 
@@ -1513,9 +1576,268 @@ document.addEventListener("keydown",e=>{
   if(["1","2","3","4"].includes(e.key)){ e.preventDefault(); arcPick(+e.key-1); }
 });
 $("#backupLink").onclick=()=>{ goTab("trophies"); setTimeout(()=>$("#saveCopy").scrollIntoView({behavior:"smooth",block:"center"}),50); };
-checkStreak(); checkBadges(); save();
 
-renderMeter(); renderChips(); newDeck(); renderQuiz(); renderHud(); renderArcade();
+/* ================= SHARED: mock dates ================= */
+const MOCK_TOPICS = TOPICS.map(t=>t.key).filter(k=>k!=="Language, thought & communication");
+const MOCK_END = "2026-12-11";
+const mockPeriod = () => today() <= MOCK_END;
+const liveStreak = () => { const t=today(); return (G.last===t || (G.last && dayNum(t)-dayNum(G.last)===1)) ? G.streak : 0; };
+function topicStats(){
+  return TOPICS.map(t=>{ const it=DATA.filter(d=>d.t===t.key), n=it.length||1;
+    return {key:t.key, k:Math.round(it.filter(d=>status(d.id)==="k").length/n*100), l:Math.round(it.filter(d=>status(d.id)==="l").length/n*100)}; });
+}
+
+/* ================= PROGRESS REPORT CODES ================= */
+// Format "FR1." + base64url(bytes). Bytes: version, name, then varints/bytes in a fixed order, then a 16-bit checksum.
+function varint(arr, n){ n=Math.max(0,Math.floor(n||0)); while(n>=128){ arr.push((n%128)|128); n=Math.floor(n/128); } arr.push(n); }
+function readVar(b, p){ let n=0, m=1, x; do{ x=b[p.i++]; if(x===undefined) throw new Error("short"); n+=(x&127)*m; m*=128; }while(x&128); return n; }
+const ck16 = bytes => { let h=0x811c9dc5; for(const x of bytes){ h^=x; h=Math.imul(h,16777619)>>>0; } return (h ^ (h>>>16)) & 0xffff; };
+const b64u = bytes => b64e(bytes).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const unb64u = s => b64d(s.replace(/-/g,"+").replace(/_/g,"/") + "===".slice((s.length+3)%4));
+const popcount = n => { let c=0; while(n){ c+=n&1; n=Math.floor(n/2); } return c; };
+function makeReport(){
+  const bytes=[1];
+  const nm=[...new TextEncoder().encode((G.name||"").trim().slice(0,24))].slice(0,40); bytes.push(nm.length, ...nm);
+  varint(bytes, dayNum(today())-dayNum("2026-01-01"));
+  varint(bytes, G.xp); varint(bytes, knownTotal());
+  const ts=topicStats(); ts.forEach(s=>bytes.push(s.k)); ts.forEach(s=>bytes.push(s.l));
+  bytes.push(G.st.cards ? Math.round(G.st.right/G.st.cards*100) : 0);
+  varint(bytes, liveStreak()); varint(bytes, G.best);
+  let bm=0; TOPICS.forEach((t,i)=>{ if(G.bosses[t.key] && G.bosses[t.key].won) bm+=Math.pow(2,i); }); varint(bytes, bm);
+  varint(bytes, G.st.cards);
+  let act=0; for(let i=0;i<14;i++){ const d=new Date(); d.setDate(d.getDate()-i); if(G.hist[ymd(d)]) act+=Math.pow(2,i); } varint(bytes, act);
+  const c=ck16(bytes); bytes.push(c>>8, c&255);
+  return "FR1."+b64u(new Uint8Array(bytes));
+}
+function parseReport(code){
+  const b=unb64u(code.slice(4)); if(b.length<12) throw new Error("short");
+  const body=b.slice(0,-2), c=(b[b.length-2]<<8)|b[b.length-1]; if(ck16(body)!==c) throw new Error("checksum");
+  const p={i:0}; if(body[p.i++]!==1) throw new Error("version");
+  const nl=body[p.i++]; const name=new TextDecoder().decode(body.slice(p.i,p.i+nl)).trim(); p.i+=nl;
+  const day=readVar(body,p), xp=readVar(body,p), known=readVar(body,p);
+  const k=[], l=[]; for(let i=0;i<TOPICS.length;i++){ const v=body[p.i++]; if(v===undefined||v>100) throw new Error("bad"); k.push(v); }
+  for(let i=0;i<TOPICS.length;i++){ const v=body[p.i++]; if(v===undefined||v>100) throw new Error("bad"); l.push(v); }
+  const acc=body[p.i++], streak=readVar(body,p), best=readVar(body,p), bm=readVar(body,p), qs=readVar(body,p), act=readVar(body,p);
+  if(p.i!==body.length) throw new Error("length");
+  const d=new Date(2026,0,1); d.setDate(d.getDate()+day);
+  let last=-1; for(let i=0;i<14;i++) if(Math.floor(act/Math.pow(2,i))%2){ last=i; break; }
+  return {name:name||"(no name)", date:ymd(d), xp, level:lvlFor(xp), known, k, l, acc, streak, best, bosses:popcount(bm), qs, act14:popcount(act), act7:popcount(act%128), lastDaysAgo:last};
+}
+
+/* ================= TEACHER PAGE (hidden: index.html?teacher) ================= */
+// Only a SHA-256 hash of the passcode lives here. To change it, replace this hash.
+const TEACHER_HASH = "7a4a8b070142725a18b5d331858e69013cd0960681ad55e530e6fa4127aa85e0";
+const T = {reports:new Map(), sort:{key:"name", dir:1}};
+const TKEY = "fount-teacher-codes";
+async function sha256hex(s){ const b=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join(""); }
+function startTeacher(){
+  tab="teacher";
+  document.body.classList.add("teacher-mode"); $("#teacherApp").hidden=false;
+  document.title="Teacher tools · Mr Wakefield's Fount";
+  delete document.documentElement.dataset.skin;
+  let ok=false; try{ ok=sessionStorage.getItem("fount-teacher")==="1"; }catch(e){}
+  ok ? tMain() : tLock();
+}
+function tLock(){
+  $("#teacherApp").innerHTML=`<div class="t-wrap"><div class="t-lock"><div style="font-size:48px">🔒</div><h1 class="t-h">Teacher tools</h1>
+    <p class="muted">Enter the passcode to continue.</p>
+    <form id="tForm"><input id="tPass" type="password" class="search" autocomplete="current-password" aria-label="Passcode" placeholder="Passcode" style="width:100%;margin:6px 0 12px">
+    <button class="btn" style="width:100%">Unlock</button></form><p id="tErr" class="t-err" aria-live="polite"></p>
+    <p class="muted" style="font-size:13px;margin-top:18px"><a href="./" class="linkbtn" style="padding:0">← Back to the revision site</a></p></div></div>`;
+  $("#tPass").focus();
+  $("#tForm").onsubmit=async e=>{ e.preventDefault();
+    try{
+      if(await sha256hex($("#tPass").value)===TEACHER_HASH){ try{ sessionStorage.setItem("fount-teacher","1"); }catch(_){} tMain(); }
+      else { $("#tErr").textContent="That passcode isn't right."; $("#tPass").select(); }
+    }catch(err){ $("#tErr").textContent="This browser can't check the passcode here. Open the site over https (the normal web address)."; }
+  };
+}
+function tMain(){
+  let remembered=null; try{ remembered=localStorage.getItem(TKEY); }catch(e){}
+  $("#teacherApp").innerHTML=`<div class="t-wrap">
+    <div class="t-top"><h1 class="t-h">🧑‍🏫 Teacher tools</h1><span class="spacer"></span>
+      <button class="btn" id="tProj">📽️ Projector mode</button><button class="btn ghost" id="tPrint">🖨️ Print</button><button class="btn ghost" id="tLockBtn">🔒 Lock</button></div>
+    <div class="box t-noprint"><h3>Paste progress codes <small>Students copy theirs from the Trophies page</small></h3>
+      <textarea id="tIn" placeholder="Paste one or many codes here. They can be mixed in with other text, e.g. copied from a Google Classroom thread."></textarea>
+      <div class="card-actions"><button class="btn" id="tAdd">Add codes</button><button class="btn ghost" id="tClear">Clear all</button>
+        <label class="t-check"><input type="checkbox" id="tRem" ${remembered?"checked":""}> Remember on this device</label></div>
+      <p class="muted" id="tMsg" aria-live="polite" style="margin:10px 0 0;font-size:15px"></p></div>
+    <div id="tOut"></div>
+    <p class="muted t-note">Codes are self-reported by students and could in theory be edited, so treat them as a guide. Nothing is sent anywhere: codes only live on this page${remembered?" and in this browser (Remember is on)":" until you close the tab"}.</p></div>`;
+  $("#tProj").onclick=()=>projSetup();
+  $("#tPrint").onclick=()=>window.print();
+  $("#tLockBtn").onclick=()=>{ try{ sessionStorage.removeItem("fount-teacher"); }catch(e){} T.reports.clear(); tLock(); };
+  $("#tAdd").onclick=()=>{ addCodes($("#tIn").value); $("#tIn").value=""; };
+  $("#tClear").onclick=()=>{ if(!T.reports.size || confirm("Remove all codes from this page?")){ T.reports.clear(); try{ localStorage.removeItem(TKEY); }catch(e){} $("#tMsg").textContent="Cleared."; tRender(); } };
+  $("#tRem").onchange=e=>{ try{ if(e.target.checked) persistCodes(); else localStorage.removeItem(TKEY); }catch(_){} tMain(); };
+  if(remembered && !T.reports.size) addCodes(remembered, true); else tRender();
+}
+function persistCodes(){ try{ if($("#tRem") && $("#tRem").checked) localStorage.setItem(TKEY, [...T.reports.values()].map(r=>r.code).join("\n")); }catch(e){} }
+function addCodes(text, quiet){
+  const found=(text||"").match(/FR1\.[A-Za-z0-9_-]{10,}/g)||[]; let ok=0, bad=0, rep=0;
+  found.forEach(code=>{ try{ const r=parseReport(code); r.code=code; const key=r.name.toLowerCase(), old=T.reports.get(key);
+      if(old){ rep++; if(old.date>r.date) return; } T.reports.set(key,r); ok++; }catch(e){ bad++; } });
+  if(!quiet) $("#tMsg").textContent = found.length ? `Added ${ok} code${ok===1?"":"s"}${rep?` (${rep} replaced an older or duplicate report)`:""}${bad?`. ${bad} code${bad===1?"":"s"} couldn't be read (incomplete or mistyped)`:""}.` : "No progress codes found in that text. They start with FR1.";
+  persistCodes(); tRender();
+}
+const shortName = k => ({"Language, thought & communication":"Language","Brain & neuropsychology":"Brain","Psychological problems":"Problems","Social influence":"Social","Research methods":"RM","RM":"RM","Exam skills":"Exam skills"}[k] || TMAP[k].name);
+const heatCol = v => `color-mix(in srgb, hsl(${Math.round(v*1.2)},75%,48%) 42%, var(--card))`;
+function tRender(){
+  const out=$("#tOut"); const rs=[...T.reports.values()];
+  if(!rs.length){ out.innerHTML=`<div class="empty"><h3>No codes yet</h3><p>Ask students to open Trophies → "Send your progress to your teacher", type their name and copy their code. Paste them all above.</p></div>`; return; }
+  const {key,dir}=T.sort;
+  const val = (r,k) => k==="name"?r.name.toLowerCase() : k.startsWith("t")? r.k[+k.slice(1)] : r[k];
+  rs.sort((a,b)=>{ const x=val(a,key), y=val(b,key); return (x<y?-1:x>y?1:0)*dir; });
+  const avg = f => Math.round(rs.reduce((s,r)=>s+f(r),0)/rs.length);
+  const topicAvg = TOPICS.map((t,i)=>({key:t.key, i, v:avg(r=>r.k[i])}));
+  const pool2 = mockPeriod() ? topicAvg.filter(t=>MOCK_TOPICS.includes(t.key)) : topicAvg;
+  const weak = pool2.slice().sort((a,b)=>a.v-b.v).slice(0,3);
+  const inactive = rs.filter(r=>r.act7===0);
+  const th = (k,label) => `<th><button class="t-sort" data-k="${k}">${label}${key===k?(dir>0?" ▲":" ▼"):""}</button></th>`;
+  out.innerHTML=`
+    <div class="tiles">
+      <div class="tile"><b>${rs.length}</b><span>Students</span></div>
+      <div class="tile"><b>${avg(r=>r.level)}</b><span>Average level</span></div>
+      <div class="tile"><b>${avg(r=>r.known)}</b><span>Average cards known</span></div>
+      <div class="tile"><b>${avg(r=>r.acc)}%</b><span>Average accuracy</span></div>
+      <div class="tile"><b>${rs.length-inactive.length}/${rs.length}</b><span>Active in the last 7 days</span></div>
+    </div>
+    <div class="box t-weak"><h3>🎯 Weakest topics for the class <small>${mockPeriod()?"Mock topics only (Language isn't in the mocks)":"All topics"}</small></h3>
+      <ol>${weak.map(w=>`<li><b>${esc(TMAP[w.key].name)}</b>: ${w.v}% of cards known on average. <span class="muted">Try: run projector mode on ${esc(TMAP[w.key].name)}, or set its boss battle as a challenge.</span></li>`).join("")}</ol></div>
+    ${inactive.length?`<div class="box"><h3>😴 No revision in the 7 days before their report <small>${inactive.length} student${inactive.length===1?"":"s"}</small></h3><p style="margin:0">${inactive.map(r=>`${esc(r.name)} <span class="muted">(${r.lastDaysAgo<0?"none in 14 days":r.lastDaysAgo+" days before report"})</span>`).join(" · ")}</p></div>`:""}
+    <div class="box"><h3>Topic heatmap <small>% of cards known · click a column to sort</small></h3>
+      <div class="t-scroll"><table class="t-table t-heat"><thead><tr>${th("name","Student")}${TOPICS.map((t,i)=>th("t"+i, esc(shortName(t.key)))).join("")}</tr></thead>
+      <tbody>${rs.map(r=>`<tr><td>${esc(r.name)}</td>${r.k.map(v=>`<td style="background:${heatCol(v)}">${v}%</td>`).join("")}</tr>`).join("")}
+      <tr class="t-avg"><td>Class average</td>${topicAvg.map(t=>`<td style="background:${heatCol(t.v)}">${t.v}%</td>`).join("")}</tr></tbody></table></div></div>
+    <div class="box"><h3>Class table <small>Click a heading to sort</small></h3>
+      <div class="t-scroll"><table class="t-table"><thead><tr>${th("name","Student")}${th("level","Level")}${th("xp","XP")}${th("known","Cards known")}${th("acc","Accuracy")}${th("streak","Streak")}${th("act14","Days active (14d)")}${th("bosses","Bosses")}${th("qs","Answered")}${th("date","Report date")}</tr></thead>
+      <tbody>${rs.map(r=>`<tr class="${r.act7===0?"t-inactive":""}"><td>${esc(r.name)}</td><td>${r.level}</td><td>${r.xp.toLocaleString()}</td><td>${r.known}</td><td>${r.acc}%</td><td>${r.streak} <span class="muted">(best ${r.best})</span></td><td>${r.act14}</td><td>${r.bosses}/9</td><td>${r.qs.toLocaleString()}</td><td>${r.date}</td></tr>`).join("")}</tbody></table></div>
+      <div class="card-actions t-noprint"><button class="btn ghost" id="tCsv">⬇️ Export CSV</button></div></div>`;
+  out.querySelectorAll(".t-sort").forEach(b=>b.onclick=()=>{ const k=b.dataset.k; T.sort = {key:k, dir: T.sort.key===k ? -T.sort.dir : (k==="name"?1:-1)}; tRender(); });
+  $("#tCsv").onclick=()=>{
+    const head=["Student","Level","XP","Cards known","Accuracy %","Streak","Best streak","Days active (14d)","Bosses defeated","Questions answered","Report date",...TOPICS.map(t=>TMAP[t.key].name+" % known"),...TOPICS.map(t=>TMAP[t.key].name+" % still learning")];
+    const q = v => /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : v;
+    const rows=rs.map(r=>[r.name,r.level,r.xp,r.known,r.acc,r.streak,r.best,r.act14,r.bosses,r.qs,r.date,...r.k,...r.l].map(q).join(","));
+    const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([[head.map(q).join(","),...rows].join("\n")],{type:"text/csv"})); a.download=`class-progress-${today()}.csv`; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
+  };
+}
+
+/* ================= PROJECTOR MODE (teacher page) ================= */
+const P = {sel:[...MOCK_TOPICS], teams:["Team 1","Team 2","Team 3","Team 4"], n:10, secs:30, items:[], i:0, scores:[], revealed:false, awarded:new Set(), timer:null, end:0, opts:null};
+function projSetup(){
+  clearInterval(P.timer);
+  const tp=$("#teacherApp");
+  tp.innerHTML=`<div class="proj"><div class="proj-bar"><b>📽️ Projector mode</b><span class="spacer"></span><button class="btn ghost" id="pFull">⛶ Full screen</button><button class="btn ghost" id="pExit">Exit</button></div>
+    <div class="proj-setup">
+      <div class="box"><h3>Topics <small><button class="linkbtn" id="pMock">Mock topics</button><button class="linkbtn" id="pAll">All</button></small></h3>
+        <div class="chips">${TOPICS.map(t=>`<button class="chip" style="--c:${t.c}" aria-pressed="${P.sel.includes(t.key)}" data-k="${esc(t.key)}"><span class="row"><span class="dot"></span>${esc(t.name)}</span></button>`).join("")}</div></div>
+      <div class="box"><h3>Teams <small>${P.teams.length} teams · edit names</small></h3>
+        <div class="seg" role="group" aria-label="Number of teams">${[2,3,4,5,6].map(n=>`<button aria-pressed="${P.teams.length===n}" data-teams="${n}">${n}</button>`).join("")}</div>
+        <div class="proj-names">${P.teams.map((t,i)=>`<label><span>${i+1}</span><input class="search" data-team="${i}" value="${esc(t)}" maxlength="24"></label>`).join("")}</div></div>
+      <div class="box"><h3>Questions and timer</h3>
+        <div class="seg" role="group" aria-label="Questions">${[5,10,15,20].map(n=>`<button aria-pressed="${P.n===n}" data-n="${n}">${n} questions</button>`).join("")}</div>
+        <div class="seg" role="group" aria-label="Timer" style="margin-top:10px">${[0,15,30,45,60].map(n=>`<button aria-pressed="${P.secs===n}" data-secs="${n}">${n?n+"s":"No timer"}</button>`).join("")}</div></div>
+      <button class="btn proj-go" id="pGo" ${P.sel.length?"":"disabled"}>Start the game</button>
+      <p class="muted" style="text-align:center">Keys: <b>Space</b> reveal / next · <b>1–6</b> give a team the point · nothing here is saved or affects students' XP.</p>
+    </div></div>`;
+  tp.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{ const k=b.dataset.k; P.sel=P.sel.includes(k)?P.sel.filter(x=>x!==k):[...P.sel,k]; projSetup(); });
+  $("#pMock").onclick=()=>{ P.sel=[...MOCK_TOPICS]; projSetup(); };
+  $("#pAll").onclick=()=>{ P.sel=TOPICS.map(t=>t.key); projSetup(); };
+  tp.querySelectorAll("[data-teams]").forEach(b=>b.onclick=()=>{ const n=+b.dataset.teams; while(P.teams.length<n) P.teams.push("Team "+(P.teams.length+1)); P.teams=P.teams.slice(0,n); projSetup(); });
+  tp.querySelectorAll("[data-team]").forEach(inp=>inp.oninput=()=>{ P.teams[+inp.dataset.team]=inp.value||("Team "+(+inp.dataset.team+1)); });
+  tp.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{ P.n=+b.dataset.n; projSetup(); });
+  tp.querySelectorAll("[data-secs]").forEach(b=>b.onclick=()=>{ P.secs=+b.dataset.secs; projSetup(); });
+  $("#pFull").onclick=projFull; $("#pExit").onclick=()=>{ clearInterval(P.timer); if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); tMain(); };
+  $("#pGo").onclick=()=>{ const s=new Set(P.sel); P.items=shuffle(DATA.filter(d=>s.has(d.t))).slice(0,P.n); P.i=0; P.scores=P.teams.map(()=>0); projQ(); };
+}
+function projFull(){ const el=document.documentElement; if(!document.fullscreenElement) el.requestFullscreen && el.requestFullscreen().catch(()=>{}); else document.exitFullscreen().catch(()=>{}); }
+function projScore(){ return `<div class="proj-scores">${P.teams.map((t,i)=>`<button class="proj-team ${P.awarded.has(i)?"won":""}" data-award="${i}" ${P.revealed?"":"disabled"}><span class="k">${i+1}</span><b>${esc(t)}</b><span class="pts">${P.scores[i]}</span></button>`).join("")}</div>`; }
+function projQ(){
+  clearInterval(P.timer); P.revealed=false; P.awarded=new Set();
+  const d=P.items[P.i], t=TMAP[d.t];
+  P.opts = d.wrong ? mcFor(d, rngFrom("proj-"+d.id+"-"+P.i)) : null;
+  $("#teacherApp").innerHTML=`<div class="proj play" style="--c:${t.c}"><div class="proj-bar"><b>Question ${P.i+1} of ${P.items.length}</b><span class="proj-topic">${esc(t.name)}</span><span class="spacer"></span><span class="proj-time" id="pTime"></span><button class="btn ghost" id="pFull">⛶</button><button class="btn ghost" id="pEnd">End</button></div>
+    ${P.secs?`<div class="timebar" id="ptb"><i id="ptbFill"></i></div>`:""}
+    <div class="proj-card">${d.sc?`<div class="proj-sc">${esc(d.sc)}</div>`:""}<div class="proj-q">${esc(d.q)}</div>
+      ${P.opts?`<ol class="proj-opts">${P.opts.opts.map((o,i)=>`<li data-o="${i}">${esc(o)}</li>`).join("")}</ol>`:""}
+      <div class="proj-a" id="pAns" hidden><div class="tag">Answer</div><div class="a">${P.opts?esc(P.opts.opts[P.opts.correct]):fmtAnswer(d.a,d.id)}</div></div></div>
+    <div class="proj-actions"><button class="btn proj-go" id="pReveal">Reveal answer <kbd>Space</kbd></button></div>
+    ${projScore()}</div>`;
+  wireProj();
+  if(P.secs){ P.end=Date.now()+P.secs*1000; P.timer=setInterval(projTick,100); projTick(); }
+}
+function projTick(){
+  const left=P.end-Date.now(), f=$("#ptbFill"), tm=$("#pTime"); if(!f){ clearInterval(P.timer); return; }
+  f.style.width=Math.max(0,left/(P.secs*1000)*100)+"%"; $("#ptb").classList.toggle("low", left<5000);
+  tm.textContent=Math.max(0,Math.ceil(left/1000))+"s";
+  if(left<=0){ clearInterval(P.timer); tm.textContent="Time!"; sfx("no"); }
+}
+function wireProj(){
+  $("#pFull").onclick=projFull;
+  $("#pEnd").onclick=projEnd;
+  const r=$("#pReveal"); if(r) r.onclick=projReveal;
+  document.querySelectorAll("[data-award]").forEach(b=>b.onclick=()=>projAward(+b.dataset.award));
+  const n=$("#pNext"); if(n) n.onclick=projNext;
+  const nb=$("#pNobody"); if(nb) nb.onclick=projNext;
+}
+function projReveal(){
+  if(P.revealed) return; P.revealed=true; clearInterval(P.timer);
+  $("#pAns").hidden=false; sfx("badge");
+  if(P.opts){ document.querySelectorAll(".proj-opts li").forEach(li=>li.classList.add(+li.dataset.o===P.opts.correct?"right":"dim")); }
+  document.querySelector(".proj-actions").innerHTML=`<button class="btn ghost" id="pNobody">Nobody got it</button><button class="btn proj-go" id="pNext">${P.i+1>=P.items.length?"See the winners":"Next question"} <kbd>Space</kbd></button>`;
+  document.querySelector(".proj-scores").outerHTML=projScore();
+  wireProj();
+}
+function projAward(i){
+  if(!P.revealed || i>=P.teams.length) return;
+  if(P.awarded.has(i)){ P.awarded.delete(i); P.scores[i]--; } else { P.awarded.add(i); P.scores[i]++; sfx("ok"); confetti(40); }
+  document.querySelector(".proj-scores").outerHTML=projScore(); wireProj();
+}
+function projNext(){ P.i++; if(P.i>=P.items.length) projEnd(); else projQ(); }
+function projEnd(){
+  clearInterval(P.timer);
+  const order=P.teams.map((t,i)=>({t,s:P.scores[i]})).sort((a,b)=>b.s-a.s);
+  const top=order[0]?order[0].s:0, winners=order.filter(o=>o.s===top);
+  const pod=[order[1],order[0],order[2]];
+  $("#teacherApp").innerHTML=`<div class="proj"><div class="proj-bar"><b>📽️ Final scores</b><span class="spacer"></span><button class="btn ghost" id="pFull">⛶</button></div>
+    <h2 class="proj-win">${winners.length>1?"It's a draw! 🤝":"🏆 "+esc(winners[0].t)+" wins!"}</h2>
+    <div class="podium">${pod.map((o,j)=>o?`<div class="pod p${[2,1,3][j]}"><b>${esc(o.t)}</b><span>${o.s} pt${o.s===1?"":"s"}</span><div class="block">${[2,1,3][j]}</div></div>`:"<div></div>").join("")}</div>
+    ${order.length>3?`<p class="muted" style="text-align:center">${order.slice(3).map((o,j)=>`${j+4}. ${esc(o.t)} (${o.s})`).join(" · ")}</p>`:""}
+    <div class="proj-actions"><button class="btn proj-go" id="pAgain">Play again</button><button class="btn ghost" id="pSetup">Change settings</button><button class="btn ghost" id="pExit">Back to teacher tools</button></div></div>`;
+  sfx("lvl"); confetti(260);
+  $("#pFull").onclick=projFull;
+  $("#pAgain").onclick=()=>{ const s=new Set(P.sel); P.items=shuffle(DATA.filter(d=>s.has(d.t))).slice(0,P.n); P.i=0; P.scores=P.teams.map(()=>0); projQ(); };
+  $("#pSetup").onclick=projSetup;
+  $("#pExit").onclick=()=>{ if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); tMain(); };
+}
+document.addEventListener("keydown",e=>{
+  if(!TEACHER || !document.querySelector(".proj.play") || e.target.matches("input,textarea")) return;
+  if(e.key===" "){ e.preventDefault(); P.revealed ? projNext() : projReveal(); }
+  else if(/^[1-6]$/.test(e.key)){ e.preventDefault(); projAward(+e.key-1); }
+});
+
+/* ---- student side: progress report box (rendered inside Trophies) ---- */
+function reportBoxHTML(){
+  return `<div class="box"><h3>📨 Send your progress to your teacher <small>A short code with your level, topics and streak</small></h3>
+    <label class="muted" for="repName" style="display:block;font-size:15px;margin-bottom:6px">Your name or initials (only saved in this browser)</label>
+    <input id="repName" class="search" maxlength="24" value="${esc(G.name||"")}" placeholder="e.g. Sam P" style="width:100%">
+    <div class="card-actions"><button class="btn" id="repCopy">Copy progress report code</button></div>
+    <p class="muted" style="margin:10px 0 0;font-size:15px">Paste it into Google Classroom, Teams or an email to your teacher. It doesn't include your save, just a summary.</p>
+    <p id="repMsg" style="margin:8px 0 0;font-size:15px;word-break:break-all" aria-live="polite"></p></div>`;
+}
+function wireReport(){
+  const n=$("#repName"); if(!n) return;
+  n.oninput=()=>{ G.name=n.value.trim().slice(0,24); save(); };
+  $("#repCopy").onclick=async()=>{
+    if(!G.name){ n.focus(); $("#repMsg").innerHTML='<span style="color:var(--warn)">Type your name or initials first, so your teacher knows it\'s you.</span>'; return; }
+    const c=makeReport();
+    try{ await navigator.clipboard.writeText(c); $("#repMsg").innerHTML=`<span style="color:var(--good)">Copied ✓</span> <code>${esc(c)}</code>`; }
+    catch(e){ $("#repMsg").innerHTML=`Copy this code: <code>${esc(c)}</code>`; }
+  };
+}
+
+if(TEACHER){ startTeacher(); }
+else { checkStreak(); checkBadges(); save(); renderMeter(); renderChips(); newDeck(); renderQuiz(); renderHud(); renderArcade(); }
 </script>
 </body>
 </html>
