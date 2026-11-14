@@ -437,6 +437,14 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .ext-lvl{display:flex;flex-direction:column;gap:4px;text-align:left;border:2px solid var(--line);background:var(--paper);border-radius:12px;padding:10px 12px}
 .ext-lvl span{font-size:14px;color:var(--muted);line-height:1.35}
 .ext-lvl[aria-pressed="true"]{border-color:var(--good);background:var(--good-bg)}
+
+/* event banner */
+.evbar{display:flex;flex-wrap:wrap;gap:8px;margin:-6px 0 14px}
+.evbar[hidden]{display:none}
+.ev{flex:1 1 260px;background:linear-gradient(90deg,#7B5BE0,#D6478F);color:#fff;border-radius:12px;padding:8px 14px;font-weight:700;font-size:15px;animation:evGlow 3s ease-in-out infinite}
+.ev small{font-weight:400;opacity:.9;margin-left:6px}
+@keyframes evGlow{50%{filter:brightness(1.12)}}
+@media (prefers-reduced-motion:reduce){.ev{animation:none}}
 /* trophies */
 .profile{display:flex;gap:22px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;margin-bottom:14px}
 .profile .bigring{position:relative;width:110px;height:110px;flex:none}
@@ -510,6 +518,7 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
     <button class="iconbtn" id="soundBtn" aria-label="Mute sounds">🔊</button>
   </div>
 
+  <div class="evbar" id="evbar" hidden></div>
   <div class="plan" id="plan" aria-live="polite"></div>
 
   <div class="tabs" role="tablist" aria-label="Revision mode">
@@ -833,7 +842,7 @@ function newDeck(){
   if(filter==="due") p=p.filter(d=>isDue(d.id));
   if(filter==="mistakes") p=DATA.filter(d=>G.mistakes[d.id]!==undefined);
   deck=shuffle(p).map(d=>d.id); pos=0; flipped=false; sessionRes={}; deckXP=0; deckBest=0; deckCombo=0;
-  golds=new Set(deck.filter(()=>Math.random()<0.07)); renderCard();
+  golds=new Set(deck.filter(()=>Math.random()<0.07*goldMult())); renderCard();
 }
 function renderCard(){
   const area=$("#cardArea");
@@ -847,7 +856,7 @@ function renderCard(){
     area.innerHTML=`<div class="empty"><h3>Deck finished</h3><p>You marked ${k} as got it and ${l} as still learning.${l?" Go round again on the ones that didn't stick yet.":" Nice work."}</p>
       <p style="font-family:var(--display);font-weight:800;font-size:22px;color:var(--ink)">+${deckXP} XP · best run ${deckBest} 🔥</p>
       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">${l?'<button class="btn" id="againL">Go again: still learning</button>':''}<button class="btn ghost" id="againAll">Shuffle a new deck</button></div></div>`;
-    const a=$("#againL"); if(a) a.onclick=()=>{ deck=shuffle(Object.keys(sessionRes).filter(id=>sessionRes[id]==="l").map(Number)); pos=0; sessionRes={}; deckXP=0; deckBest=0; deckCombo=0; golds=new Set(deck.filter(()=>Math.random()<0.1)); flipped=false; renderCard(); };
+    const a=$("#againL"); if(a) a.onclick=()=>{ deck=shuffle(Object.keys(sessionRes).filter(id=>sessionRes[id]==="l").map(Number)); pos=0; sessionRes={}; deckXP=0; deckBest=0; deckCombo=0; golds=new Set(deck.filter(()=>Math.random()<0.1*goldMult())); flipped=false; renderCard(); };
     $("#againAll").onclick=newDeck; return;
   }
   const d=BY_ID[deck[pos]], t=TMAP[d.t], st=status(d.id), gold=golds.has(d.id), due=isDue(d.id), dn=dueCount();
@@ -1130,13 +1139,13 @@ function goalMet(){
   addXP(50,false);
   if(G.streak%7===0 && G.freeze<2){ G.freeze++; setTimeout(()=>toast("🧊","Streak freeze earned","It saves your streak if you miss a day."),1200); }
 }
-function answer({ok, el, mode, gold, x2, review, topic}){
+function answer({ok, el, mode, gold, x2, review, topic, boss}){
   checkStreak();
   const t=today();
   G.st.cards++; if(ok) G.st.right++;
   if(ok){ combo++; if(combo>G.st.combo) G.st.combo=combo; } else combo=0;
   const base = mode==="quiz" ? (ok?15:4) : mode==="arcade" ? (ok?6:1) : (ok?10:3);
-  let mult = (ok ? comboMult() : 1) * (x2 ? 2 : 1);
+  let mult = (ok ? comboMult() : 1) * (x2 ? 2 : 1) * eventMult(topic, boss);
   if(gold && ok){ mult*=5; G.st.gold++; }
   const xp=Math.round(base*mult)+(review?5:0);
   G.hist[t]=(G.hist[t]||0)+1;
@@ -2165,8 +2174,33 @@ function extTick(){ const el=$("#extTime"); if(!el){ clearInterval(ext.timer); r
   const s=Math.ceil(left/1000); el.textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")} left`; el.classList.toggle("low", left<120000); }
 document.querySelectorAll("[data-qm]").forEach(b=>b.onclick=()=>setQuizMode(b.dataset.qm));
 
+/* ================= DOUBLE XP EVENTS — edit dates here =================
+   from/to: "MM-DD" repeats every year, "YYYY-MM-DD" is a one-off.
+   mult = XP multiplier · scope:"boss" = boss battles only · topics = only these topics · gold = golden cards × as common.
+   If two events overlap, the bigger multiplier wins (they don't stack). */
+const EVENTS = [
+  {id:"firstwknd", rule:"firstWeekend", mult:2,   banner:"⚡ Double XP weekend: everything earns 2× XP"},
+  {id:"halloween", from:"10-25", to:"10-31", mult:2, scope:"boss", banner:"🎃 Halloween Boss Rush: 2× XP in boss battles"},
+  {id:"advent",    from:"12-01", to:"12-24", gold:2, banner:"🎄 Advent: golden cards are twice as common"},
+  {id:"mock",      from:"2026-11-20", to:"2026-12-11", mult:1.5, topics:MOCK_TOPICS, banner:"🎯 Mock countdown: 1.5× XP on mock topics"},
+  {id:"newyear",   from:"01-01", to:"01-07", mult:1.5, banner:"🎆 New Year resolution week: 1.5× XP on everything"},
+  {id:"final",     from:"2027-04-10", to:"2027-05-09", mult:1.5, banner:"🏁 Final countdown to Paper 1: 1.5× XP on everything"},
+];
+function eventActive(e, d=new Date()){
+  if(e.rule==="firstWeekend"){ const day=d.getDay(), dt=d.getDate(); return (day===6 && dt<=7) || (day===0 && dt>=2 && dt<=8); }
+  const s=ymd(d), md=s.slice(5);
+  if(e.from.length===5) return e.from<=e.to ? (md>=e.from && md<=e.to) : (md>=e.from || md<=e.to);
+  return s>=e.from && s<=e.to;
+}
+const activeEvents = (d) => EVENTS.filter(e=>eventActive(e,d));
+function eventMult(topic, boss){ let m=1; activeEvents().forEach(e=>{ if(!e.mult) return; if(e.scope==="boss" && !boss) return; if(e.topics && !e.topics.includes(topic)) return; m=Math.max(m,e.mult); }); return m; }
+function goldMult(){ return Math.max(1, ...activeEvents().map(e=>e.gold||1)); }
+function eventUntil(e){ if(e.rule==="firstWeekend") return "until Sunday night"; const y=new Date().getFullYear(); const to=e.to.length===5?`${y}-${e.to}`:e.to; return "until "+niceDate(to); }
+function renderEvents(){ const el=$("#evbar"); if(!el) return; const a=activeEvents(); el.hidden=!a.length;
+  el.innerHTML=a.map(e=>`<span class="ev">${esc(e.banner)} <small>${eventUntil(e)}</small></span>`).join(""); }
+
 if(TEACHER){ startTeacher(); }
-else { checkStreak(); checkBadges(); save(); renderMeter(); renderChips(); newDeck(); renderQuiz(); renderHud(); renderArcade(); renderPlan(); }
+else { checkStreak(); checkBadges(); save(); renderMeter(); renderChips(); newDeck(); renderQuiz(); renderHud(); renderArcade(); renderPlan(); renderEvents(); }
 </script>
 </body>
 </html>
