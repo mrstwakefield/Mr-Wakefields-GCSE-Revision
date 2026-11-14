@@ -713,6 +713,12 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 :root[data-skin="snowdome"] .h1t{color:#2B54C8;letter-spacing:.01em}
 :root[data-skin="snowdome"] .hud,:root[data-skin="snowdome"] .tabs{border-top:4px solid #2F6E5E}
 :root[data-skin="snowdome"] .h1t::after{content:" ❄️"}
+:root[data-skin="bullring"]{--paper:#143A86;--card:#1B4699;--ink:#F2F5FA;--muted:#BCC8E2;--line:#2C58AD;--soft:#224FA3;--good:#E0A15C;--good-bg:#4A3A2A;--warn:#FF9B7A;--warn-bg:#4A2A3A;color-scheme:dark}
+:root[data-skin="bullring"] body{background-image:radial-gradient(circle at 40% 38%,rgba(255,255,255,.42) 0,rgba(201,207,217,.30) 4px,rgba(142,151,168,.22) 6.5px,transparent 7px);background-size:26px 26px;background-position:0 0}
+:root[data-skin="bullring"] .h1t{color:#FFFFFF;text-shadow:0 3px 0 #0B2459}
+:root[data-skin="bullring"] .h1t::after{content:" 🐂"}
+:root[data-skin="bullring"] h1 span:not(.h1t){color:#D5DAE2}
+:root[data-skin="bullring"] .btn.good{color:#143A86}
 :root[data-skin="greens"]{--paper:#EEF6E4;--card:#FFFFFF;--ink:#1E3312;--muted:#5A7048;--line:#D3E6C0;--soft:#E2EFD3;--good:#3F8A12;--good-bg:#DDF0CC;--warn:#B4531B;--warn-bg:#FBE7D9;color-scheme:light}
 :root[data-skin="greens"] .h1t::after{content:" 🥦🥕"}
 :root[data-skin="volts"]{--paper:#101014;--card:#1A1A22;--ink:#FFF7D6;--muted:#BDB59A;--line:#2E2E3A;--soft:#23232D;--good:#FFD60A;--good-bg:#3A3410;--warn:#FF6B4A;--warn-bg:#3E1E16;color-scheme:dark}
@@ -1702,6 +1708,7 @@ const THEMES = [
   {k:"wakefield", name:"✦ Wakefield Mode", lvl:1, secret:true, sw:["#0D2A1E","#F6F0DC","#E6C35C"]},
   {k:"retro", name:"👾 Retro Arcade", lvl:1, secret:true, scroll:"konami", sw:["#0A0A12","#39FF14","#FF2BD6"]},
   {k:"snowdome", name:"❄️ Snowdome", lvl:1, secret:true, scroll:"tamworth", sw:["#EFEBDD","#4E9C8E","#2B54C8"]},
+  {k:"bullring", name:"🐂 Bullring", lvl:1, secret:true, scroll:"blues", sw:["#143A86","#D5DAE2","#C68A4A"]},
   {k:"greens", name:"🥦 Eat Your Greens", lvl:1, secret:true, scroll:"wakefield", sw:["#EEF6E4","#1E3312","#4C9A1C"]},
   {k:"volts", name:"⚡ 450 Volts", lvl:1, secret:true, scroll:"milgram", sw:["#101014","#FFF7D6","#FFD60A"]},
   {k:"nap", name:"😴 Nap Time", lvl:1, secret:true, scroll:"ring", sw:["#1A1830","#E9E6FA","#A99BFF"]},
