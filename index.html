@@ -445,6 +445,39 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .ev small{font-weight:400;opacity:.9;margin-left:6px}
 @keyframes evGlow{50%{filter:brightness(1.12)}}
 @media (prefers-reduced-motion:reduce){.ev{animation:none}}
+
+/* certificates */
+.certs{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.certbtn{display:flex;flex-direction:column;gap:4px;text-align:left;border:2px solid color-mix(in srgb,#E0A100 55%,var(--line));background:color-mix(in srgb,#FFD54A 10%,var(--card));border-radius:14px;padding:12px}
+.certbtn .ci{font-size:28px}
+.certbtn b{font-size:15px}
+.certbtn span:last-child{font-size:13px;color:var(--muted)}
+.certbtn.locked{border-color:var(--line);background:var(--paper);opacity:.6;cursor:default}
+.cert-overlay{align-content:start;overflow:auto;gap:12px}
+.cert-tools{display:flex;gap:10px;align-items:end;flex-wrap:wrap;justify-content:center;background:var(--card);padding:12px;border-radius:14px;max-width:880px;width:100%}
+.cert-tools label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:700;flex:1 1 220px}
+.cert-tools input{flex:none;width:100%}
+.cert{width:min(880px,100%);aspect-ratio:297/210;background:#FFFDF6;color:#2A2416;padding:2.2%;border-radius:6px;box-shadow:0 20px 60px rgba(0,0,0,.35);font-family:Georgia,"Times New Roman",serif}
+.cert-in{height:100%;border:3px double #B8860B;outline:1.5px solid #B8860B;outline-offset:-10px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:3% 6%;gap:.6em;background:radial-gradient(circle at 50% 40%,#FFF8E1 0,transparent 70%)}
+.cert-seal{font-size:clamp(30px,5vw,54px);width:1.8em;height:1.8em;border-radius:50%;display:grid;place-items:center;background:radial-gradient(#FFE58A,#D4A017);box-shadow:0 0 0 4px #FFFDF6,0 0 0 6px #B8860B}
+.cert-kick{font-family:var(--display);font-weight:800;letter-spacing:.18em;text-transform:uppercase;font-size:clamp(14px,2.4vw,26px);color:#8A6508}
+.cert-small{margin:0;font-size:clamp(11px,1.6vw,17px);font-style:italic;color:#5A4E33}
+.cert-name{font-family:var(--display);font-weight:800;font-size:clamp(26px,5.4vw,58px);line-height:1.05;border-bottom:2px solid #B8860B;padding:0 .4em .1em;min-width:50%}
+.cert-ach{font-family:var(--display);font-weight:700;font-size:clamp(16px,3vw,32px);color:#1F3A5F}
+.cert-foot{display:flex;justify-content:space-between;width:80%;margin-top:4%;gap:20px}
+.cert-foot{align-items:flex-end}
+.cert-foot > div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;flex:1}
+.cert-sig{font-size:clamp(12px,2vw,20px);min-height:1.4em}
+.cert-sig.sig{font-family:"Brush Script MT","Segoe Script","Lucida Handwriting",cursive;font-size:clamp(18px,3.4vw,36px);color:#1F3A5F}
+.cert-line{border-top:1px solid #5A4E33;width:100%;font-size:clamp(10px,1.3vw,13px);color:#5A4E33;padding-top:2px}
+@media (max-width:700px){.cert{aspect-ratio:auto}.cert-in{padding:8% 6%}.cert-seal{margin-top:6px}}
+@page{size:A4 landscape;margin:0}
+@media print{
+  body.printing-cert > *:not(.cert-overlay){display:none!important}
+  body.printing-cert .cert-overlay{position:static;background:none;padding:0;display:block}
+  body.printing-cert .cert-tools{display:none}
+  body.printing-cert .cert{width:297mm;height:210mm;max-width:none;box-shadow:none;border-radius:0;aspect-ratio:auto;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 /* trophies */
 .profile{display:flex;gap:22px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;margin-bottom:14px}
 .profile .bigring{position:relative;width:110px;height:110px;flex:none}
@@ -1100,7 +1133,7 @@ function levelUp(n){
   sfx("lvl"); confetti(200);
   const o=document.createElement("div"); o.className="overlay";
   o.innerHTML=`<div class="levelup" role="dialog" aria-modal="true" aria-label="Level up"><div class="kick">Level up!</div><div class="num">${n}</div>
-    <h3>${r!==old?"New rank: "+esc(r):esc(r)}</h3>${(()=>{const th=THEMES.find(t=>t.lvl===n);return th?`<p style="margin:0 0 8px;color:var(--ink)">🎨 New theme unlocked: <b>${esc(th.name)}</b>. Switch it on in Trophies.</p>`:""})()}<p>${lvlStart(n+1)-G.xp} XP to level ${n+1}. Keep it going.</p><button class="btn" id="luOk">Let's go</button></div>`;
+    <h3>${r!==old?"New rank: "+esc(r):esc(r)}</h3>${(()=>{const th=THEMES.find(t=>t.lvl===n);return th?`<p style="margin:0 0 8px;color:var(--ink)">🎨 New theme unlocked: <b>${esc(th.name)}</b>. Switch it on in Trophies.</p>`:""})()}${CERT_LEVELS.includes(n)?`<p style="margin:0 0 8px;color:var(--ink)">🏅 <b>Certificate unlocked!</b> Print it from Trophies.</p>`:""}<p>${lvlStart(n+1)-G.xp} XP to level ${n+1}. Keep it going.</p><button class="btn" id="luOk">Let's go</button></div>`;
   document.body.appendChild(o);
   const close=()=>{ o.remove(); document.removeEventListener("keydown",esc2,true); };
   const esc2=e=>{ if(e.key==="Tab") return; e.stopPropagation(); if(e.key==="Escape"||e.key==="Enter"||e.key===" "){ e.preventDefault(); close(); } };
@@ -1643,6 +1676,7 @@ function renderTrophies(){
     <div class="box"><h3>Last 12 weeks <small>Darker = closer to your goal</small></h3><div class="heat">${cells}</div></div>
     <div class="box"><h3>Themes <small>Unlock new looks as you level up</small></h3><div class="themes">${THEMES.map(th=>{ const open=n>=th.lvl, on=(G.skin||"")===th.k;
       return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b><span>${open?(on?"In use":"Tap to use"):"🔒 Level "+th.lvl}</span></button>`; }).join("")}</div></div>
+    ${certBoxHTML()}
     ${reportBoxHTML()}
     <div class="box"><h3>Move or back up your progress <small>Your progress only lives in this browser</small></h3>
       <p class="muted" style="margin:0 0 12px">To carry on using another device (school computer, phone, laptop), copy your save code and paste it there. Keep a copy somewhere safe in case your browser data gets cleared.</p>
@@ -1655,6 +1689,7 @@ function renderTrophies(){
       return `<div class="badge ${has?"got":"locked"}"><div class="bi">${ic}</div><b>${esc(name)}</b><span>${esc(desc)}</span></div>`; }).join("")}</div></div>`;
   document.querySelectorAll(".theme").forEach(b=>b.onclick=()=>{ G.skin=b.dataset.skin; save(); applySkin(); renderTrophies(); });
   wireSave(); wireReport();
+  document.querySelectorAll("[data-cert]").forEach(b=>b.onclick=()=>openCert(b.dataset.cert));
   document.querySelectorAll("[data-goal]").forEach(b=>b.onclick=()=>{ G.goal=+b.dataset.goal; if((G.hist[t]||0)>=G.goal && G.last!==t) goalMet(); save(); renderHud(); renderTrophies(); });
 }
 
@@ -2173,6 +2208,45 @@ function extTick(){ const el=$("#extTime"); if(!el){ clearInterval(ext.timer); r
   if(left<=0){ clearInterval(ext.timer); el.textContent="⏰ Time's up! Finish your sentence."; el.classList.add("low"); sfx("no"); return; }
   const s=Math.ceil(left/1000); el.textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")} left`; el.classList.toggle("low", left<120000); }
 document.querySelectorAll("[data-qm]").forEach(b=>b.onclick=()=>setQuizMode(b.dataset.qm));
+
+/* ================= PRINTABLE CERTIFICATES ================= */
+const CERT_LEVELS = [5,10,20,30,40,50,60];
+function certList(){
+  const n=lvlFor(G.xp);
+  const l=CERT_LEVELS.map(v=>({id:"L"+v, open:n>=v, title:`Level ${v}: ${rankFor(v)}`, need:`Reach level ${v}`}));
+  l.push({id:"dungeon", open:!!G.badges.bossall, title:"Dungeon cleared: every boss defeated", need:"Defeat all 9 bosses"});
+  G.certs=G.certs||{}; l.forEach(c=>{ if(c.open && !G.certs[c.id]) G.certs[c.id]=today(); c.date=G.certs[c.id]; });
+  return l;
+}
+function certBoxHTML(){
+  const l=certList(), got=l.filter(c=>c.open).length;
+  return `<div class="box"><h3>🏅 Certificates <small>${got} of ${l.length} unlocked · print or save as PDF</small></h3>
+    <div class="certs">${l.map(c=>`<button class="certbtn ${c.open?"":"locked"}" data-cert="${c.id}" ${c.open?"":"disabled"}><span class="ci">${c.open?"🏅":"🔒"}</span><b>${esc(c.title)}</b><span>${c.open?"Tap to view and print":esc(c.need)}</span></button>`).join("")}</div></div>`;
+}
+function openCert(id){
+  const c=certList().find(x=>x.id===id); if(!c||!c.open) return;
+  const o=document.createElement("div"); o.className="overlay cert-overlay";
+  const draw=()=>`<div class="cert-tools"><label>Name on certificate <input id="certName" class="search" maxlength="24" value="${esc(G.name||"")}" placeholder="Type your name"></label><button class="btn" id="certPrint">🖨️ Print / save as PDF</button><button class="btn ghost" id="certClose">Close</button></div>
+    <div class="cert"><div class="cert-in">
+      <div class="cert-seal">⛲</div>
+      <div class="cert-kick">Certificate of Achievement</div>
+      <p class="cert-small">This is to certify that</p>
+      <div class="cert-name" id="certNameOut">${esc(G.name||"Your name")}</div>
+      <p class="cert-small">has achieved</p>
+      <div class="cert-ach">${esc(c.title)}</div>
+      <p class="cert-small">in <b>Mr Wakefield's Fount of Knowledge and Wisdom</b> · GCSE Psychology</p>
+      <div class="cert-foot"><div><span class="cert-sig">${esc(new Date(c.date+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"}))}</span><span class="cert-line">Date</span></div><div><span class="cert-sig sig">Mr Wakefield</span><span class="cert-line">Signed</span></div></div>
+    </div></div>`;
+  o.innerHTML=draw(); document.body.appendChild(o);
+  const close=()=>{ o.remove(); document.body.classList.remove("printing-cert"); document.removeEventListener("keydown",k,true); };
+  const k=e=>{ if(e.key==="Escape"){ e.stopPropagation(); close(); } };
+  document.addEventListener("keydown",k,true);
+  $("#certName").oninput=e=>{ G.name=e.target.value.trim().slice(0,24); save(); $("#certNameOut").textContent=G.name||"Your name"; };
+  $("#certClose").onclick=close;
+  o.onclick=e=>{ if(e.target===o) close(); };
+  $("#certPrint").onclick=()=>{ if(!G.name){ $("#certName").focus(); return; } document.body.classList.add("printing-cert"); window.print(); setTimeout(()=>document.body.classList.remove("printing-cert"),500); };
+  sfx("badge");
+}
 
 /* ================= DOUBLE XP EVENTS — edit dates here =================
    from/to: "MM-DD" repeats every year, "YYYY-MM-DD" is a one-off.
