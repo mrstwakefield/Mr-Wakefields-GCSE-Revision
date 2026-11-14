@@ -1301,7 +1301,7 @@ const BADGES = [
   ["festive","🎄","Festive swot","Revise on Christmas Day",()=>!!G.flags.festive, "Even Santa does revision"],
   ["bossrush","⚔️","Boss rush","Defeat 3 different bosses in one day",()=>!!G.flags.bossrush, "Three in a day? Brave."],
   ["palindrome","🔢","Palindrome","Finish with an XP total that reads the same backwards",()=>!!G.flags.palindrome, "Racecar, kayak, 12321"],
-  ["keeper","📜","Keeper of the Scrolls","Find all 10 secret scrolls",()=>!!G.flags.keeper, "Collect them all"],
+  ["keeper","📜","Keeper of the Scrolls","Find every secret scroll",()=>!!G.flags.keeper, "Collect them all"],
 ];
 function checkBadges(){
   let delay=0;
@@ -2353,6 +2353,8 @@ const SECRET_SCROLLS = [
    text:"You found the rarest scroll of all. Honestly? Being this deep in a revision website is exactly the kind of effort that gets grades. I'm proud of you. Now go and smash it in May. — Mr W", hint:"Up, up, down, down… (keyboard required)"},
   {id:"blues", trigger:"Type 'blues' or 'kro'", title:"Keep Right On",
    text:"Keep right on to the end of the road. It's the Blues anthem and, it turns out, the best revision advice ever written. Up the Blues! 💙 (Villa fans: this scroll is not for you.) — Mr W", hint:"Keep right on… (keyboard required)"},
+  {id:"tamworth", trigger:"Type 'tamworth'", title:"Tamworth",
+   text:"Castle. SnowDome. The Lambs. And now the finest psychology revision this side of the A5. Some say Tamworth is the centre of the universe. Mr W has never denied this. — Mr W", hint:"Castle, SnowDome, Lambs… (keyboard required)"},
   {id:"pavlov", trigger:"Answer a Key Terms gap fill with 'pavlov'", title:"Ding!",
    text:"Did you just get hungry? That's classical conditioning. Pavlov's dogs drooled at a bell — you drool at XP. We are not so different. — Mr W", hint:"Ring a bell? Try the gap fills."},
   {id:"april", trigger:"Open the site on 1 April", title:"Insider exam tip",
@@ -2403,6 +2405,7 @@ document.addEventListener("keydown",e=>{
   if(ends(KONAMI)) foundScroll("konami");
   else if(ends([..."wakefield"])) foundScroll("wakefield");
   else if(ends([..."milgram"])) foundScroll("milgram");
+  else if(ends([..."tamworth"])) foundScroll("tamworth");
   else if(ends([..."blues"])||ends([..."kro"])) foundScroll("blues");
   else if(ends([..."stan"])) foundScroll("stan");
 });
