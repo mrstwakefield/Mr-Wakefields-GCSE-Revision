@@ -499,6 +499,8 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .scroll.blues .scroll-rod{background:linear-gradient(#DDE4FF,#FFFFFF,#DDE4FF)}
 .scroll.blues .btn{background:#fff;border-color:#fff;color:#1F3FBF}
 @media (prefers-reduced-motion:reduce){.scroll{animation:none}}
+.gapcard{margin-bottom:0}
+.gapcard.golden{border:2px solid #E0A100;border-top:10px solid #E0A100;box-shadow:0 0 0 4px color-mix(in srgb,#E0A100 22%,transparent)}
 /* trophies */
 .profile{display:flex;gap:22px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;margin-bottom:14px}
 .profile .bigring{position:relative;width:110px;height:110px;flex:none}
@@ -607,6 +609,7 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
         <button aria-pressed="false" data-filter="mistakes">🩹 Mistakes <span id="mistN"></span></button>
       </div>
       <span class="spacer"></span>
+      <div class="seg" role="group" aria-label="Card mode"><button aria-pressed="true" data-cm="flip">🃏 Flip</button><button aria-pressed="false" data-cm="gap">🔤 Gap fill</button></div>
       <button class="btn ghost" id="shuffleBtn" style="padding:8px 14px">Shuffle a new deck</button>
     </div>
     <div id="cardArea"></div>
@@ -894,12 +897,101 @@ let filter="all", deck=[], pos=0, flipped=false, sessionRes={}, golds=new Set(),
 function setFilter(f){ filter=f; document.querySelectorAll("[data-filter]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.filter===f)); newDeck(); }
 document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>setFilter(b.dataset.filter)));
 $("#shuffleBtn").onclick=newDeck;
+let cardMode = "flip";
+function setCardMode(m){ cardMode=m; G.cardMode=m; save(); document.querySelectorAll("[data-cm]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.cm===m)); newDeck(); }
+document.querySelectorAll("[data-cm]").forEach(b=>b.onclick=()=>setCardMode(b.dataset.cm));
+/* ---- gap-fill flashcards: type the key term for each definition, or the answer to a maths card ---- */
+const typeMaths = d => d.kind==="maths" && d.opt && !/higher mean/.test(d.opt);
+const SUPS={"⁰":"0","¹":"1","²":"2","³":"3","⁴":"4","⁵":"5","⁶":"6","⁷":"7","⁸":"8","⁹":"9","⁻":"-"};
+function normM(s){ let x=String(s).toLowerCase().replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻]/g,c=>SUPS[c]).replace(/[−–]/g,"-").replace(/\s+/g,"").replace(/[×*]/g,"x").replace(/10\^/g,"10").replace(/correlation/g,"").replace(/%$/,"");
+  return x==="none"||x==="nocorrelation" ? "no" : x; }
+function mathMatch(input, ans){ const a=normM(input), b=normM(ans); if(!a) return false; if(a===b) return true;
+  const na=Number(a), nb=Number(b); return !isNaN(na) && !isNaN(nb) && b!=="" && Math.abs(na-nb)<0.051; }
+let cgHints=0, cgTries=0, cgLocked=false;
+function cgBlanks(term, hints){ let li=0; return term.split("").map(ch=>{ if(/\s/.test(ch)) return '<span class="gapsp"></span>'; if(!/[a-z0-9]/i.test(ch)) return `<span class="gapch">${esc(ch)}</span>`; const show=li++<hints; return `<span class="gapbox ${show?"on":""}">${show?esc(ch.toUpperCase()):""}</span>`; }).join(""); }
+function renderGapCard(){
+  const id=deck[pos], d=BY_ID[id], term=TERM_BY_ID[id], t=TMAP[d.t], gold=golds.has(id), st=status(id);
+  if(!term) return renderMathCard();
+  cgHints=0; cgTries=0; cgLocked=false;
+  const stLabel = st==="k"?'<span class="pill k">Known</span>':st==="l"?'<span class="pill l">Still learning</span>':'';
+  $("#cardArea").innerHTML=`<div class="progressline"><i style="width:${pos/deck.length*100}%"></i></div>
+    <div class="quiz-q gapcard ${gold?"golden":""}" style="--c:${t.c}">
+      <div class="tag">${gold?'<span class="goldtag">✨ Golden card · 5× XP</span>':esc(t.name)} <span class="muted">Card ${pos+1} of ${deck.length}</span></div>
+      <div class="def">${esc(term.def)}</div>
+      <div class="blanks" id="cgBlanks" aria-hidden="true">${cgBlanks(term.term,0)}</div>
+      <label for="cgIn" class="muted" style="display:block;margin:4px 0 6px;font-size:15px">Type the key term ${stLabel}</label>
+      <input id="cgIn" class="search gapin" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go">
+      <div id="cgFb" class="gapfb" aria-live="polite"></div>
+      <div class="card-actions" id="cgActs"><div class="nav"><button id="prevC" aria-label="Previous card" ${pos===0?"disabled":""}>‹</button><button id="nextC" aria-label="Skip to next card">›</button></div>
+        <button class="btn ghost" id="cgHint">Hint<kbd>?</kbd></button><button class="btn ghost" id="cgSkip">I don't know</button><button class="btn" id="cgGo">Check<kbd>Enter</kbd></button></div>
+    </div>`;
+  const inp=$("#cgIn"); inp.focus({preventScroll:true});
+  inp.onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); cgCheck(); } else if(e.key==="?"){ e.preventDefault(); cgHint(); } };
+  $("#cgGo").onclick=cgCheck; $("#cgHint").onclick=cgHint; $("#cgSkip").onclick=()=>cgDone(false);
+  $("#prevC").onclick=()=>{ if(pos>0){ pos--; renderCard(); } };
+  $("#nextC").onclick=()=>{ pos++; renderCard(); };
+}
+function renderMathCard(){
+  const id=deck[pos], d=BY_ID[id], t=TMAP[d.t], gold=golds.has(id);
+  cgTries=0; cgLocked=false;
+  const ph = /correlation/i.test(d.opt) ? "e.g. positive" : /:/.test(d.opt) ? "e.g. 3:2" : /\//.test(d.opt) ? "e.g. 1/4" : /×/.test(d.opt) ? "e.g. 4.5 x 10^-3" : /%/.test(d.opt) ? "e.g. 35%" : "Type a number";
+  $("#cardArea").innerHTML=`<div class="progressline"><i style="width:${pos/deck.length*100}%"></i></div>
+    <div class="quiz-q gapcard ${gold?"golden":""}" style="--c:${t.c}">
+      <div class="tag">${gold?'<span class="goldtag">✨ Golden card · 5× XP</span>':"🧮 RM maths"} <span class="muted">Card ${pos+1} of ${deck.length}</span></div>
+      ${scHTML(d)}<div class="q has-sc">${esc(d.q)}</div>
+      <label for="cgIn" class="muted" style="display:block;margin:4px 0 6px;font-size:15px">Type your answer</label>
+      <input id="cgIn" class="search gapin" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" placeholder="${ph}">
+      <div id="cgFb" class="gapfb" aria-live="polite"></div>
+      <div class="card-actions" id="cgActs"><div class="nav"><button id="prevC" aria-label="Previous card" ${pos===0?"disabled":""}>‹</button><button id="nextC" aria-label="Skip to next card">›</button></div>
+        <button class="btn ghost" id="cgSkip">I don't know</button><button class="btn" id="cgGo">Check<kbd>Enter</kbd></button></div>
+    </div>`;
+  const inp=$("#cgIn"); inp.focus({preventScroll:true});
+  const check=()=>{ if(cgLocked) return; if(!inp.value.trim()){ inp.focus(); return; }
+    if(mathMatch(inp.value,d.opt)) return mathDone(true);
+    cgTries++; if(cgTries>=2) return mathDone(false);
+    inp.classList.remove("shake"); void inp.offsetWidth; inp.classList.add("shake");
+    $("#cgFb").innerHTML='<span style="color:var(--warn)">Not quite. Check your working and have one more go.</span>'; sfx("no"); inp.select(); };
+  inp.onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); check(); } };
+  $("#cgGo").onclick=check; $("#cgSkip").onclick=()=>mathDone(false);
+  $("#prevC").onclick=()=>{ if(pos>0){ pos--; renderCard(); } };
+  $("#nextC").onclick=()=>{ pos++; renderCard(); };
+}
+function mathDone(ok){
+  if(cgLocked) return; cgLocked=true;
+  const d=BY_ID[deck[pos]]; $("#cgIn").disabled=true;
+  $("#cgFb").innerHTML = (ok ? `<b style="color:var(--good)">✓ Correct: ${esc(d.opt)}</b>` : `<b style="color:var(--warn)">The right answer is ${esc(d.opt)}</b>`) + `<div class="muted" style="margin-top:4px">Working: ${esc(d.a)}</div>`;
+  $("#cgActs").innerHTML=`<button class="btn ${ok?"good":""}" id="cgNext">Next card<kbd>Enter</kbd></button>`;
+  const nx=$("#cgNext"); nx.focus({preventScroll:true});
+  let gone=false; const go=()=>{ if(gone) return; gone=true; rate(ok?"k":"l"); const n=$("#cgIn"); if(n) n.focus({preventScroll:true}); };
+  nx.onclick=go; if(ok) setTimeout(()=>{ if($("#cgNext")===nx) go(); },1600);
+}
+function cgHint(){ if(cgLocked) return; const term=TERM_BY_ID[deck[pos]], letters=term.term.replace(/[^a-z0-9]/gi,"").length; if(cgHints>=letters-1) return; cgHints++; $("#cgBlanks").innerHTML=cgBlanks(term.term,cgHints); $("#cgIn").focus(); sfx("tick"); }
+function cgCheck(){
+  if(cgLocked) return; const inp=$("#cgIn"), term=TERM_BY_ID[deck[pos]];
+  if(!inp.value.trim()){ inp.focus(); return; }
+  if(normT(inp.value)==="pavlov") setTimeout(()=>foundScroll("pavlov"),900);
+  if(termMatch(inp.value,term)) return cgDone(true);
+  cgTries++; if(cgTries>=2) return cgDone(false);
+  inp.classList.remove("shake"); void inp.offsetWidth; inp.classList.add("shake");
+  $("#cgFb").innerHTML='<span style="color:var(--warn)">Not quite. One more go, or take a hint.</span>'; sfx("no"); inp.select();
+}
+function cgDone(ok){
+  if(cgLocked) return; cgLocked=true;
+  const term=TERM_BY_ID[deck[pos]];
+  $("#cgBlanks").innerHTML=cgBlanks(term.term,99); $("#cgIn").disabled=true;
+  $("#cgFb").innerHTML = ok ? `<b style="color:var(--good)">✓ ${esc(term.term)}</b>${cgHints?` <span class="muted">(${cgHints} hint${cgHints>1?"s":""})</span>`:""}` : `<b style="color:var(--warn)">The answer is: ${esc(term.term)}</b> <span class="muted">· added to still learning</span>`;
+  $("#cgActs").innerHTML=`<button class="btn ${ok?"good":""}" id="cgNext">Next card<kbd>Enter</kbd></button>`;
+  const nx=$("#cgNext"); nx.focus({preventScroll:true});
+  let gone=false; const go=()=>{ if(gone) return; gone=true; rate(ok?"k":"l"); const n=$("#cgIn"); if(n) n.focus({preventScroll:true}); };
+  nx.onclick=go; if(ok) setTimeout(()=>{ if($("#cgNext")===nx) go(); },1200);
+}
 function newDeck(){
   let p = pool();
   if(filter==="notknown") p=p.filter(d=>status(d.id)!=="k");
   if(filter==="learning") p=p.filter(d=>status(d.id)==="l");
   if(filter==="due") p=p.filter(d=>isDue(d.id));
   if(filter==="mistakes") p=DATA.filter(d=>G.mistakes[d.id]!==undefined);
+  if(cardMode==="gap") p=p.filter(d=>TERM_BY_ID[d.id] || typeMaths(d));
   deck=shuffle(p).map(d=>d.id); pos=0; flipped=false; sessionRes={}; deckXP=0; deckBest=0; deckCombo=0;
   golds=new Set(deck.filter(()=>Math.random()<0.07*goldMult())); renderCard();
 }
@@ -907,7 +999,7 @@ function renderCard(){
   const area=$("#cardArea");
   if(!store.sel.length){ area.innerHTML=`<div class="empty"><h3>Pick a topic to start</h3><p>Tap one or more topics above and your flashcards will appear here.</p></div>`; return; }
   if(!deck.length){
-    const msg = filter==="mistakes" ? ["No mistakes to fix 🎉","Anything you get wrong, anywhere on the site, lands here. Get it right twice in a row and it's fixed."] : filter==="due" ? ["Nothing due today 🎉","Cards you know come back for a quick review after 1, 3, 7, 21 and 45 days, just before you'd forget them. Come back tomorrow."] : filter==="learning" ? ["Nothing marked as still learning","When you mark a card as still learning, it will show up here so you can go over it again."] : ["You know every card here","Every question in these topics is marked as known. Try another topic, or switch to all cards for a refresher."];
+    const msg = cardMode==="gap" && (filter==="all"||filter==="notknown") ? ["No key terms here","Gap fills are made from key-term definitions. Try different topics, or switch back to 🃏 Flip."] : filter==="mistakes" ? ["No mistakes to fix 🎉","Anything you get wrong, anywhere on the site, lands here. Get it right twice in a row and it's fixed."] : filter==="due" ? ["Nothing due today 🎉","Cards you know come back for a quick review after 1, 3, 7, 21 and 45 days, just before you'd forget them. Come back tomorrow."] : filter==="learning" ? ["Nothing marked as still learning","When you mark a card as still learning, it will show up here so you can go over it again."] : ["You know every card here","Every question in these topics is marked as known. Try another topic, or switch to all cards for a refresher."];
     area.innerHTML=`<div class="empty"><h3>${msg[0]}</h3><p>${msg[1]}</p></div>`; return;
   }
   if(pos>=deck.length){
@@ -919,6 +1011,7 @@ function renderCard(){
     const a=$("#againL"); if(a) a.onclick=()=>{ deck=shuffle(Object.keys(sessionRes).filter(id=>sessionRes[id]==="l").map(Number)); pos=0; sessionRes={}; deckXP=0; deckBest=0; deckCombo=0; golds=new Set(deck.filter(()=>Math.random()<0.1*goldMult())); flipped=false; renderCard(); };
     $("#againAll").onclick=newDeck; return;
   }
+  if(cardMode==="gap") return renderGapCard();
   const d=BY_ID[deck[pos]], t=TMAP[d.t], st=status(d.id), gold=golds.has(d.id), due=isDue(d.id), dn=dueCount();
   const stLabel = st==="k"?'<span class="pill k">Known</span>':st==="l"?'<span class="pill l">Still learning</span>':'';
   area.innerHTML=`${filter!=="due"&&dn?`<div class="duebar">📅 <span><b>${dn} card${dn>1?"s":""}</b> due for review today</span><button class="btn" id="dueGo" style="padding:7px 14px">Review now</button></div>`:""}
@@ -967,7 +1060,7 @@ function rate(s){ const id=deck[pos], wasDue=isDue(id); sessionRes[id]=s; if(s==
   deckCombo = s==="k" ? deckCombo+1 : 0; if(deckCombo>deckBest) deckBest=deckCombo;
   pos++; flipped=false; renderCard(); const b=$("#flipBtn"); if(b) b.focus({preventScroll:true}); }
 document.addEventListener("keydown",e=>{
-  if(tab!=="cards" || e.target.matches("input,textarea") || e.metaKey||e.ctrlKey||e.altKey) return;
+  if(tab!=="cards" || cardMode==="gap" || e.target.matches("input,textarea") || e.metaKey||e.ctrlKey||e.altKey) return;
   if(pos>=deck.length) return;
   if(e.key===" "){ e.preventDefault(); flip(); }
   else if(flipped && e.key==="1") rate("l");
@@ -1389,6 +1482,7 @@ const TERMS = (()=>{
   });
   return out;
 })();
+const TERM_BY_ID = Object.fromEntries(TERMS.map(x=>[x.id,x]));
 const normT = s => s.toLowerCase().replace(/&/g,"and").replace(/[^a-z0-9]/g,"").replace(/s$/,"");
 function lev(a,b){ const m=a.length,n=b.length; if(!m) return n; if(!n) return m; let p=Array.from({length:n+1},(_,j)=>j); for(let i=1;i<=m;i++){ const c=[i]; for(let j=1;j<=n;j++) c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1)); p=c; } return p[n]; }
 function termMatch(input, item){ const x=normT(input); if(!x) return false; return item.alts.some(a=>{ const y=normT(a), tol=y.length<5?0:y.length<10?1:2; return lev(x,y)<=tol; }); }
@@ -2420,7 +2514,8 @@ function dateEggs(){
 }
 
 if(TEACHER){ startTeacher(); }
-else { dateEggs(); checkStreak(); checkBadges(); save(); renderMeter(); renderChips(); newDeck(); renderQuiz(); renderHud(); renderArcade(); renderPlan(); renderEvents(); }
+else { if(G.cardMode==="gap"){ cardMode="gap"; document.querySelectorAll("[data-cm]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.cm==="gap")); }
+  dateEggs(); checkStreak(); checkBadges(); save(); renderMeter(); renderChips(); newDeck(); renderQuiz(); renderHud(); renderArcade(); renderPlan(); renderEvents(); }
 </script>
 </body>
 </html>
