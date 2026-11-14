@@ -711,7 +711,8 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
     <button role="tab" aria-selected="false" data-tab="trophies" data-tp="weak" id="tab-weak" aria-controls="p-trophies">🎯 Weak spots</button>
     <button role="tab" aria-selected="false" data-tab="trophies" data-tp="badges" id="tab-badges" aria-controls="p-trophies">🏅 Badges</button>
     <button role="tab" aria-selected="false" data-tab="trophies" data-tp="scrolls" id="tab-scrolls" aria-controls="p-trophies">📜 Secret scrolls</button>
-    <button role="tab" aria-selected="false" data-tab="trophies" data-tp="looks" id="tab-looks" aria-controls="p-trophies">🎨 Themes & save</button>
+    <button role="tab" aria-selected="false" data-tab="trophies" data-tp="looks" id="tab-looks" aria-controls="p-trophies">🎨 Themes</button>
+    <button role="tab" aria-selected="false" data-tab="trophies" data-tp="save" id="tab-save" aria-controls="p-trophies">💾 Save</button>
   </div>
 
   <section class="topics" aria-labelledby="topicsTitle">
@@ -1466,7 +1467,7 @@ function levelUp(n){
   sfx("lvl"); confetti(200);
   const o=document.createElement("div"); o.className="overlay";
   o.innerHTML=`<div class="levelup" role="dialog" aria-modal="true" aria-label="Level up"><div class="kick">Level up!</div><div class="num">${n}</div>
-    <h3>${r!==old?"New rank: "+esc(r):esc(r)}</h3>${(()=>{const th=THEMES.find(t=>t.lvl===n);return th?`<p style="margin:0 0 8px;color:var(--ink)">🎨 New theme unlocked: <b>${esc(th.name)}</b>. Switch it on in the Themes &amp; save tab.</p>`:""})()}${CERT_LEVELS.includes(n)?`<p style="margin:0 0 8px;color:var(--ink)">🏅 <b>Certificate unlocked!</b> Print it from the Progress tab.</p>`:""}<p>${lvlStart(n+1)-G.xp} XP to level ${n+1}. Keep it going.</p><button class="btn" id="luOk">Let's go</button></div>`;
+    <h3>${r!==old?"New rank: "+esc(r):esc(r)}</h3>${(()=>{const th=THEMES.find(t=>t.lvl===n);return th?`<p style="margin:0 0 8px;color:var(--ink)">🎨 New theme unlocked: <b>${esc(th.name)}</b>. Switch it on in the Themes tab.</p>`:""})()}${CERT_LEVELS.includes(n)?`<p style="margin:0 0 8px;color:var(--ink)">🏅 <b>Certificate unlocked!</b> Print it from the Progress tab.</p>`:""}<p>${lvlStart(n+1)-G.xp} XP to level ${n+1}. Keep it going.</p><button class="btn" id="luOk">Let's go</button></div>`;
   document.body.appendChild(o);
   const close=()=>{ o.remove(); document.removeEventListener("keydown",esc2,true); };
   const esc2=e=>{ if(e.key==="Tab") return; e.stopPropagation(); if(e.key==="Escape"||e.key==="Enter"||e.key===" "){ e.preventDefault(); close(); } };
@@ -2283,8 +2284,8 @@ function renderTrophies(){
     const l= v===0?"": v<G.goal/2?"l1": v<G.goal?"l2":"l3";
     cells+=`<i class="${l} ${k===t?"today":""}" ${future?'style="visibility:hidden"':""} title="${k}: ${v} answered"></i>`;
   }
-  let tp=G.tpage||"progress"; if(tp==="save") tp=G.tpage="looks";
-  if(!["progress","weak","badges","scrolls","looks"].includes(tp)) tp=G.tpage="progress";
+  let tp=G.tpage||"progress";
+  if(!["progress","weak","badges","scrolls","looks","save"].includes(tp)) tp=G.tpage="progress";
   const pages={
     progress:`<div class="profile"><div class="bigring"><svg viewBox="0 0 110 110"><circle class="ring-bg" cx="55" cy="55" r="48" style="stroke-width:9"/><circle class="ring-fg" cx="55" cy="55" r="48" style="stroke-width:9" ${ring(48,frac)}/></svg><b>${n}</b></div>
       <div><h2>${esc(rankFor(n))}</h2><p>Level ${n} · ${G.xp.toLocaleString()} XP total · ${e-G.xp} XP to level ${n+1}</p>
@@ -2322,8 +2323,8 @@ function renderTrophies(){
       return `<div class="badge ${has?"got":"locked"}"><div class="bi">${ic}</div><b>${esc(name)}</b><span>${esc(desc)}</span></div>`; }).join("")}</div></div>`,
     scrolls:`${scrollBoxHTML()}`,
     looks:`<div class="box"><h3>Themes <small>Unlock new looks as you level up</small></h3><div class="themes">${THEMES.filter(th=>!th.secret||themeOpen(th)).map(th=>{ const open=themeOpen(th), on=(G.skin||"")===th.k;
-      return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b><span>${open?(on?"In use":"Tap to use"):"🔒 Level "+th.lvl}</span></button>`; }).join("")}</div></div>
-    <div class="box"><h3>Move or back up your progress <small>Your progress only lives in this browser</small></h3>
+      return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b><span>${open?(on?"In use":"Tap to use"):"🔒 Level "+th.lvl}</span></button>`; }).join("")}</div></div>`,
+    save:`<div class="box"><h3>Move or back up your progress <small>Your progress only lives in this browser</small></h3>
       <p class="muted" style="margin:0 0 12px">To carry on using another device (school computer, phone, laptop), copy your save code and paste it there. Keep a copy somewhere safe in case your browser data gets cleared.</p>
       <div class="card-actions" style="margin-top:0"><button class="btn" id="saveCopy">Copy save code</button><button class="btn ghost" id="saveFile">Download backup file</button></div>
       <textarea id="saveIn" placeholder="Paste a save code here to load it on this device" style="min-height:80px;margin-top:14px;font-size:14px"></textarea>
@@ -2336,7 +2337,7 @@ function renderTrophies(){
   document.querySelectorAll("[data-wboss]").forEach(b=>b.onclick=()=>{ goTab("arcade"); startBoss(b.dataset.wboss); });
   document.querySelectorAll("[data-bf]").forEach(b=>b.onclick=()=>{ G.bfilter=b.dataset.bf; save(); renderTrophies(); });
   document.querySelectorAll(".theme").forEach(b=>b.onclick=()=>{ G.skin=b.dataset.skin; G.skinsTried[G.skin||"classic"]=1; save(); applySkin(); checkBadges(); renderTrophies(); });
-  if(tp==="looks"){ wireSave(); wireReport(); }
+  if(tp==="save"){ wireSave(); wireReport(); }
   document.querySelectorAll("[data-cert]").forEach(b=>b.onclick=()=>openCert(b.dataset.cert));
   document.querySelectorAll("[data-scroll]").forEach(b=>b.onclick=()=>showScroll(SECRET_SCROLLS.find(s=>s.id===b.dataset.scroll), false));
   document.querySelectorAll("[data-goal]").forEach(b=>b.onclick=()=>{ G.goal=+b.dataset.goal; if((G.hist[t]||0)>=G.goal && G.last!==t) goalMet(); save(); renderHud(); renderTrophies(); });
@@ -2346,7 +2347,7 @@ document.addEventListener("keydown",e=>{
   if(tab!=="arcade" || arc.phase!=="play" || arc.mode==="terms" || e.target.matches("input,textarea") || e.metaKey||e.ctrlKey||e.altKey) return;
   if(["1","2","3","4"].includes(e.key)){ e.preventDefault(); arcPick(+e.key-1); }
 });
-$("#backupLink").onclick=()=>{ goTab("trophies","looks"); setTimeout(()=>$("#saveCopy").scrollIntoView({behavior:"smooth",block:"center"}),50); };
+$("#backupLink").onclick=()=>{ goTab("trophies","save"); setTimeout(()=>$("#saveCopy").scrollIntoView({behavior:"smooth",block:"center"}),50); };
 
 /* ================= SHARED: mock dates ================= */
 const MOCK_TOPICS = TOPICS.map(t=>t.key).filter(k=>k!=="Language, thought & communication");
@@ -2460,7 +2461,7 @@ function tMain(){
   $("#teacherApp").innerHTML=`<div class="t-wrap">
     <div class="t-top"><h1 class="t-h">🧑‍🏫 Teacher tools</h1><span class="spacer"></span>
       <button class="btn" id="tProj">📽️ Projector mode</button><button class="btn ghost" id="tPrint">🖨️ Print</button><button class="btn ghost" id="tLockBtn">🔒 Lock</button></div>
-    <div class="box t-noprint"><h3>Paste progress codes <small>Students copy theirs from the Themes &amp; save tab</small></h3>
+    <div class="box t-noprint"><h3>Paste progress codes <small>Students copy theirs from the Save tab</small></h3>
       <textarea id="tIn" placeholder="Paste one or many codes here. They can be mixed in with other text, e.g. copied from a Google Classroom thread."></textarea>
       <div class="card-actions"><button class="btn" id="tAdd">Add codes</button><button class="btn ghost" id="tClear">Clear all</button>
         <label class="t-check"><input type="checkbox" id="tRem" ${remembered?"checked":""}> Remember on this device</label></div>
@@ -2487,7 +2488,7 @@ const shortName = k => ({"Language, thought & communication":"Language","Brain &
 const heatCol = v => `color-mix(in srgb, hsl(${Math.round(v*1.2)},75%,48%) 42%, var(--card))`;
 function tRender(){
   const out=$("#tOut"); const rs=[...T.reports.values()];
-  if(!rs.length){ out.innerHTML=`<div class="empty"><h3>No codes yet</h3><p>Ask students to open Themes &amp; save → "Send your progress to your teacher", type their name and copy their code. Paste them all above.</p></div>`; return; }
+  if(!rs.length){ out.innerHTML=`<div class="empty"><h3>No codes yet</h3><p>Ask students to open the Save tab → "Send your progress to your teacher", type their name and copy their code. Paste them all above.</p></div>`; return; }
   const {key,dir}=T.sort;
   const val = (r,k) => k==="name"?r.name.toLowerCase() : k.startsWith("t")? r.k[+k.slice(1)] : r[k];
   rs.sort((a,b)=>{ const x=val(a,key), y=val(b,key); return (x<y?-1:x>y?1:0)*dir; });
@@ -3377,7 +3378,7 @@ function foundScroll(id){
   showScroll(s, first);
   if(first){
     setTimeout(()=>{ addXP(30,false); toast("📜",`Secret scroll ${Object.keys(G.scrolls).length} of ${SECRET_SCROLLS.length} found`,"+30 XP"); },700);
-    if(SECRET_SCROLLS.every(x=>G.scrolls[x.id])){ G.flags.keeper=1; save(); setTimeout(()=>{ checkBadges(); toast("✦","Wakefield Mode theme unlocked","Find it in the Themes & save tab."); confetti(200,["#E6C35C","#0D2A1E","#F6F0DC"]); },2200); }
+    if(SECRET_SCROLLS.every(x=>G.scrolls[x.id])){ G.flags.keeper=1; save(); setTimeout(()=>{ checkBadges(); toast("✦","Wakefield Mode theme unlocked","Find it in the Themes tab."); confetti(200,["#E6C35C","#0D2A1E","#F6F0DC"]); },2200); }
   }
 }
 function showScroll(s, first){
@@ -3438,7 +3439,7 @@ function showInstallHelp(){
     ${isIOS?`<ol style="padding-left:1.2em;line-height:1.6"><li>Open this page in <b>Safari</b>.</li><li>Tap the <b>Share</b> button (the square with an arrow).</li><li>Choose <b>Add to Home Screen</b>, then <b>Add</b>.</li></ol>`
       :`<ol style="padding-left:1.2em;line-height:1.6"><li>Open the browser menu (<b>⋮</b> or <b>⋯</b>).</li><li>Choose <b>Install app</b> or <b>Add to Home screen</b>.</li></ol><p class="muted" style="font-size:14px">On a computer, look for the install icon at the right of the address bar.</p>`}
     <p class="muted" style="font-size:14px">It opens full screen like an app and works offline.</p>
-    ${isIOS?`<p style="font-size:14px;background:var(--warn-bg);border-radius:10px;padding:8px 10px">⚠️ On iPhone and iPad the home-screen app keeps its own progress. Before installing, go to <b>Themes &amp; save → Copy save code</b>, then paste it into Trophies in the app.</p>`:`<p class="muted" style="font-size:14px">Your progress comes with you.</p>`}
+    ${isIOS?`<p style="font-size:14px;background:var(--warn-bg);border-radius:10px;padding:8px 10px">⚠️ On iPhone and iPad the home-screen app keeps its own progress. Before installing, go to <b>Save → Copy save code</b>, then paste it into Trophies in the app.</p>`:`<p class="muted" style="font-size:14px">Your progress comes with you.</p>`}
     <div style="text-align:center"><button class="btn" id="instOk">Got it</button></div></div>`;
   document.body.appendChild(o); o.onclick=e=>{ if(e.target===o||e.target.id==="instOk") o.remove(); }; $("#instOk").focus();
 }
