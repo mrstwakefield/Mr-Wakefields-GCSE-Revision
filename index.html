@@ -603,6 +603,52 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .mt-col{display:grid;gap:8px;align-content:start}
 .mt-grid .opt{min-height:56px}
 .mt-l.sel{border-color:#9A6324;box-shadow:0 0 0 2px #9A6324 inset;background:#fff6e0}
+.sw-stage{position:relative;min-height:220px;display:grid;place-items:center;margin:12px 0}
+.sw-card{width:min(520px,100%);min-height:170px;display:grid;place-items:center;text-align:center;background:var(--card);border:2px solid var(--line);border-radius:20px;padding:22px;font-size:21px;font-weight:700;line-height:1.35;box-shadow:0 6px 18px rgba(0,0,0,.08);transition:transform .25s,opacity .25s;touch-action:none;cursor:grab;user-select:none}
+.sw-card p{margin:0}
+.sw-card.tl{border-color:#2C6BE0}.sw-card.tr{border-color:#C2410C}
+.sw-fb{min-height:24px;text-align:center;margin-top:8px}
+.sw-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sw-btns .btn{font-size:17px;padding:14px}
+.sw-l{border-color:#2C6BE0!important}.sw-r{border-color:#C2410C!important}
+.ws-clues{margin:8px 0 14px;padding-left:24px;display:grid;gap:6px;font-size:18px}
+.ws-clues li:last-child{font-weight:800;animation:bump .3s}
+.ws-opts{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.psy-clue{margin:4px 0 12px;font-size:16px}
+.psy-board{display:grid;gap:6px;justify-content:center;margin:8px 0 12px}
+.psy-row{display:flex;gap:6px;justify-content:center}
+.psy-tile{width:clamp(34px,9vw,52px);height:clamp(34px,9vw,52px);display:grid;place-items:center;border:2px solid var(--line);border-radius:8px;font-family:var(--display);font-weight:800;font-size:clamp(18px,4.5vw,26px);background:var(--card)}
+.psy-tile.typed{border-color:var(--ink)}
+.psy-tile.g,.psy-k.g{background:#1C8A5E;border-color:#1C8A5E;color:#fff}
+.psy-tile.y,.psy-k.y{background:#D9A400;border-color:#D9A400;color:#fff}
+.psy-tile.b,.psy-k.b{background:#6B7280;border-color:#6B7280;color:#fff}
+.psy-kb{display:grid;gap:6px;max-width:560px;margin:0 auto}
+.psy-kr{display:flex;gap:4px;justify-content:center}
+.psy-k{flex:1;min-width:0;max-width:44px;height:48px;border:0;border-radius:8px;background:var(--soft);font-weight:800;font-size:15px;color:var(--ink)}
+.psy-k.wide{max-width:72px;flex:1.6;font-size:13px}
+.petbtn{width:auto;padding:0 4px;overflow:hidden}
+.petbtn svg{display:block}
+.petbtn.sleepy{filter:saturate(.6)}
+.pet-box{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.pet-art{flex:none}
+.pet-info{flex:1;min-width:220px}
+.pet-msg{margin:0;font-size:17px}
+.pet-info h3{display:flex;align-items:baseline;gap:8px;justify-content:flex-start}
+@media (max-width:560px){.petbtn svg{width:34px;height:26px}.hud{gap:6px!important}.hud .iconbtn{width:36px;min-width:36px;height:38px;padding:0}.hud .petbtn{width:auto;padding:0 2px}.hud .focusbtn{width:auto;min-width:36px;padding:0 6px}.hud .hud-stat{padding-left:8px;padding-right:8px}.hud #hudGoal .goalring{display:none}}
+.pet-svg.ecstatic g:first-of-type{animation:petdance .7s ease-in-out infinite alternate;transform-origin:80px 110px}
+.pet-svg.happy .pet-tail{animation:petwag 1s ease-in-out infinite alternate;transform-origin:118px 96px}
+.pet-z text{animation:petz 2.4s ease-in-out infinite}
+.pet-z text:nth-child(2){animation-delay:.4s}.pet-z text:nth-child(3){animation-delay:.8s}
+@keyframes petdance{from{transform:translateY(0) rotate(-3deg)}to{transform:translateY(-6px) rotate(3deg)}}
+@keyframes petwag{from{transform:rotate(-6deg)}to{transform:rotate(8deg)}}
+@keyframes petz{0%,100%{opacity:.2;transform:translateY(4px)}50%{opacity:1;transform:translateY(-2px)}}
+@media (prefers-reduced-motion:reduce){.pet-svg *{animation:none!important}}
+.proj-scores.race{grid-template-columns:1fr;gap:8px}
+.race-lane{display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:10px;align-items:center}
+.race-track{display:grid;grid-template-columns:repeat(16,1fr);gap:4px}
+.race-sq{aspect-ratio:1;display:grid;place-items:center;border-radius:8px;background:var(--soft);border:2px solid var(--line);font-size:clamp(14px,1.6vw,22px)}
+.race-sq.up{background:#DDF3E8}.race-sq.down{background:#FDE3D3}.race-sq.fin{background:#FFF3C4;border-color:#E0A100}
+.race-tok{font-style:normal;width:80%;height:80%;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;background:hsl(var(--h) 70% 45%);box-shadow:0 2px 6px rgba(0,0,0,.25);animation:bump .3s}
 .ord-done{margin:10px 0 12px;padding-left:28px;display:grid;gap:6px}
 .ord-done li{background:var(--good-bg);border-radius:10px;padding:8px 12px;font-size:16px}
 .ord-done li.ord-empty{background:var(--soft);min-height:38px;border:2px dashed var(--line)}
@@ -801,6 +847,7 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
     <div class="hud-stat" id="hudStreak"><span class="ico">🔥</span><span><span id="hudStreakN">0</span><span class="lab">streak</span></span></div>
     <button class="hud-stat" id="hudGoal" aria-label="Today's goal. Open progress"><svg class="goalring" viewBox="0 0 30 30"><circle class="ring-bg" cx="15" cy="15" r="12" style="stroke-width:4"/><circle class="ring-fg" id="hudGoalRing" cx="15" cy="15" r="12" style="stroke-width:4" stroke-dasharray="75.4" stroke-dashoffset="75.4"/></svg><span><span id="hudGoalN">0/30</span><span class="lab">today</span></span></button>
     <div class="combo" id="combo" aria-live="polite"></div>
+    <button class="iconbtn petbtn" id="petBtn" aria-label="Your lab rat"></button>
     <button class="iconbtn focusbtn" id="focusBtn" aria-label="Start a 25-minute focus session" title="Focus timer: 25 minutes">🎯</button>
     <button class="iconbtn" id="soundBtn" aria-label="Mute sounds">🔊</button>
   </div>
@@ -1688,6 +1735,9 @@ const BADGES = [
   ["mock1","📝","Exam conditions","Finish a mock paper",()=>Object.keys((G.mocks||{}).done||{}).length>=1],
   ["mock4","🏅","Mock marathon","Finish all four mock papers",()=>Object.keys((G.mocks||{}).done||{}).length>=4],
   ["parent3","👪","Family quiz night","Get tested by a parent or carer 3 times",()=>(G.st.parent||0)>=3],
+  ["psy5","🔤","Word nerd","Win Psychle 5 times",()=>(G.st.psyWins||0)>=5],
+  ["which30","🕵️","Super sleuth","Score 30+ in Which Study?",()=>(G.st.whichBest||0)>=30],
+  ["petwise","🐀","Rat whisperer","Raise your lab rat to a wise rat",()=>(G.st.cards||0)>=2500],
   ["focus5","🎯","Deep focus","Complete 5 focus sessions",()=>(G.st.focus||0)>=5],
   ["flaw14","🔍","Flaw finder","Score 14+ in Spot the Flaw",()=>(G.st.flawBest||0)>=14],
   ["order15","🔢","Sequence master","Score 15+ in Put it in Order",()=>(G.st.orderBest||0)>=15],
@@ -1725,7 +1775,7 @@ const BADGES = [
   ["keeper","📜","Keeper of the Scrolls","Find every secret scroll",()=>!!G.flags.keeper, "Collect them all"],
 ];
 function checkBadges(){
-  checkSeals();
+  checkSeals(); if(typeof petCheck==="function") petCheck();
   let delay=0;
   BADGES.forEach(([id,ic,name,desc,test])=>{
     if(G.badges[id]) return;
@@ -1872,6 +1922,9 @@ const MODES = {
   boss:{icon:"🐉", name:"Boss Battles", c:"#B91C1C", desc:"Face the boss of each topic. 15 HP, 3 lives, 15 seconds a question. Combos of 5+ deal double damage."},
   surv:{icon:"❤️", name:"Survival", c:"#7B5BE0", desc:"Three lives and 12 seconds per question. How far can you get? Includes exam-skills bonus questions."},
   flaw:{icon:"🔍", name:"Spot the Flaw", c:"#9A6324", hot:"2× XP", desc:"Read a short study, find what's wrong with it, then pick the best fix. 8 studies, 2 points each."},
+  psychle:{icon:"🔤", name:"Psychle", c:"#1C8A5E", desc:"Today's mystery key term. Six guesses, Wordle-style, with a clue after three. Same word for everyone. Share your result."},
+  swipe:{icon:"👉", name:"Swipe Sort", c:"#9A6324", hot:"2× XP", desc:"Theory or study? Strength or weakness? Nature or nurture? AO1 or AO3? S or C? Swipe as many as you can in 45 seconds."},
+  which:{icon:"🕵️", name:"Which Study?", c:"#9A6324", hot:"2× XP", desc:"Clues appear one at a time. Name the study as early as you can: 5 points on the first clue, 1 on the last."},
   match:{icon:"🔗", name:"Study Matcher", c:"#9A6324", hot:"2× XP", desc:"Match each researcher to their finding, against the clock. 3 rounds of 5. Wrong matches add 5 seconds."},
   order:{icon:"🔢", name:"Put it in Order", c:"#9A6324", hot:"2× XP", desc:"Tap the steps in the right order: synaptic transmission, MSM, CBT, sampling, AMRC, TDEE and more. 6 rounds."},
 };
@@ -1898,6 +1951,9 @@ function bestLabel(k){
     : k==="exam" ? (st.exam?`Best: ${st.exam}/10`:"No score yet")
     : k==="terms" ? (st.terms?`Best: ${st.terms}/30 points`:"No score yet")
     : k==="maths" ? (st.mathsBest?`Best: ${st.mathsBest}/10`:"No score yet")
+    : k==="psychle" ? (G.psychle&&G.psychle[today()]&&G.psychle[today()].done ? (G.psychle[today()].won?`Done today: ${G.psychle[today()].g.length}/6 ✓`:"Done today: X/6") : `Psychle #${psyNo()} is ready`)
+    : k==="swipe" ? (Object.keys(G.st.swipe||{}).length?`Best: ${Math.max(...Object.values(G.st.swipe))}`:"No score yet")
+    : k==="which" ? (G.st.whichBest?`Best: ${G.st.whichBest}/40`:"No score yet")
     : k==="match" ? (st.matchBest?`Fastest: ${st.matchBest}s`:"No time yet")
     : k==="flaw" ? (st.flawBest?`Best: ${st.flawBest}/16`:"No score yet")
     : k==="order" ? (st.orderBest?`Best: ${st.orderBest}/18`:"No score yet")
@@ -2005,6 +2061,9 @@ function arcToTop(){ const a=$("#arcArea"), r=a.getBoundingClientRect(), hud=$("
 function startArc(mode){
   if(mode==="flaw"||mode==="order") return gmStart(mode);
   if(mode==="match") return mtStart();
+  if(mode==="swipe") return swStart();
+  if(mode==="which") return wsStart();
+  if(mode==="psychle") return psyStart();
   if(mode==="boss"){ clearInterval(arc.timer); arc.phase="bossmenu"; arc.mode="boss"; renderArcade(); arcToTop(); return; }
   if(mode==="daily"){
     const dd=G.daily[today()];
@@ -2365,6 +2424,317 @@ function mtFinish(quit){
   $("#arcAgain").onclick=mtStart; $("#arcMenu").onclick=()=>{ arc.phase="menu"; renderArcade(); };
 }
 
+/* ================= SWIPE SORT ================= */
+// each deck: [title, left label, right label, [[statement, 0=left|1=right, why], ...]]
+const SWIPE = [
+ ["Theory or study?","Theory","Study",[
+  ["When an authority figure gives an order, we shift from an autonomous state to an agentic state.",0,"That's Milgram's agency theory: an explanation."],
+  ["40 American men gave 'shocks' up to 450V and 65% went all the way.",1,"That's Milgram's study: who, what, results."],
+  ["Information passes from STM to LTM if it is rehearsed.",0,"The multi-store model: a theory of how memory works."],
+  ["Words at the start and end of a list were recalled best.",1,"Murdock's findings: a study."],
+  ["We use schemas to fill in the gaps when we recall.",0,"Reconstructive memory: Bartlett's theory."],
+  ["English students changed 'canoe' to 'boat' when retelling a story.",1,"Bartlett's War of the Ghosts study."],
+  ["Perception is learned: we make inferences from past experience.",0,"Gregory's constructivist theory."],
+  ["Hungry participants rated food pictures as brighter.",1,"Gilchrist and Nesberg's study."],
+  ["Children pass through four stages in a fixed order.",0,"Piaget's stage theory."],
+  ["90% of 3½–5-year-olds hid the boy doll from the policemen.",1,"Hughes' study."],
+  ["Groups of neurons that fire together form cell assemblies.",0,"Hebb's theory."],
+  ["Taxi drivers had a larger hippocampus than other people.",1,"Maguire's study."],
+  ["Language determines or influences the way we think.",0,"The Sapir-Whorf hypothesis: a theory."],
+  ["Bees did a waggle dance when food was over 100 m away.",1,"Von Frisch's study."],
+  ["Depression is caused by low levels of serotonin.",0,"The biological explanation: a theory."],
+  ["54% of MZ twins vs 28% of DZ twins were concordant for alcohol abuse.",1,"Kaij's twin study."],
+  ["Ability can grow with effort: a growth mindset.",0,"Dweck's mindset theory."],
+  ["Japanese students focused on the eyes of emoticons, Americans on the mouth.",1,"Yuki's study."]]],
+ ["Strength or weakness?","Weakness","Strength",[
+  ["The study used only American male students.",0,"Biased sample: low generalisability."],
+  ["The study was carried out in a natural setting.",1,"High ecological validity."],
+  ["Standardised instructions were used for every participant.",1,"Replicable, so reliability can be checked."],
+  ["Participants were deceived and not debriefed.",0,"Ethical issue."],
+  ["The theory has led to treatments used by the NHS.",1,"Practical applications (SPACER: P)."],
+  ["The task was learning lists of random words.",0,"Low mundane realism."],
+  ["Lots of later research supports the theory.",1,"Credibility (SPACER: C)."],
+  ["The theory explains behaviour only through brain chemistry.",0,"Reductionist (SPACER: R)."],
+  ["The sample was 469 randomly allocated participants.",1,"Large sample, random allocation: controls participant variables."],
+  ["Participants could guess the aim of the study.",0,"Demand characteristics."],
+  ["The theory's claims can be tested with brain scans.",1,"Scientific (SPACER: S)."],
+  ["Only 6 participants, including the researcher.",0,"Tiny sample and researcher bias."],
+  ["Extraneous variables were tightly controlled in a lab.",1,"High control: cause and effect."],
+  ["The study was carried out in 1951.",0,"May lack temporal validity."],
+  ["Self-report questionnaires were used.",0,"Social desirability bias."],
+  ["Results were replicated in other countries.",1,"Reliable and generalisable."]]],
+ ["Nature or nurture?","Nature","Nurture",[
+  ["Babies avoided the deep side of the visual cliff.",0,"Suggests depth perception is innate."],
+  ["Schooled participants saw depth in 2D pictures; others didn't.",1,"Culture and experience shape perception."],
+  ["Depression runs in families because of inherited genes.",0,"Genetic: nature."],
+  ["Teenagers start drinking because their friends do.",1,"Peer influence: nurture."],
+  ["Facial expressions are recognised in every culture.",0,"Darwin: innate and universal."],
+  ["Japanese and American students read emoticons differently.",1,"Learned cultural differences."],
+  ["A strict, harsh upbringing creates an authoritarian personality.",1,"Upbringing: nurture."],
+  ["MZ twins are more alike for alcohol abuse than DZ twins.",0,"Genes: nature."],
+  ["Gibson's direct theory of perception.",0,"Perception without needing experience."],
+  ["Gregory's constructivist theory of perception.",1,"Perception built from experience."],
+  ["Negative schemas formed after childhood experiences.",1,"Experience: nurture."],
+  ["The brain develops through genetically set stages in the womb.",0,"Biological maturation: nature."],
+  ["Practice strengthens connections between neurons.",1,"Experience changes the brain: nurture."],
+  ["Children pass through Piaget's stages at about the same ages.",0,"Maturation: mostly nature."]]],
+ ["Describe (AO1) or evaluate (AO3)?","AO1 describe","AO3 evaluate",[
+  ["Murdock found a primacy and a recency effect.",0,"States a finding: AO1."],
+  ["However, word lists lack mundane realism.",1,"Judges the study: AO3."],
+  ["Milgram used a rigged draw so the participant was always the teacher.",0,"Method detail: AO1."],
+  ["This means the findings may not apply to women.",1,"Evaluates generalisability: AO3."],
+  ["STM has a capacity of about 7 items.",0,"Knowledge of the theory: AO1."],
+  ["One strength is that the theory has research support.",1,"Evaluation point: AO3."],
+  ["Piaget said children are egocentric until about 7.",0,"Describes the theory: AO1."],
+  ["Hughes challenges this, as 90% of young children could decentre.",1,"Challenging evidence: AO3."],
+  ["CBT uses thought diaries and disputing.",0,"Describes the treatment: AO1."],
+  ["This is a weakness because it relies on the patient's motivation.",1,"Explains a weakness: AO3."],
+  ["Bees do a round dance for food under about 100 m away.",0,"Finding: AO1."],
+  ["The study was carried out over 20 years, so it is reliable.",1,"Evaluates reliability: AO3."]]],
+ ["S or C? (SPACER)","S: can we check it?","C: was it right?",[
+  ["The theory makes predictions that can be tested with experiments.",0,"Testable = Scientific."],
+  ["Studies have found evidence that supports the theory.",1,"Supporting research = Credibility."],
+  ["Its claims can be measured objectively with brain scans.",0,"Objective measurement = Scientific."],
+  ["Later research challenged the theory's predictions.",1,"Was it right? = Credibility."],
+  ["Concepts like 'the unconscious' can't be observed or measured.",0,"Not testable = a weakness for S."],
+  ["Hughes found children decentre earlier than Piaget claimed.",1,"Checked and it was wrong = Credibility."],
+  ["The theory is falsifiable.",0,"Falsifiable = Scientific."],
+  ["Murdock's results matched what the MSM predicted.",1,"Checked and it was right = Credibility."],
+  ["Bartlett's evidence came from his own subjective interpretation.",0,"Not objective = a weakness for S."],
+  ["Twin studies support the genetic explanation of addiction.",1,"Supporting evidence = Credibility."]]],
+];
+const sw = {deck:null, items:[], i:0, score:0, wrong:0, end:0, timer:null, xp:0, missed:[], drag:null, locked:false};
+function swStart(di){
+  clearInterval(arc.timer); clearInterval(sw.timer); arc.phase="swipe"; arc.mode="swipe";
+  if(di===undefined){ swMenu(); return; }
+  const d=SWIPE[di];
+  Object.assign(sw,{deck:di, items:shuffle(d[3]), i:0, score:0, wrong:0, end:Date.now()+45000, xp:0, missed:[], locked:false});
+  resetCombo(); sw.timer=setInterval(swTick,100); swRender(); arcToTop();
+}
+function swMenu(){
+  arc.phase="swipe";
+  $("#arcArea").innerHTML=`<div class="arc-top"><span class="big">👉 Swipe Sort</span><span class="spacer"></span><button class="btn ghost" id="arcMenu" style="padding:7px 14px">Back</button></div>
+    <p class="muted">Sort each statement left or right as fast as you can: swipe, tap the buttons or use the ← → keys. 45 seconds. Wrong answers cost a point.</p>
+    <div class="modes">${SWIPE.map((d,i)=>`<button class="mode" style="--c:#9A6324" data-sw="${i}"><span class="mi">${["🧠","⚖️","🧬","✍️","🔬"][i]}</span><h3>${esc(d[0])}</h3><p>${esc(d[1])} ← → ${esc(d[2])}</p><span class="best">${(G.st.swipe||{})[i]?`Best: ${G.st.swipe[i]}`:"No score yet"}</span></button>`).join("")}</div>`;
+  $("#arcMenu").onclick=()=>{ arc.phase="menu"; renderArcade(); };
+  document.querySelectorAll("[data-sw]").forEach(b=>b.onclick=()=>swStart(+b.dataset.sw));
+}
+function swTick(){ const left=sw.end-Date.now(), f=$("#swFill"), t=$("#swTime"); if(arc.phase!=="swipe"||!f){ clearInterval(sw.timer); return; }
+  f.style.width=Math.max(0,left/45000*100)+"%"; t.textContent=Math.max(0,Math.ceil(left/1000))+"s"; $("#swTb").classList.toggle("low",left<8000);
+  if(left<=0) swFinish(); }
+function swRender(){
+  if(sw.i>=sw.items.length){ sw.items=sw.items.concat(shuffle(SWIPE[sw.deck][3])); }
+  const d=SWIPE[sw.deck], it=sw.items[sw.i];
+  $("#arcArea").innerHTML=`<div class="arc-top"><span class="big">👉 ${esc(d[0])}</span><span class="spacer"></span><span>Score</span><span class="big">${sw.score}</span><span class="big" id="swTime" style="min-width:2.2em;text-align:right"></span></div>
+    <div class="timebar" id="swTb"><i id="swFill"></i></div>
+    <div class="sw-stage"><div class="sw-card" id="swCard"><p>${esc(it[0])}</p></div><div id="swFb" class="sw-fb" aria-live="polite"></div></div>
+    <div class="sw-btns"><button class="btn ghost sw-l" id="swL">← ${esc(d[1])}</button><button class="btn ghost sw-r" id="swR">${esc(d[2])} →</button></div>
+    <p style="text-align:right;margin-top:10px"><button class="linkbtn" id="arcQuit">End game</button></p>`;
+  $("#swL").onclick=()=>swPick(0); $("#swR").onclick=()=>swPick(1); $("#arcQuit").onclick=()=>swFinish();
+  const c=$("#swCard"); let x0=null, dx=0;
+  c.onpointerdown=e=>{ x0=e.clientX; dx=0; c.setPointerCapture(e.pointerId); c.style.transition="none"; };
+  c.onpointermove=e=>{ if(x0===null) return; dx=e.clientX-x0; c.style.transform=`translateX(${dx}px) rotate(${dx/18}deg)`; c.classList.toggle("tl",dx<-40); c.classList.toggle("tr",dx>40); };
+  c.onpointerup=()=>{ if(x0===null) return; x0=null; c.style.transition=""; if(Math.abs(dx)>70) swPick(dx<0?0:1); else { c.style.transform=""; c.classList.remove("tl","tr"); } };
+  swTick();
+}
+function swPick(side){
+  if(sw.locked || arc.phase!=="swipe") return; sw.locked=true;
+  const it=sw.items[sw.i], ok=it[1]===side, c=$("#swCard");
+  c.style.transform=`translateX(${side?400:-400}px) rotate(${side?20:-20}deg)`; c.style.opacity="0";
+  if(ok) sw.score++; else { sw.score=Math.max(0,sw.score-1); sw.wrong++; sw.missed.push(it); }
+  sw.xp+=answer({ok, el:$(side?"#swR":"#swL"), mode:"arcade", topic:"Exam skills"});
+  $("#swFb").innerHTML = ok ? `<b style="color:var(--good)">✓</b>` : `<b style="color:var(--warn)">✗ ${esc(SWIPE[sw.deck][1+it[1]])}: ${esc(it[2])}</b>`;
+  setTimeout(()=>{ sw.locked=false; if(arc.phase!=="swipe") return; sw.i++; swRender(); }, ok?260:1500);
+}
+document.addEventListener("keydown",e=>{ if(arc.phase!=="swipe" || !$("#swCard") || e.target.matches("input,textarea")) return; if(e.key==="ArrowLeft"){ e.preventDefault(); swPick(0); } if(e.key==="ArrowRight"){ e.preventDefault(); swPick(1); } });
+function swFinish(){
+  if(arc.phase!=="swipe") return; clearInterval(sw.timer); arc.phase="swdone";
+  G.st.swipe=G.st.swipe||{}; const best=sw.score>(G.st.swipe[sw.deck]||0); if(best) G.st.swipe[sw.deck]=sw.score;
+  const bonus=(5+sw.score*2)*2; sw.xp+=bonus; addXP(bonus,false); if(best&&sw.score>0){ confetti(150); sfx("lvl"); }
+  checkBadges(); save();
+  const d=SWIPE[sw.deck];
+  $("#arcArea").innerHTML=`<div class="empty">${best&&sw.score>0?'<div class="newbest">🏆 NEW PERSONAL BEST</div>':""}<h3>👉 ${esc(d[0])}</h3><p class="score">${sw.score}</p><p class="muted">${sw.wrong} wrong · +${sw.xp} XP (2× exam skills XP)</p>
+    <button class="btn" id="arcAgain">Play again</button> <button class="btn ghost" id="swOther">Other decks</button> <button class="btn ghost" id="arcMenu">Arcade menu</button>
+    ${sw.missed.length?`<ul class="results" style="margin-top:22px"><li style="padding-left:14px;background:none;border:0"><b>Learn from these:</b></li>${sw.missed.map(x=>`<li class="no"><b>${esc(x[0])}</b><div class="ans">${esc(d[1+x[1]])}: ${esc(x[2])}</div></li>`).join("")}</ul>`:""}</div>`;
+  $("#arcAgain").onclick=()=>swStart(sw.deck); $("#swOther").onclick=()=>swStart(); $("#arcMenu").onclick=()=>{ arc.phase="menu"; renderArcade(); };
+}
+
+/* ================= WHICH STUDY? ================= */
+const CLUESETS = [
+ ["Milgram",["The participants were all men, recruited by a newspaper advert.","It took place at a famous American university.","A rigged draw decided who was 'teacher'.","The learner was called Mr Wallace.","65% went all the way to 450V."]],
+ ["Asch",["The participants were American male students.","Everyone else in the room was a confederate.","Participants answered out loud.","There were 18 trials, 12 of them critical.","They had to judge which line matched a standard line."]],
+ ["Piliavin",["Over 4,000 people took part without knowing it.","It happened in 1969 on public transport.","A man collapsed about 70 seconds after the doors closed.","He carried either a cane or a bottle.","The cane victim was helped 95% of the time."]],
+ ["Murdock",["The participants were psychology students.","They heard lists of between 10 and 40 items.","They could recall in any order.","It supports separate STM and LTM stores.","It produced a famous U-shaped curve."]],
+ ["Bartlett",["The participants were 20 students at Cambridge.","They read a Native American folk tale.","They retold it several times over weeks and months.","Unfamiliar details were changed or left out.","A canoe became a boat."]],
+ ["Bruner and Minturn",["The participants were 24 university students.","They were split into two groups.","One group saw letters, the other saw numbers.","The key image was shown for less than a second.","Was it a B or a 13?"]],
+ ["Gilchrist and Nesberg",["The sample was 26 student volunteers.","One group went without food for up to 20 hours.","Participants saw pictures of meals.","They adjusted a lighting knob.","Hungry people saw food as brighter."]],
+ ["Hughes",["The participants were 30 children from Edinburgh.","They were aged 3½ to 5.","The equipment included two walls crossing each other.","Children had to hide a boy doll.","Toy policemen were 'looking' for him."]],
+ ["McGarrigle and Donaldson",["The sample was 80 children aged 4–6.","It tested conservation of number.","Children saw two rows of four counters.","Sometimes the adult changed the row; sometimes a toy did.","Naughty teddy messed up the counters."]],
+ ["Von Frisch",["The study went on for about 20 years.","It used a glass hive.","The 'participants' were marked with paint dots.","Sugar water was placed at different distances.","Round dance or waggle dance?"]],
+ ["Yuki",["95 Japanese and 118 American students took part.","They rated faces on a scale from 1 to 9.","The faces were very simple drawings.","It looked at cultural differences in reading emotion.","Eyes or mouth: emoticons."]],
+ ["Penfield",["Over 1,000 patients took part.","They all had epilepsy.","They were awake during brain surgery.","A mild electric current was used.","About 8% relived vivid memories: the interpretive cortex."]],
+ ["Tulving",["There were only 6 participants.","The researcher and his wife took part.","They were injected with a radioactive substance.","It used PET scans.","Episodic and semantic memories: the 'gold' study."]],
+ ["Kaij",["The participants were all male.","The study took place in Sweden.","It used a temperance board register.","It compared MZ and DZ twins.","Alcohol abuse: 54% vs 28%."]],
+ ["Wiles",["469 adults took part.","They were recruited from UK GP practices.","Their depression hadn't improved on medication.","It was called the CoBalT trial.","CBT was added to antidepressants."]],
+ ["Gibson and Walk",["The participants were babies aged 6–14 months.","Their mothers called them from across a table.","The table was glass.","It tested depth perception.","The visual cliff."]],
+];
+const ws = {items:[], i:0, clue:0, score:0, xp:0, locked:false, opts:[], log:[]};
+function wsStart(){
+  clearInterval(arc.timer); arc.phase="which"; arc.mode="which";
+  Object.assign(ws,{items:shuffle(CLUESETS).slice(0,8), i:0, clue:0, score:0, xp:0, locked:false, log:[]}); resetCombo(); wsNew(); arcToTop();
+}
+function wsNew(){ const s=ws.items[ws.i]; ws.clue=0; ws.locked=false; ws.opts=shuffle([s[0],...shuffle(CLUESETS.filter(x=>x!==s)).slice(0,5).map(x=>x[0])]); wsRender(); }
+function wsRender(){
+  const s=ws.items[ws.i], pts=5-ws.clue;
+  $("#arcArea").innerHTML=`<div class="arc-top"><span class="big">🕵️ Which Study?</span><span class="spacer"></span><span>Points</span><span class="big">${ws.score}</span><span class="big">${ws.i+1}/8</span></div>
+    <div class="progressline"><i style="width:${ws.i/8*100}%"></i></div>
+    <div class="quiz-q" style="--c:#9A6324"><div class="tag">Clue ${ws.clue+1} of 5 <span class="muted">· worth ${pts} point${pts===1?"":"s"}</span></div>
+      <ol class="ws-clues">${s[1].slice(0,ws.clue+1).map(c=>`<li>${esc(c)}</li>`).join("")}</ol>
+      <div class="opts ws-opts">${ws.opts.map((o,i)=>`<button class="opt" data-ws="${i}"><span class="k">${i+1}</span><span>${esc(o)}</span></button>`).join("")}</div>
+      <div class="card-actions"><button class="btn ghost" id="wsMore" ${ws.clue>=4?"disabled":""}>Another clue (−1 point)</button></div><div id="wsFb" class="gapfb" aria-live="polite"></div></div>
+    <p style="text-align:right;margin-top:10px"><button class="linkbtn" id="arcQuit">End game</button></p>`;
+  $("#wsMore").onclick=()=>{ if(ws.clue<4){ ws.clue++; sfx("tick"); wsRender(); } };
+  document.querySelectorAll("[data-ws]").forEach(b=>b.onclick=()=>wsPick(+b.dataset.ws, b));
+  $("#arcQuit").onclick=()=>wsFinish();
+}
+function wsPick(i, btn){
+  if(ws.locked) return;
+  const s=ws.items[ws.i], ok=ws.opts[i]===s[0];
+  if(!ok && ws.clue<4){ btn.disabled=true; btn.classList.add("wrong"); ws.clue++; sfx("no"); $("#wsFb").innerHTML=`<span style="color:var(--warn)">Not ${esc(ws.opts[i])}. Here's another clue…</span>`;
+    setTimeout(()=>{ if(!ws.locked) wsRender(); },900); return; }
+  ws.locked=true; const pts=ok?5-ws.clue:0; ws.score+=pts; ws.log.push({s, ok, pts});
+  document.querySelectorAll("[data-ws]").forEach((b,j)=>{ b.disabled=true; if(ws.opts[j]===s[0]) b.classList.add("right"); else if(j===i) b.classList.add("wrong"); });
+  ws.xp+=answer({ok, el:btn, mode:"arcade", topic:"Exam skills"});
+  $("#wsFb").innerHTML = ok ? `<b style="color:var(--good)">✓ ${esc(s[0])} · +${pts}</b>` : `<b style="color:var(--warn)">It was ${esc(s[0])}</b>`;
+  setTimeout(()=>{ ws.i++; if(ws.i>=8) wsFinish(); else wsNew(); }, ok?1100:1900);
+}
+function wsFinish(){
+  if(arc.phase!=="which") return; arc.phase="wdone";
+  const best=ws.score>(G.st.whichBest||0); if(best) G.st.whichBest=ws.score;
+  const bonus=(10+ws.score*2)*2; ws.xp+=bonus; addXP(bonus,false); if(best&&ws.score>0){ confetti(150); sfx("lvl"); }
+  checkBadges(); save();
+  const missed=ws.log.filter(x=>!x.ok);
+  $("#arcArea").innerHTML=`<div class="empty">${best&&ws.score>0?'<div class="newbest">🏆 NEW PERSONAL BEST</div>':""}<h3>🕵️ Which Study? over</h3><p class="score">${ws.score}/40</p><p class="muted">+${ws.xp} XP (2× exam skills XP)</p>
+    <button class="btn" id="arcAgain">Play again</button> <button class="btn ghost" id="arcMenu">Arcade menu</button>
+    ${missed.length?`<ul class="results" style="margin-top:22px"><li style="padding-left:14px;background:none;border:0"><b>Learn from these:</b></li>${missed.map(x=>`<li class="no"><b>${esc(x.s[0])}</b><div class="ans">${esc(x.s[1].join(" "))}</div></li>`).join("")}</ul>`:""}</div>`;
+  $("#arcAgain").onclick=wsStart; $("#arcMenu").onclick=()=>{ arc.phase="menu"; renderArcade(); };
+}
+
+/* ================= PSYCHLE (daily key term) ================= */
+const PSY_WORDS = (()=>{ const seen=new Set(); return TERMS.filter(x=>/^[a-z]{5,8}$/i.test(x.term) && !seen.has(x.term.toLowerCase()) && seen.add(x.term.toLowerCase())); })();
+const psyNo = () => dayNum(today())-dayNum("2026-11-01")+1;
+const PSY_ORDER = shuffleR(PSY_WORDS, rngFrom("psychle-order-v1"));
+function psyToday(){ const n=psyNo(); return PSY_ORDER[((n%PSY_ORDER.length)+PSY_ORDER.length)%PSY_ORDER.length]; }
+function psyState(){ G.psychle=G.psychle||{}; return G.psychle[today()] = G.psychle[today()] || {g:[], done:false, won:false}; }
+function psyMarks(guess, ans){
+  const g=guess.split(""), a=ans.split(""), res=g.map(()=>"b"), left={};
+  a.forEach((ch,i)=>{ if(g[i]===ch) res[i]="g"; else left[ch]=(left[ch]||0)+1; });
+  g.forEach((ch,i)=>{ if(res[i]!=="g" && left[ch]){ res[i]="y"; left[ch]--; } });
+  return res;
+}
+let psyCur="";
+function psyStart(){ clearInterval(arc.timer); arc.phase="psychle"; arc.mode="psychle"; psyCur=""; psyRender(); arcToTop(); }
+function psyRender(){
+  const w=psyToday(), ans=w.term.toLowerCase(), L=ans.length, st=psyState(), t=TMAP[w.t];
+  const rows=[]; for(let r=0;r<6;r++){ const g=st.g[r]; const m=g?psyMarks(g,ans):null; const cur=!g && r===st.g.length && !st.done;
+    rows.push(`<div class="psy-row">${Array.from({length:L},(_,i)=>{ const ch=g?g[i]:cur?(psyCur[i]||""):""; return `<span class="psy-tile ${m?m[i]:""} ${cur&&psyCur[i]?"typed":""}">${esc(ch.toUpperCase())}</span>`; }).join("")}</div>`); }
+  const used={}; st.g.forEach(g=>psyMarks(g,ans).forEach((m,i)=>{ const c=g[i], rank={g:3,y:2,b:1}; if(!used[c]||rank[m]>rank[used[c]]) used[c]=m; }));
+  const kb=["qwertyuiop","asdfghjkl","zxcvbnm"].map((row,ri)=>`<div class="psy-kr">${ri===2?'<button class="psy-k wide" data-pk="enter">Enter</button>':""}${row.split("").map(c=>`<button class="psy-k ${used[c]||""}" data-pk="${c}">${c.toUpperCase()}</button>`).join("")}${ri===2?'<button class="psy-k wide" data-pk="back" aria-label="Delete">⌫</button>':""}</div>`).join("");
+  $("#arcArea").innerHTML=`<div class="arc-top"><span class="big">🔤 Psychle #${psyNo()}</span><span class="spacer"></span><button class="btn ghost" id="arcMenu" style="padding:7px 14px">Back</button></div>
+    <p class="muted" style="margin:0 0 6px">Guess today's ${L}-letter key term in 6 tries. 🟩 right letter, right place · 🟨 in the word, wrong place.</p>
+    <p class="psy-clue"><span class="tag" style="color:${t.c}">${esc(t.name)}</span>${st.g.length>=3||st.done?` · <b>Clue:</b> ${esc(w.def)}`:` · <span class="muted">Definition clue after 3 guesses</span>`}</p>
+    <div class="psy-board">${rows.join("")}</div>
+    <div id="psyMsg" class="gapfb" aria-live="polite" style="text-align:center">${st.done?(st.won?`<b style="color:var(--good)">🎉 Got it in ${st.g.length}! It was ${esc(w.term)}.</b>`:`<b style="color:var(--warn)">It was ${esc(w.term)}. New word tomorrow!</b>`):""}</div>
+    ${st.done?`<div class="share">${esc(psyShare())}</div><div class="card-actions" style="justify-content:center"><button class="btn ghost" id="psyCopy">Copy result</button></div><p class="muted" style="text-align:center">Next Psychle in ${untilMidnight()}.</p>`:`<div class="psy-kb">${kb}</div>`}`;
+  $("#arcMenu").onclick=()=>{ arc.phase="menu"; renderArcade(); };
+  document.querySelectorAll("[data-pk]").forEach(b=>b.onclick=()=>psyKey(b.dataset.pk));
+  const c=$("#psyCopy"); if(c) c.onclick=()=>{ navigator.clipboard && navigator.clipboard.writeText(psyShare()).then(()=>{ c.textContent="Copied ✓"; }).catch(()=>{}); };
+}
+function psyShare(){ const ans=psyToday().term.toLowerCase(), st=psyState(); return `Psychle #${psyNo()} ${st.won?st.g.length:"X"}/6\n`+st.g.map(g=>psyMarks(g,ans).map(m=>m==="g"?"🟩":m==="y"?"🟨":"⬛").join("")).join("\n"); }
+function psyKey(k){
+  const st=psyState(); if(st.done) return; const ans=psyToday().term.toLowerCase(), L=ans.length;
+  if(k==="back"){ psyCur=psyCur.slice(0,-1); psyRender(); return; }
+  if(k==="enter"){
+    if(psyCur.length<L){ const m=$("#psyMsg"); m.innerHTML=`<span style="color:var(--warn)">Not enough letters</span>`; return; }
+    st.g.push(psyCur); const won=psyCur===ans; psyCur="";
+    if(won||st.g.length>=6){ st.done=true; st.won=won; const xp=won?(10+(7-st.g.length)*8)*2:10; addXP(xp,false); sfx(won?"lvl":"no"); if(won) confetti(160);
+      G.st.psyWins=(G.st.psyWins||0)+(won?1:0); G.hist[today()]=(G.hist[today()]||0)+1; checkBadges(); }
+    else sfx("tick");
+    save(); psyRender(); return;
+  }
+  if(/^[a-z]$/.test(k) && psyCur.length<L){ psyCur+=k; psyRender(); }
+}
+document.addEventListener("keydown",e=>{ if(arc.phase!=="psychle" || e.target.matches("input,textarea") || e.metaKey||e.ctrlKey||e.altKey) return;
+  const k=e.key.toLowerCase(); if(k==="enter"){ e.preventDefault(); psyKey("enter"); } else if(k==="backspace"){ e.preventDefault(); psyKey("back"); } else if(/^[a-z]$/.test(k)){ e.preventDefault(); psyKey(k); } });
+
+/* ================= REVISION PET (lab rat) ================= */
+const PET_STAGES = [[0,"Baby rat"],[100,"Little rat"],[400,"Teen rat"],[1000,"Grown-up rat"],[2500,"Wise rat"],[6000,"Legendary rat"]];
+function petInit(){ G.pet=G.pet||{name:"Professor Squeaks", born:today(), stage:0, mood:""}; return G.pet; }
+function petStage(){ const n=G.st.cards||0; let s=0; PET_STAGES.forEach(([v],i)=>{ if(n>=v) s=i; }); return s; }
+function petDaysAway(){ const days=Object.keys(G.hist||{}).filter(d=>G.hist[d]>0).sort(); if(!days.length) return -1; return dayNum(today())-dayNum(days[days.length-1]); }
+function petMood(){
+  const away=petDaysAway(), td=(G.hist||{})[today()]||0;
+  if(away<0) return "new";
+  if(away===0) return td>=G.goal ? "ecstatic" : "happy";
+  if(away===1) return "waiting";
+  if(away===2) return "sleepy";
+  return "asleep";
+}
+const PET_MSG = {
+  new:"Meet your new lab rat! Answer questions to help them grow.",
+  ecstatic:"is doing a happy dance 🎉 You smashed your daily goal!",
+  happy:"is happy you're revising today. Hit your daily goal for a happy dance!",
+  waiting:"is waiting for you. Answer a few questions to keep them happy.",
+  sleepy:"is getting sleepy… 😴 They miss you. Revise today to perk them up.",
+  asleep:"has fallen fast asleep 💤 Answer some questions to wake them up!",
+};
+function petSVG(stage, mood, px){
+  const sc=.62+stage*.076, sleepy=mood==="sleepy"||mood==="asleep", happy=mood==="ecstatic"||mood==="happy"||mood==="new";
+  const eye = x => sleepy ? `<path d="M${x-5} 50 q5 ${mood==="asleep"?4:3} 10 0" stroke="#2A2230" stroke-width="2.6" fill="none" stroke-linecap="round"/>`
+                          : `<circle cx="${x}" cy="49" r="4.4" fill="#2A2230"/><circle cx="${x+1.5}" cy="47.4" r="1.4" fill="#fff"/>`;
+  return `<svg class="pet-svg ${mood}" viewBox="0 0 160 120" width="${px}" height="${px*.75}" role="img" aria-label="Your lab rat, ${esc(PET_STAGES[stage][1])}, ${mood}">
+    <g transform="translate(80 118) scale(${sc}) translate(-80 -118)">
+      <path d="M118 96 q32 -4 30 -30 q-2 -14 -12 -12" stroke="#E8A3B4" stroke-width="5" fill="none" stroke-linecap="round" class="pet-tail"/>
+      <ellipse cx="88" cy="88" rx="38" ry="28" fill="#C9CCD6"/>
+      ${stage>=3?`<path d="M62 70 q26 18 52 0 l6 40 h-64z" fill="#FFFFFF" opacity=".95"/><path d="M88 74 v34" stroke="#D6DAE2" stroke-width="2"/>`:""}
+      <ellipse cx="70" cy="112" rx="10" ry="5" fill="#E8A3B4"/><ellipse cx="104" cy="112" rx="10" ry="5" fill="#E8A3B4"/>
+      <circle cx="40" cy="30" r="13" fill="#C9CCD6"/><circle cx="40" cy="30" r="8" fill="#F2B8C6"/>
+      <circle cx="82" cy="28" r="13" fill="#C9CCD6"/><circle cx="82" cy="28" r="8" fill="#F2B8C6"/>
+      <ellipse cx="60" cy="56" rx="30" ry="26" fill="#D7DAE2"/>
+      ${eye(50)}${eye(70)}
+      ${stage>=4?`<g stroke="#2A2230" stroke-width="2.2" fill="none"><circle cx="50" cy="49" r="8"/><circle cx="70" cy="49" r="8"/><path d="M58 49 h4"/></g>`:""}
+      <ellipse cx="44" cy="60" rx="5" ry="3" fill="#F2B8C6" opacity=".8"/><ellipse cx="76" cy="60" rx="5" ry="3" fill="#F2B8C6" opacity=".8"/>
+      <circle cx="60" cy="62" r="4" fill="#E88AA2"/>
+      ${happy?`<path d="M54 67 q6 6 12 0" stroke="#2A2230" stroke-width="2.2" fill="none" stroke-linecap="round"/>`:`<path d="M55 69 h10" stroke="#2A2230" stroke-width="2" stroke-linecap="round"/>`}
+      <g stroke="#9AA0AE" stroke-width="1.4"><path d="M46 63 l-20 -3"/><path d="M46 66 l-20 3"/><path d="M74 63 l20 -3"/><path d="M74 66 l20 3"/></g>
+      ${stage>=5?`<g><path d="M36 22 l24 -10 l24 10 l-24 10z" fill="#1E2233"/><rect x="48" y="22" width="24" height="9" fill="#1E2233"/><path d="M84 22 v12" stroke="#E2B53E" stroke-width="2"/><circle cx="84" cy="35" r="2.5" fill="#E2B53E"/></g>`:""}
+      ${stage===2?`<path d="M52 84 l8 -5 l8 5 l-8 5z" fill="#E11D74"/>`:""}
+    </g>
+    ${sleepy?`<g class="pet-z" fill="#7B8BB8" font-family="var(--display)" font-weight="800"><text x="104" y="34" font-size="16">z</text><text x="116" y="22" font-size="20">Z</text>${mood==="asleep"?'<text x="130" y="12" font-size="24">Z</text>':""}</g>`:""}
+    ${mood==="ecstatic"?`<g class="pet-spark" font-size="16"><text x="12" y="24">✨</text><text x="128" y="44">🎉</text></g>`:""}
+  </svg>`;
+}
+function petBoxHTML(){
+  const p=petInit(), st=petStage(), mood=petMood(), n=G.st.cards||0, next=PET_STAGES[st+1];
+  const td=(G.hist||{})[today()]||0, cheese=Math.min(3,Math.floor(td/10));
+  return `<div class="box pet-box"><div class="pet-art">${petSVG(st,mood,220)}</div>
+    <div class="pet-info"><h3 style="margin:0">🐀 <span id="petName">${esc(p.name)}</span> <button class="linkbtn" id="petRename" style="font-size:14px">Rename</button></h3>
+      <p class="muted" style="margin:2px 0 8px">${esc(PET_STAGES[st][1])}${next?` · ${next[0]-n} more answers to become a ${esc(next[1].toLowerCase())}`:" · fully grown legend 🎓"}</p>
+      ${next?`<div class="xpbar" style="margin-bottom:10px"><i style="width:${(n-PET_STAGES[st][0])/(next[0]-PET_STAGES[st][0])*100}%"></i></div>`:""}
+      <p class="pet-msg"><b>${esc(p.name)}</b> ${esc(PET_MSG[mood])}</p>
+      <p class="muted" style="margin:6px 0 0;font-size:15px">Cheese today: ${"🧀".repeat(cheese)}${"<span style='opacity:.25'>🧀</span>".repeat(3-cheese)} <span style="font-size:13px">(one for every 10 answers)</span></p></div></div>`;
+}
+function wirePet(){ const b=$("#petRename"); if(b) b.onclick=()=>{ const n=prompt("Name your lab rat:", G.pet.name); if(n && n.trim()){ G.pet.name=n.trim().slice(0,20); save(); renderTrophies(); petHud(); } }; }
+function petHud(){ const b=$("#petBtn"); if(!b||TEACHER) return; petInit(); const m=petMood(); b.innerHTML=petSVG(petStage(),m,46); b.setAttribute("aria-label",`${G.pet.name} the lab rat: ${PET_MSG[m]}`); b.title=`${G.pet.name} ${PET_MSG[m]}`; b.classList.toggle("sleepy", m==="sleepy"||m==="asleep"); }
+function petCheck(){
+  if(TEACHER) return; const p=petInit(), st=petStage(), m=petMood();
+  if(st>p.stage){ p.stage=st; save(); setTimeout(()=>{ toast("🐀",`${p.name} grew into a ${PET_STAGES[st][1].toLowerCase()}!`,st>=5?"They're wearing a graduation cap. Legendary.":st>=4?"Look, glasses! So wise.":st>=3?"They've got their own lab coat now.":"Keep revising to help them grow.",true); confetti(100); },600); }
+  if((p.mood==="sleepy"||p.mood==="asleep") && (m==="happy"||m==="ecstatic")) setTimeout(()=>toast("🐀",`${p.name} woke up!`,"They're so happy to see you revising again.",true),400);
+  if(p.mood!=="ecstatic" && m==="ecstatic" && p.mood) setTimeout(()=>toast("🐀",`${p.name} is doing a happy dance!`,"Daily goal smashed. 🧀🧀🧀",true),800);
+  if(p.mood!==m){ p.mood=m; save(); }
+  petHud();
+}
+
 /* ================= FOCUS TIMER ================= */
 const FOCUS_MIN=25, FOCUS_NEED=15;   // answer at least 15 questions during the session to earn the bonus
 let focusTimer=null;
@@ -2442,7 +2812,7 @@ function renderTrophies(){
   let tp=G.tpage||"progress";
   if(!["progress","weak","badges","scrolls","looks","save"].includes(tp)) tp=G.tpage="progress";
   const pages={
-    progress:`<div class="profile"><div class="bigring"><svg viewBox="0 0 110 110"><circle class="ring-bg" cx="55" cy="55" r="48" style="stroke-width:9"/><circle class="ring-fg" cx="55" cy="55" r="48" style="stroke-width:9" ${ring(48,frac)}/></svg><b>${n}</b></div>
+    progress:`${petBoxHTML()}<div class="profile"><div class="bigring"><svg viewBox="0 0 110 110"><circle class="ring-bg" cx="55" cy="55" r="48" style="stroke-width:9"/><circle class="ring-fg" cx="55" cy="55" r="48" style="stroke-width:9" ${ring(48,frac)}/></svg><b>${n}</b></div>
       <div><h2>${esc(rankFor(n))}</h2><p>Level ${n} · ${G.xp.toLocaleString()} XP total · ${e-G.xp} XP to level ${n+1}</p>
       <p>${(()=>{const nx=RANKS.find(r=>r[0]>n); return nx?`Next rank: <b>${esc(nx[1])}</b> at level ${nx[0]}`:"You've reached the top rank. Legend."})()}</p></div></div>
     <h3 class="tp-h">Your stats</h3><div class="tiles"><div class="tile"><b>🔥 ${G.last===t||(G.last&&dayNum(t)-dayNum(G.last)===1)?G.streak:0}</b><span>Day streak (best ${G.best})</span></div>
@@ -2493,6 +2863,7 @@ function renderTrophies(){
   document.querySelectorAll("[data-bf]").forEach(b=>b.onclick=()=>{ G.bfilter=b.dataset.bf; save(); renderTrophies(); });
   document.querySelectorAll(".theme").forEach(b=>b.onclick=()=>{ G.skin=b.dataset.skin; G.skinsTried[G.skin||"classic"]=1; save(); applySkin(); checkBadges(); renderTrophies(); });
   if(tp==="save"){ wireSave(); wireReport(); }
+  if(tp==="progress") wirePet();
   document.querySelectorAll("[data-cert]").forEach(b=>b.onclick=()=>openCert(b.dataset.cert));
   document.querySelectorAll("[data-scroll]").forEach(b=>b.onclick=()=>showScroll(SECRET_SCROLLS.find(s=>s.id===b.dataset.scroll), false));
   document.querySelectorAll("[data-goal]").forEach(b=>b.onclick=()=>{ G.goal=+b.dataset.goal; if((G.hist[t]||0)>=G.goal && G.last!==t) goalMet(); save(); renderHud(); renderTrophies(); });
@@ -2682,7 +3053,8 @@ function tRender(){
 }
 
 /* ================= PROJECTOR MODE (teacher page) ================= */
-const P = {sel:[...MOCK_TOPICS], teams:["Team 1","Team 2","Team 3","Team 4"], n:10, secs:30, items:[], i:0, scores:[], revealed:false, awarded:new Set(), timer:null, end:0, opts:null};
+const RACE_LEN=15, RACE_SQ={3:2,6:-2,9:2,12:-2};   // 🪜 +2, 🐍 −2
+const P = {mode:"points", pos:[], prev:[], sel:[...MOCK_TOPICS], teams:["Team 1","Team 2","Team 3","Team 4"], n:10, secs:30, items:[], i:0, scores:[], revealed:false, awarded:new Set(), timer:null, end:0, opts:null};
 function projSetup(){
   clearInterval(P.timer);
   const tp=$("#teacherApp");
@@ -2693,6 +3065,9 @@ function projSetup(){
       <div class="box"><h3>Teams <small>${P.teams.length} teams · edit names</small></h3>
         <div class="seg" role="group" aria-label="Number of teams">${[2,3,4,5,6].map(n=>`<button aria-pressed="${P.teams.length===n}" data-teams="${n}">${n}</button>`).join("")}</div>
         <div class="proj-names">${P.teams.map((t,i)=>`<label><span>${i+1}</span><input class="search" data-team="${i}" value="${esc(t)}" maxlength="24"></label>`).join("")}</div></div>
+      <div class="box"><h3>Game</h3>
+        <div class="seg" role="group" aria-label="Game type">${[["points","🏆 Points quiz"],["race","🏁 Topic Race"]].map(([k,l])=>`<button aria-pressed="${P.mode===k}" data-pmode="${k}">${l}</button>`).join("")}</div>
+        <p class="muted" style="margin:8px 0 0;font-size:15px">${P.mode==="race"?`Each correct answer moves a team one square. Land on 🪜 to climb 2, on 🐍 to slide back 2. First to square ${RACE_LEN} wins (or furthest when the questions run out).`:"Give a point to every team that gets it right. Most points wins."}</p></div>
       <div class="box"><h3>Questions and timer</h3>
         <div class="seg" role="group" aria-label="Questions">${[5,10,15,20].map(n=>`<button aria-pressed="${P.n===n}" data-n="${n}">${n} questions</button>`).join("")}</div>
         <div class="seg" role="group" aria-label="Timer" style="margin-top:10px">${[0,15,30,45,60].map(n=>`<button aria-pressed="${P.secs===n}" data-secs="${n}">${n?n+"s":"No timer"}</button>`).join("")}</div></div>
@@ -2705,12 +3080,13 @@ function projSetup(){
   tp.querySelectorAll("[data-teams]").forEach(b=>b.onclick=()=>{ const n=+b.dataset.teams; while(P.teams.length<n) P.teams.push("Team "+(P.teams.length+1)); P.teams=P.teams.slice(0,n); projSetup(); });
   tp.querySelectorAll("[data-team]").forEach(inp=>inp.oninput=()=>{ P.teams[+inp.dataset.team]=inp.value||("Team "+(+inp.dataset.team+1)); });
   tp.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{ P.n=+b.dataset.n; projSetup(); });
+  tp.querySelectorAll("[data-pmode]").forEach(b=>b.onclick=()=>{ P.mode=b.dataset.pmode; if(P.mode==="race" && P.n<20) P.n=20; projSetup(); });
   tp.querySelectorAll("[data-secs]").forEach(b=>b.onclick=()=>{ P.secs=+b.dataset.secs; projSetup(); });
   $("#pFull").onclick=projFull; $("#pExit").onclick=()=>{ clearInterval(P.timer); if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); tMain(); };
-  $("#pGo").onclick=()=>{ const s=new Set(P.sel); P.items=shuffle(DATA.filter(d=>s.has(d.t))).slice(0,P.n); P.i=0; P.scores=P.teams.map(()=>0); projQ(); };
+  $("#pGo").onclick=()=>{ const s=new Set(P.sel); P.items=shuffle(DATA.filter(d=>s.has(d.t))).slice(0,P.n); P.i=0; P.scores=P.teams.map(()=>0); P.pos=P.teams.map(()=>0); projQ(); };
 }
 function projFull(){ const el=document.documentElement; if(!document.fullscreenElement) el.requestFullscreen && el.requestFullscreen().catch(()=>{}); else document.exitFullscreen().catch(()=>{}); }
-function projScore(){ return `<div class="proj-scores">${P.teams.map((t,i)=>`<button class="proj-team ${P.awarded.has(i)?"won":""}" data-award="${i}" ${P.revealed?"":"disabled"}><span class="k">${i+1}</span><b>${esc(t)}</b><span class="pts">${P.scores[i]}</span></button>`).join("")}</div>`; }
+function projScore(){ if(P.mode==="race") return projTrack(); return `<div class="proj-scores">${P.teams.map((t,i)=>`<button class="proj-team ${P.awarded.has(i)?"won":""}" data-award="${i}" ${P.revealed?"":"disabled"}><span class="k">${i+1}</span><b>${esc(t)}</b><span class="pts">${P.scores[i]}</span></button>`).join("")}</div>`; }
 function projQ(){
   clearInterval(P.timer); P.revealed=false; P.awarded=new Set();
   const d=P.items[P.i], t=TMAP[d.t];
@@ -2747,12 +3123,22 @@ function projReveal(){
   document.querySelector(".proj-scores").outerHTML=projScore();
   wireProj();
 }
+function projTrack(){
+  const sq=n=>RACE_SQ[n]>0?"🪜":RACE_SQ[n]<0?"🐍":n===RACE_LEN?"🏁":"";
+  return `<div class="proj-scores race">${P.teams.map((t,i)=>`<div class="race-lane"><button class="proj-team ${P.awarded.has(i)?"won":""}" data-award="${i}" ${P.revealed?"":"disabled"}><span class="k">${i+1}</span><b>${esc(t)}</b></button>
+    <div class="race-track">${Array.from({length:RACE_LEN+1},(_,n)=>`<span class="race-sq ${n===RACE_LEN?"fin":""} ${RACE_SQ[n]>0?"up":RACE_SQ[n]<0?"down":""}">${P.pos[i]===n?`<i class="race-tok" style="--h:${i*57}">${i+1}</i>`:sq(n)}</span>`).join("")}</div></div>`).join("")}</div>`;
+}
 function projAward(i){
   if(!P.revealed || i>=P.teams.length) return;
+  if(P.mode==="race"){
+    if(P.awarded.has(i)){ P.awarded.delete(i); P.pos[i]=P.prev[i]; }
+    else { P.awarded.add(i); P.prev[i]=P.pos[i]; let n=Math.min(RACE_LEN,P.pos[i]+1); const fx=RACE_SQ[n]||0; n=Math.max(0,Math.min(RACE_LEN,n+fx)); P.pos[i]=n; sfx(fx<0?"no":"ok"); confetti(fx>0?60:30); }
+    P.scores=P.pos.slice(); document.querySelector(".proj-scores").outerHTML=projScore(); wireProj(); return;
+  }
   if(P.awarded.has(i)){ P.awarded.delete(i); P.scores[i]--; } else { P.awarded.add(i); P.scores[i]++; sfx("ok"); confetti(40); }
   document.querySelector(".proj-scores").outerHTML=projScore(); wireProj();
 }
-function projNext(){ P.i++; if(P.i>=P.items.length) projEnd(); else projQ(); }
+function projNext(){ P.i++; if(P.i>=P.items.length || (P.mode==="race" && P.pos.some(x=>x>=RACE_LEN))) projEnd(); else projQ(); }
 function projEnd(){
   clearInterval(P.timer);
   const order=P.teams.map((t,i)=>({t,s:P.scores[i]})).sort((a,b)=>b.s-a.s);
@@ -2760,12 +3146,12 @@ function projEnd(){
   const pod=[order[1],order[0],order[2]];
   $("#teacherApp").innerHTML=`<div class="proj"><div class="proj-bar"><b>📽️ Final scores</b><span class="spacer"></span><button class="btn ghost" id="pFull">⛶</button></div>
     <h2 class="proj-win">${winners.length>1?"It's a draw! 🤝":"🏆 "+esc(winners[0].t)+" wins!"}</h2>
-    <div class="podium">${pod.map((o,j)=>o?`<div class="pod p${[2,1,3][j]}"><b>${esc(o.t)}</b><span>${o.s} pt${o.s===1?"":"s"}</span><div class="block">${[2,1,3][j]}</div></div>`:"<div></div>").join("")}</div>
+    <div class="podium">${pod.map((o,j)=>o?`<div class="pod p${[2,1,3][j]}"><b>${esc(o.t)}</b><span>${P.mode==="race"?(o.s>=RACE_LEN?"🏁 Finished":"Square "+o.s):`${o.s} pt${o.s===1?"":"s"}`}</span><div class="block">${[2,1,3][j]}</div></div>`:"<div></div>").join("")}</div>
     ${order.length>3?`<p class="muted" style="text-align:center">${order.slice(3).map((o,j)=>`${j+4}. ${esc(o.t)} (${o.s})`).join(" · ")}</p>`:""}
     <div class="proj-actions"><button class="btn proj-go" id="pAgain">Play again</button><button class="btn ghost" id="pSetup">Change settings</button><button class="btn ghost" id="pExit">Back to teacher tools</button></div></div>`;
   sfx("lvl"); confetti(260);
   $("#pFull").onclick=projFull;
-  $("#pAgain").onclick=()=>{ const s=new Set(P.sel); P.items=shuffle(DATA.filter(d=>s.has(d.t))).slice(0,P.n); P.i=0; P.scores=P.teams.map(()=>0); projQ(); };
+  $("#pAgain").onclick=()=>{ const s=new Set(P.sel); P.items=shuffle(DATA.filter(d=>s.has(d.t))).slice(0,P.n); P.i=0; P.scores=P.teams.map(()=>0); P.pos=P.teams.map(()=>0); projQ(); };
   $("#pSetup").onclick=projSetup;
   $("#pExit").onclick=()=>{ if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); tMain(); };
 }
@@ -3642,7 +4028,7 @@ function sealHTML(t){
 let keyBuf=[];
 const KONAMI=["arrowup","arrowup","arrowdown","arrowdown","arrowleft","arrowright","arrowleft","arrowright","b","a"];
 document.addEventListener("keydown",e=>{
-  if(TEACHER || e.target.matches("input,textarea,select") || e.metaKey||e.ctrlKey||e.altKey || document.querySelector(".scroll-overlay")) return;
+  if(TEACHER || e.target.matches("input,textarea,select") || e.metaKey||e.ctrlKey||e.altKey || document.querySelector(".scroll-overlay") || arc.phase==="psychle") return;
   keyBuf.push(e.key.toLowerCase()); keyBuf=keyBuf.slice(-12);
   const s="|"+keyBuf.join("|"), ends=seq=>s.endsWith("|"+seq.join("|"));
   if(ends(KONAMI)) foundScroll("konami");
@@ -3690,6 +4076,8 @@ else { if(G.cardMode==="gap"){ cardMode="gap"; document.querySelectorAll("[data-
 $("#focusBtn").onclick=focusClick; if(G.focus && G.focus.end){ if(Date.now()>=G.focus.end) focusEnd(true); else { focusTimer=setInterval(focusTick,1000); focusBtnRender(); } }
 $("#parentLink").onclick=()=>{ goTab("quiz"); setQuizMode("parent"); $("#parentArea").scrollIntoView({behavior:reduced()?"auto":"smooth"}); };
 if(!TEACHER && /(^|[?&#])parent\b/i.test(location.search+location.hash)){ goTab("quiz"); setQuizMode("parent"); }
+$("#petBtn").onclick=()=>{ goTab("trophies","progress"); scrollTo({top:0,behavior:reduced()?"auto":"smooth"}); };
+if(!TEACHER) petCheck();
 </script>
 </body>
 </html>
