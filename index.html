@@ -1345,7 +1345,7 @@ function checkTyped(typed, d){
   // word order matters for pairs like proactive vs retroactive: penalise answers that reverse the key words
   const seq=aw.filter(w=>hits.has(w)).map(w=>tw.findIndex(t=>wordHit(w,[t]))).filter(i=>i>=0);
   let inv=0; for(let i=0;i<seq.length;i++) for(let j=i+1;j<seq.length;j++) if(seq[i]>seq[j]) inv++;
-  if(seq.length>=3 && inv>=seq.length-1) score=Math.min(score,0.5);
+  if(seq.length>=3 && inv>=seq.length-1) score=Math.min(score,0.4);
   return {score, hits};
 }
 function markHits(text, hits){ return esc(text).replace(/[A-Za-z0-9]+/g, w => hits.has(w.toLowerCase()) ? `<mark class="hit">${w}</mark>` : w); }
@@ -1537,27 +1537,34 @@ function mcPick(i){
 }
 function mcNext(){ if(mcPicked===null) return; pos++; mcPicked=null; renderCard(); }
 function actionsHTML(){ return flipped
-  ? (flipVerdict==="yes" ? `<button class="btn good" id="gotBtn">✓ Next card<kbd>2</kbd></button>`
-    : flipVerdict==="no" ? `${flipTries<1?`<button class="btn ghost" id="retryBtn">Try again</button>`:""}<button class="btn warn" id="learnBtn">Still learning<kbd>1</kbd></button>`
-    : `<button class="btn warn" id="learnBtn">Still learning<kbd>1</kbd></button><button class="btn good" id="gotBtn">Got it<kbd>2</kbd></button>`)
+  ? `<button class="btn ${flipVerdict==="yes"?"good":""}" id="flipNext">Next card<kbd>Enter</kbd></button>`
   : `<button class="btn" id="flipBtn" ${flipReady()?"":"disabled"}>Check my answer<kbd>Enter</kbd></button>`; }
-function wireActions(){ if(flipped){ const l=$("#learnBtn"), g=$("#gotBtn"), r=$("#retryBtn"); if(l) l.onclick=()=>rate("l"); if(g) g.onclick=()=>rate("k");
-    if(r) r.onclick=()=>{ flipTries++; flipVerdict=null; flipTyped=""; flipped=false; renderCard(); const fi=$("#flipIn"); if(fi) fi.focus(); }; } else $("#flipBtn").onclick=flip; }
+function wireActions(){ if(flipped){ const n=$("#flipNext"); if(n) n.onclick=flipNext; } else $("#flipBtn").onclick=flip; }
+// record a flip result automatically (same effects as the other modes), without leaving the card
+function flipRecord(id, ok){
+  const wasDue=isDue(id); sessionRes[id]=ok?"k":"l";
+  if(!ok){ G.st.learnMarks=(G.st.learnMarks||0)+1; G.lcount[id]=(G.lcount[id]||0)+1; } else if((G.lcount[id]||0)>=3) G.flags.finally=1;
+  mark(id, ok?"k":"l"); trackMistake(id, ok);
+  deckXP+=answer({ok, el:$("#card"), mode:"cards", gold:golds.has(id), review:wasDue&&ok, topic:BY_ID[id].t});
+  deckCombo = ok ? deckCombo+1 : 0; if(deckCombo>deckBest) deckBest=deckCombo;
+}
+function flipNext(){ pos++; flipped=false; flipTyped=""; flipVerdict=null; flipTries=0; renderCard(); const fi=$("#flipIn"); if(fi) fi.focus({preventScroll:true}); }
 function flip(){
   const c=$("#card"); if(!c) return;
   if(!flipped && !flipReady()){ const fi=$("#flipIn"); if(fi){ fi.focus(); fi.classList.remove("shake"); void fi.offsetWidth; fi.classList.add("shake"); fi.placeholder="Have a go first: type a few words"; } return; }
   if(!flipped && !flipVerdict){ const fc=$(".flip-commit"); if(fc) fc.remove();
     const d=BY_ID[deck[pos]], r=checkTyped(flipTyped, d);
-    flipVerdict = r.score>=0.66 ? "yes" : r.score>=0.3 ? "close" : "no";
+    flipVerdict = r.score>=0.5 ? "yes" : "no";
+    flipRecord(d.id, flipVerdict==="yes");
     const back=c.querySelector(".back");
     if(back){ const a=back.querySelector(".a"); if(a && r.hits.size) a.innerHTML=markHits(d.a, r.hits);
-      back.insertAdjacentHTML("beforeend", `<div class="flip-mine"><span class="muted">Your answer:</span> ${esc(flipTyped)}</div><div class="flip-verdict ${flipVerdict}">${flipVerdict==="yes"?"✓ That matches!":flipVerdict==="close"?"≈ Close: you got some of the key words (highlighted). Be honest: did you have it?":"✗ That doesn't match the answer yet."}</div>`); } }
+      back.insertAdjacentHTML("beforeend", `<div class="flip-mine"><span class="muted">Your answer:</span> ${esc(flipTyped)}</div><div class="flip-verdict ${flipVerdict}">${flipVerdict==="yes"?"✓ That matches! Marked as got it.":"✗ That doesn't match the answer yet. Added to still learning."}</div>`); } }
   const hadFocus = document.activeElement && ["flipBtn","gotBtn","learnBtn"].includes(document.activeElement.id);
   flipped=!flipped; c.classList.toggle("flipped",flipped);
   c.querySelector(".front").setAttribute("aria-hidden",flipped); c.querySelector(".back").setAttribute("aria-hidden",!flipped);
   c.setAttribute("aria-label","Flashcard. Press to "+(flipped?"see the question":"reveal the answer"));
   $("#acts").innerHTML=actionsHTML(); wireActions();
-  if(hadFocus) $(flipped?"#gotBtn":"#flipBtn").focus({preventScroll:true});
+  const nb=$("#flipNext"); if(flipped && nb) nb.focus({preventScroll:true}); else if(hadFocus){ const fb=$("#flipBtn"); if(fb) fb.focus({preventScroll:true}); }
 }
 function rate(s){ const id=deck[pos], wasDue=isDue(id); sessionRes[id]=s; if(s==="l"){ G.st.learnMarks=(G.st.learnMarks||0)+1; G.lcount[id]=(G.lcount[id]||0)+1; } else if((G.lcount[id]||0)>=3) G.flags.finally=1;
   mark(id,s); trackMistake(id, s==="k");
@@ -1569,8 +1576,7 @@ document.addEventListener("keydown",e=>{
   if(pos>=deck.length) return;
   if(cardMode==="mc"){ if(mcPicked===null && /^[1-4]$/.test(e.key)){ e.preventDefault(); mcPick(+e.key-1); } else if(mcPicked!==null && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); mcNext(); } return; }
   if(e.key===" "){ e.preventDefault(); flip(); }
-  else if(flipped && e.key==="1" && flipVerdict!=="yes") rate("l");
-  else if(flipped && e.key==="2" && flipVerdict!=="no") rate("k");
+  else if(flipped && flipVerdict && (e.key==="Enter")) { e.preventDefault(); flipNext(); }
   else if(e.key==="ArrowRight"){ pos++; flipped=false; renderCard(); }
   else if(e.key==="ArrowLeft" && pos>0){ pos--; flipped=false; renderCard(); }
 });
