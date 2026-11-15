@@ -665,10 +665,18 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .gotd-ico{font-size:30px}
 .mode.gotd{outline:3px solid #E0A100;outline-offset:2px}
 .gotd-tag{background:#E0A100!important;color:#3A2A00!important}
+.hardbtn{display:inline-block;margin-top:8px;padding:5px 10px;border-radius:99px;background:#E0533D;color:#fff;font-weight:800;font-size:13px}
+.hardbtn:hover{filter:brightness(1.1)}
 .ord-done{margin:10px 0 12px;padding-left:28px;display:grid;gap:6px}
 .ord-done li{background:var(--good-bg);border-radius:10px;padding:8px 12px;font-size:16px}
 .ord-done li.ord-empty{background:var(--soft);min-height:38px;border:2px dashed var(--line)}
 .ord-pool{display:grid;gap:8px}
+.ord-step{cursor:grab}
+.ord-step.dragging{opacity:.4}
+.ord-grip{color:var(--muted);font-size:18px;line-height:1}
+.ord-done li.ord-empty.over{border-color:#9A6324;background:#FFF3C4}
+.ord-tip{font-size:14px;margin:8px 0 0}
+@media (hover:none){.ord-grip{display:none}.ord-tip{display:none}}
 .ord-step{justify-content:flex-start}
 .focusbtn{width:auto;min-width:44px;padding:0 10px;font-weight:800;white-space:nowrap}
 .focusbtn.on{background:#1C8A5E;color:#fff}
@@ -1765,6 +1773,8 @@ const BADGES = [
   ["psy5","🔤","Word wizard","Win Psychle 5 times",()=>(G.st.psyWins||0)>=5],
   ["which30","🕵️","Super sleuth","Score 30+ in Which Study?",()=>(G.st.whichBest||0)>=30],
   ["petwise","🐀","Squeaks' best friend","Help Professor Squeaks grow into a wise rat",()=>(G.st.cards||0)>=2500],
+  ["hard1","🔥","Hard mode hero","Defeat a boss on hard mode",()=>Object.values(G.bosses||{}).some(b=>b.hardWon)],
+  ["hardall","🌋","Hard mode legend","Defeat every boss on hard mode",()=>Object.keys(BOSSES).every(k=>(G.bosses[k]||{}).hardWon)],
   ["focus5","🎯","Deep focus","Complete 5 focus sessions",()=>(G.st.focus||0)>=5],
   ["flaw14","🔍","Flaw finder","Score 14+ in Spot the Flaw",()=>(G.st.flawBest||0)>=14],
   ["order15","🔢","Sequence master","Score 15+ in Put it in Order",()=>(G.st.orderBest||0)>=15],
@@ -1964,7 +1974,9 @@ const gotdMult = () => (typeof arc!=="undefined" && arc.mode===gotd()) ? 2 : 1;
 const arc={phase:"menu", mode:null, items:[], base:[], bi:0, i:0, score:0, right:0, lives:3, end:0, qEnd:0, timer:null, cur:null, locked:false, log:[], t0:0, xp:0, best:false, tries:0, hints:0};
 const dailyNo = () => dayNum(today())-dayNum("2026-01-01")+1;
 const ROUND10 = {exam:1, terms:1, maths:1, daily:1};
-const BOSS_HP=15;
+const BOSS_HP=15, HARD_HP=25;
+const bossMax = () => arc.hard ? HARD_HP : BOSS_HP;
+const bossSecs = () => arc.hard ? 10000 : 15000;
 const BOSSES = {
   "Memory":{icon:"🌀", name:"The Forgetting Fog", says:["Your memory is short-term at best!","Rehearse all you like, it's already decayed.","That answer's been displaced. Try again."]},
   "Perception":{icon:"🎩", name:"The Illusionist", says:["Things aren't always what they seem…","Your depth cues are deceiving you.","Ha! Fooled you, just like the Müller-Lyer."]},
@@ -2012,10 +2024,10 @@ function renderArcade(){
   }
   if(arc.phase==="bossmenu"){
     area.innerHTML=`<div class="arc-top"><span class="big">🐉 Boss Battles</span><span class="spacer"></span><button class="btn ghost" id="arcMenu" style="padding:7px 14px">Back</button></div>
-      <div class="modes">${TOPICS.map(t=>{ const B=BOSSES[t.key], r=G.bosses[t.key]||{}; return `<button class="mode bosscard" style="--c:${t.c}" data-boss="${esc(t.key)}">${r.won?`<span class="new" style="background:${r.flawless?"#E0A100":"#1C8A5E"};animation:none">${r.flawless?"👑 Flawless":"✓ Defeated"}</span>`:""}<span class="mi">${B.icon}</span><h3>${esc(B.name)}</h3><p>Boss of ${esc(t.name)}</p><span class="best">${r.won?`Beaten ${r.wins} time${r.wins>1?"s":""}`:r.tries?`Best: ${BOSS_HP-r.bestHp}/${BOSS_HP} damage`:"Undefeated"}</span></button>`; }).join("")}</div>
+      <div class="modes">${TOPICS.map(t=>{ const B=BOSSES[t.key], r=G.bosses[t.key]||{}; return `<button class="mode bosscard" style="--c:${t.c}" data-boss="${esc(t.key)}">${r.won?`<span class="new" style="background:${r.flawless?"#E0A100":"#1C8A5E"};animation:none">${r.flawless?"👑 Flawless":"✓ Defeated"}</span>`:""}<span class="mi">${B.icon}</span><h3>${esc(B.name)}</h3><p>Boss of ${esc(t.name)}</p><span class="best">${r.won?`Beaten ${r.wins} time${r.wins>1?"s":""}${r.hardWon?" · 🔥 Hard mode beaten":""}`:r.tries?`Best: ${BOSS_HP-r.bestHp}/${BOSS_HP} damage`:"Undefeated"}</span>${r.won?`<span class="hardbtn" role="button" tabindex="0" data-hard="${esc(t.key)}">🔥 ${r.hardWon?"Hard mode again":"Rematch on hard mode"}</span>`:""}</button>`; }).join("")}</div>
       <p class="arc-note">Bosses use your hardest cards first: still learning, then not yet known. Beat a boss without losing a life for a 👑.</p>`;
     $("#arcMenu").onclick=()=>{ arc.phase="menu"; renderArcade(); };
-    area.querySelectorAll("[data-boss]").forEach(b=>b.onclick=()=>startBoss(b.dataset.boss));
+    area.querySelectorAll("[data-boss]").forEach(b=>b.onclick=e=>{ const hd=e.target.closest("[data-hard]"); startBoss(b.dataset.boss, !!hd); });
     return;
   }
   if(arc.phase==="play"){
@@ -2026,7 +2038,7 @@ function renderArcade(){
       : `<span>Question</span><span class="big">${arc.i+1}/10</span>`;
     const timed = arc.mode==="blitz"||arc.mode==="surv"||arc.mode==="boss";
     const B=BOSSES[arc.boss], bt=TMAP[arc.boss];
-    const top = arc.mode==="boss" ? `<div class="bossbar" style="--c:${bt?bt.c:"#B91C1C"}"><div class="boss-ico" id="bossIco">${B.icon}</div><div class="boss-info"><b>${esc(B.name)}</b><div class="hp"><i id="hpFill" style="width:${arc.hp/BOSS_HP*100}%"></i></div><span class="muted" id="hpTxt">${arc.hp}/${BOSS_HP} HP</span><div class="boss-say" id="bossSay"></div></div><div class="boss-side"><span class="hearts" aria-label="${arc.lives} lives left">${"❤️".repeat(arc.lives)}${"🖤".repeat(3-arc.lives)}</span><span class="big" id="arcTime"></span></div></div><div class="timebar" id="tb"><i id="tbFill"></i></div>`
+    const top = arc.mode==="boss" ? `<div class="bossbar" style="--c:${bt?bt.c:"#B91C1C"}"><div class="boss-ico" id="bossIco">${B.icon}</div><div class="boss-info"><b>${esc(B.name)}</b><div class="hp"><i id="hpFill" style="width:${arc.hp/bossMax()*100}%"></i></div><span class="muted" id="hpTxt">${arc.hp}/${bossMax()} HP${arc.hard?' · <b style="color:#E0533D">🔥 HARD MODE</b>':""}</span><div class="boss-say" id="bossSay"></div></div><div class="boss-side"><span class="hearts" aria-label="${arc.lives} lives left">${"❤️".repeat(arc.lives)}${"🖤".repeat(3-arc.lives)}</span><span class="big" id="arcTime"></span></div></div><div class="timebar" id="tb"><i id="tbFill"></i></div>`
       : `<div class="arc-top"><span class="big">${m.icon} ${m.name}</span><span class="spacer"></span>${right}${timed?`<span class="big" id="arcTime" style="min-width:2.2em;text-align:right"></span>`:""}</div>
       ${timed?`<div class="timebar" id="tb"><i id="tbFill"></i></div>`:`<div class="progressline"><i style="width:${arc.i*10}%"></i></div>`}`;
     const quit=`<p style="text-align:right;margin-top:10px"><button class="linkbtn" id="arcQuit">${arc.mode==="daily"?"Stop (counts as your go)":"End game"}</button></p>`;
@@ -2064,13 +2076,14 @@ function renderArcade(){
     extra=`<div class="share" id="shareTxt">${esc(shareText())}</div><br><button class="btn ghost" id="copyShare">Copy result</button> `;
   }
   if(arc.mode==="boss"){ const B=BOSSES[arc.boss], win=arc.hp<=0;
-    head = win ? `<div class="boss-ico big">${B.icon}</div><p class="score" style="font-size:48px">Victory!</p><p class="muted">You defeated ${esc(B.name)}${arc.lives===3?" without losing a life 👑":` with ${arc.lives} li${arc.lives>1?"ves":"fe"} left`}.</p>`
-      : `<div class="boss-ico big" style="filter:grayscale(.2)">${B.icon}</div><p class="score" style="font-size:48px">Defeated</p><p class="muted">${esc(B.name)} survived with ${arc.hp}/${BOSS_HP} HP. “${esc(bossLine(B))}”</p>`; }
-  area.innerHTML=`<div class="empty">${arc.best?`<div class="newbest">${arc.mode==="boss"?"⚔️ BOSS DEFEATED":"🏆 NEW PERSONAL BEST"}</div>`:""}${arc.mode==="boss"?"":`<h3>${m.icon} ${m.name} over</h3>`}${head}
+    head = win ? `<div class="boss-ico big">${B.icon}</div><p class="score" style="font-size:48px">Victory!</p><p class="muted">You defeated ${esc(B.name)}${arc.hard?" on 🔥 hard mode":""}${arc.lives===3?" without losing a life 👑":` with ${arc.lives} li${arc.lives>1?"ves":"fe"} left`}.</p>`
+      : `<div class="boss-ico big" style="filter:grayscale(.2)">${B.icon}</div><p class="score" style="font-size:48px">Defeated</p><p class="muted">${esc(B.name)} survived with ${arc.hp}/${bossMax()} HP${arc.hard?" on hard mode":""}. “${esc(bossLine(B))}”</p>`; }
+  area.innerHTML=`<div class="empty">${arc.best?`<div class="newbest">${arc.mode==="boss"?(arc.hard?"🔥 HARD MODE CLEARED":"⚔️ BOSS DEFEATED"):"🏆 NEW PERSONAL BEST"}</div>`:""}${arc.mode==="boss"?"":`<h3>${m.icon} ${m.name} over</h3>`}${head}
     <p style="margin-top:10px">+${arc.xp} XP earned${arc.mode==="daily"?". Next Daily 10 in "+untilMidnight()+".":""}</p>${extra}
-    ${arc.mode!=="daily"?`<button class="btn" id="arcAgain">${arc.mode==="boss"?(arc.hp<=0?"Fight again":"Rematch"):"Play again"}</button> `:""}<button class="btn ghost" id="arcMenu">${arc.mode==="boss"?"All bosses":"Arcade menu"}</button>
+    ${arc.mode!=="daily"?`<button class="btn" id="arcAgain">${arc.mode==="boss"?(arc.hp<=0?"Fight again":"Rematch"):"Play again"}</button> `:""}${arc.mode==="boss"&&arc.hp<=0&&!arc.hard?`<button class="btn" id="arcHard" style="background:#E0533D;border-color:#E0533D">🔥 Rematch on hard mode</button> `:""}<button class="btn ghost" id="arcMenu">${arc.mode==="boss"?"All bosses":"Arcade menu"}</button>
     ${missed.length?`<ul class="results" style="margin-top:22px"><li style="padding-left:14px;background:none;border:0"><b>Learn from these:</b></li>${missed.slice(0,20).map(x=>{const d=x.item;return `<li class="no">${d.sc?`<div class="ans" style="margin:0 0 4px">${esc(d.sc)}</div>`:""}<b>${esc(d.def?"_____: "+d.def:d.q)}</b><div class="ans">${esc(d.def?d.term:d.a)}</div></li>`}).join("")}</ul>`:""}</div>`;
-  const a=$("#arcAgain"); if(a) a.onclick=()=>arc.mode==="boss"?startBoss(arc.boss):startArc(arc.mode);
+  const a=$("#arcAgain"); if(a) a.onclick=()=>arc.mode==="boss"?startBoss(arc.boss, arc.hard):startArc(arc.mode);
+  const hb=$("#arcHard"); if(hb) hb.onclick=()=>startBoss(arc.boss, true);
   $("#arcMenu").onclick=()=>{ arc.phase = arc.mode==="boss" ? "bossmenu" : "menu"; renderArcade(); };
   const c=$("#copyShare"); if(c) c.onclick=()=>{ navigator.clipboard && navigator.clipboard.writeText(shareText()).then(()=>{ c.textContent="Copied ✓"; }).catch(()=>{}); };
 }
@@ -2087,10 +2100,10 @@ function streamItem(){
   if(arc.bi>=arc.base.length){ arc.base=shuffle(arc.base); arc.bi=0; }
   return arc.base[arc.bi++];
 }
-function startBoss(key){
+function startBoss(key, hard=false){
   clearInterval(arc.timer);
   const order=d=>status(d.id)==="l"?0:status(d.id)===""?1:2;
-  Object.assign(arc,{mode:"boss", boss:key, phase:"play", i:0, score:0, right:0, lives:3, hp:BOSS_HP, log:[], xp:0, best:false, locked:false, t0:Date.now(), items:[], bi:0, rng:Math.random});
+  Object.assign(arc,{mode:"boss", boss:key, hard, phase:"play", i:0, score:0, right:0, lives:3, hp:hard?HARD_HP:BOSS_HP, log:[], xp:0, best:false, locked:false, t0:Date.now(), items:[], bi:0, rng:Math.random});
   arc.base=shuffle(DATA.filter(d=>d.t===key)).sort((a,b)=>order(a)-order(b));
   resetCombo(); arc.timer=setInterval(arcTick,100);
   arcNewQ(); renderArcade(); arcToTop();
@@ -2138,11 +2151,11 @@ function arcNewQ(){
   arc.cur = arc.mode==="terms" ? null : mcFor(d, arc.rng||Math.random);
   arc.locked=false; arc.tries=0; arc.hints=0;
   if(arc.mode==="surv") arc.qEnd=Date.now()+12000;
-  if(arc.mode==="boss") arc.qEnd=Date.now()+15000;
+  if(arc.mode==="boss") arc.qEnd=Date.now()+bossSecs();
 }
 function arcTick(){
   if(arc.phase!=="play" || !(arc.mode==="blitz"||arc.mode==="surv"||arc.mode==="boss")) return;
-  const now=Date.now(), left = arc.mode==="blitz" ? arc.end-now : arc.qEnd-now, total = arc.mode==="blitz"?60000:arc.mode==="boss"?15000:12000;
+  const now=Date.now(), left = arc.mode==="blitz" ? arc.end-now : arc.qEnd-now, total = arc.mode==="blitz"?60000:arc.mode==="boss"?bossSecs():12000;
   const f=$("#tbFill"), tm=$("#arcTime"), tb=$("#tb");
   if(f && !arc.locked){ f.style.width=Math.max(0,left/total*100)+"%"; tb.classList.toggle("low", left<(arc.mode==="blitz"?10000:4000)); }
   if(tm && !arc.locked) tm.textContent=Math.max(0,Math.ceil(left/1000))+"s";
@@ -2165,7 +2178,7 @@ function arcPick(i){
   const d=arc.items[arc.i], ok=i===arc.cur.correct, btns=[...document.querySelectorAll(".opt")];
   btns.forEach((b,j)=>{ b.disabled=true; if(j===arc.cur.correct) b.classList.add("right"); else if(j===i) b.classList.add("wrong"); else b.classList.add("dim"); });
   logResult(d, ok, btns[i]||btns[arc.cur.correct]);
-  if(ok && arc.mode==="boss"){ const dmg=comboMult()>1?2:1; arc.hp=Math.max(0,arc.hp-dmg); const f=$("#hpFill"), tx=$("#hpTxt"), ic=$("#bossIco"); if(f) f.style.width=(arc.hp/BOSS_HP*100)+"%"; if(tx) tx.textContent=`${arc.hp}/${BOSS_HP} HP`; if(ic){ ic.classList.remove("hit"); void ic.offsetWidth; ic.classList.add("hit"); } floater(dmg>1?"CRITICAL! −2 HP":"−1 HP", ic, dmg>1?"big":""); }
+  if(ok && arc.mode==="boss"){ const dmg=comboMult()>1?2:1; arc.hp=Math.max(0,arc.hp-dmg); const f=$("#hpFill"), tx=$("#hpTxt"), ic=$("#bossIco"); if(f) f.style.width=(arc.hp/bossMax()*100)+"%"; if(tx) tx.textContent=`${arc.hp}/${bossMax()} HP${arc.hard?" · 🔥 HARD MODE":""}`; if(ic){ ic.classList.remove("hit"); void ic.offsetWidth; ic.classList.add("hit"); } floater(dmg>1?"CRITICAL! −2 HP":"−1 HP", ic, dmg>1?"big":""); }
   if(ok){ if(arc.mode==="blitz"){ arc.score+=Math.round(100*comboMult()); const s=$("#arcScore"); if(s) s.textContent=arc.score.toLocaleString(); } }
   else {
     if(arc.mode==="blitz"){ arc.end-=3000; floater("−3s", $("#arcTime"), "meh"); }
@@ -2219,8 +2232,9 @@ function arcFinish(){
   if(arc.mode==="boss"){
     const win=arc.hp<=0, flaw=win&&arc.lives===3, r=G.bosses[arc.boss]||{tries:0,wins:0,bestHp:BOSS_HP};
     r.tries++; r.bestHp=Math.min(r.bestHp,arc.hp);
-    if(win){ if(!r.won) arc.best=true; r.won=true; r.wins=(r.wins||0)+1; if(flaw){ if(!r.flawless) arc.best=true; r.flawless=true; } }
-    G.bosses[arc.boss]=r; bonus = win ? 100+(flaw?50:0) : arc.right*3;
+    if(win && arc.hard){ if(!r.hardWon) arc.best=true; r.hardWon=true; G.st.hardWins=(G.st.hardWins||0)+1; }
+    else if(win){ if(!r.won) arc.best=true; r.won=true; r.wins=(r.wins||0)+1; if(flaw){ if(!r.flawless) arc.best=true; r.flawless=true; } }
+    G.bosses[arc.boss]=r; bonus = win ? (arc.hard?200:100)+(flaw?50:0) : arc.right*3;
     if(win){ G.st.bossWins=(G.st.bossWins||0)+1; if(flaw) G.st.flawless=(G.st.flawless||0)+1; }
   }
   if(arc.mode==="fix"){ bonus=arc.right*3; }
@@ -2345,8 +2359,15 @@ function gmRender(){
     const o=it.o, n=o[1].length;
     area.innerHTML=gmTop()+`<div class="quiz-q" style="--c:#9A6324"><div class="tag">🔢 Put it in order <span class="muted">Tap the steps in the right order · ${3-Math.min(3,gm.wrongs)} point${3-gm.wrongs===1?"":"s"} left</span></div><div class="q">${esc(o[0])}</div>
       <ol class="ord-done">${gm.picked.map(i=>`<li>${esc(o[1][i])}</li>`).join("")}${Array.from({length:n-gm.picked.length},()=>'<li class="ord-empty"></li>').join("")}</ol>
-      <div class="ord-pool">${it.pool.filter(p=>!gm.picked.includes(p.i)).map(p=>`<button class="opt ord-step" data-s="${p.i}"><span>${esc(p.s)}</span></button>`).join("")}</div><div id="gmFb" class="gapfb" aria-live="polite"></div></div>`+quit;
-    area.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>gmOrder(+b.dataset.s, b));
+      <div class="ord-pool">${it.pool.filter(p=>!gm.picked.includes(p.i)).map(p=>`<button class="opt ord-step" draggable="true" data-s="${p.i}"><span class="ord-grip" aria-hidden="true">⠿</span><span>${esc(p.s)}</span></button>`).join("")}</div>
+      <p class="muted ord-tip">Tap the steps in order, or drag them into the next empty slot.</p><div id="gmFb" class="gapfb" aria-live="polite"></div></div>`+quit;
+    area.querySelectorAll("[data-s]").forEach(b=>{ b.onclick=()=>gmOrder(+b.dataset.s, b);
+      b.ondragstart=e=>{ e.dataTransfer.setData("text/plain", b.dataset.s); e.dataTransfer.effectAllowed="move"; b.classList.add("dragging"); };
+      b.ondragend=()=>{ b.classList.remove("dragging"); document.querySelectorAll(".ord-done li").forEach(l=>l.classList.remove("over")); }; });
+    const slot=document.querySelector(".ord-done .ord-empty"), list=document.querySelector(".ord-done");
+    if(list){ list.ondragover=e=>{ e.preventDefault(); if(slot) slot.classList.add("over"); };
+      list.ondragleave=e=>{ if(!list.contains(e.relatedTarget) && slot) slot.classList.remove("over"); };
+      list.ondrop=e=>{ e.preventDefault(); const s=e.dataTransfer.getData("text/plain"); const btn=document.querySelector(`[data-s="${s}"]`); if(btn) gmOrder(+s, btn); }; }
   }
   $("#arcQuit").onclick=()=>gmFinish();
 }
