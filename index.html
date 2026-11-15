@@ -668,6 +668,10 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .hardbtn{display:inline-block;margin-top:8px;padding:5px 10px;border-radius:99px;background:#E0533D;color:#fff;font-weight:800;font-size:13px}
 .hardbtn:hover{filter:brightness(1.1)}
 .why{margin-top:8px;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,#E0A100 14%,var(--card));font-size:15px;line-height:1.4;color:var(--ink)}
+.flip-commit{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.flip-commit input{flex:1;min-width:200px}
+.flip-mine{margin-top:10px;padding:8px 12px;border:1px dashed var(--line);border-radius:10px;font-size:15px}
+.mc-card .opts{margin-top:12px}
 .ord-done{margin:10px 0 12px;padding-left:28px;display:grid;gap:6px}
 .ord-done li{background:var(--good-bg);border-radius:10px;padding:8px 12px;font-size:16px}
 .ord-done li.ord-empty{background:var(--soft);min-height:38px;border:2px dashed var(--line)}
@@ -922,7 +926,7 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
         <button aria-pressed="false" data-filter="mistakes">🩹 Mistakes <span id="mistN"></span></button>
       </div>
       <span class="spacer"></span>
-      <div class="seg" role="group" aria-label="Card mode"><button aria-pressed="true" data-cm="flip">🃏 Flip</button><button aria-pressed="false" data-cm="gap">🔤 Gap fill</button></div>
+      <div class="seg" role="group" aria-label="Card mode"><button aria-pressed="true" data-cm="mc">🔘 Multiple choice</button><button aria-pressed="false" data-cm="gap">🔤 Gap fill</button><button aria-pressed="false" data-cm="flip">🃏 Flip</button></div>
       <button class="btn ghost" id="shuffleBtn" style="padding:8px 14px">Shuffle a new deck</button>
     </div>
     <div id="cardArea"></div>
@@ -1305,8 +1309,9 @@ let filter="all", deck=[], pos=0, flipped=false, sessionRes={}, golds=new Set(),
 function setFilter(f){ filter=f; document.querySelectorAll("[data-filter]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.filter===f)); newDeck(); }
 document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>setFilter(b.dataset.filter)));
 $("#shuffleBtn").onclick=newDeck;
-let cardMode = "flip";
-function setCardMode(m){ cardMode=m; G.cardMode=m; save(); document.querySelectorAll("[data-cm]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.cm===m)); newDeck(); }
+let cardMode = "mc";
+let mcPicked = null, flipSaid = false, flipTyped = "";
+function setCardMode(m){ cardMode=m; G.cardMode=m; mcPicked=null; flipSaid=false; flipTyped=""; save(); document.querySelectorAll("[data-cm]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.cm===m)); newDeck(); }
 document.querySelectorAll("[data-cm]").forEach(b=>b.onclick=()=>setCardMode(b.dataset.cm));
 /* ---- gap-fill flashcards: type the key term for each definition, or the answer to a maths card ---- */
 const typeMaths = d => d.kind==="maths" && d.opt && !/higher mean/.test(d.opt);
@@ -1420,6 +1425,7 @@ function renderCard(){
     $("#againAll").onclick=newDeck; return;
   }
   if(cardMode==="gap") return renderGapCard();
+  if(cardMode==="mc") return renderMcCard();
   const d=BY_ID[deck[pos]], t=TMAP[d.t], st=status(d.id), gold=golds.has(d.id), due=isDue(d.id), dn=dueCount();
   const stLabel = st==="k"?'<span class="pill k">Known</span>':st==="l"?'<span class="pill l">Still learning</span>':'';
   area.innerHTML=`${filter!=="due"&&dn?`<div class="duebar">📅 <span><b>${dn} card${dn>1?"s":""}</b> due for review today</span><button class="btn" id="dueGo" style="padding:7px 14px">Review now</button></div>`:""}
@@ -1429,15 +1435,17 @@ function renderCard(){
         <div class="face front" aria-hidden="${flipped}">
           <div class="tag">${gold?'<span class="goldtag">✨ Golden card · 5× XP</span>':esc(t.name)+(due?' <span class="pill k" style="margin-left:6px">Review</span>':"")} <span class="muted">Card ${pos+1} of ${deck.length}</span></div>
           ${scHTML(d)}<div class="q ${d.sc?"has-sc":""}">${esc(d.q)}</div>${optsHTML(d)}
-          <div class="hint">Say or write your answer, then tap the card to check. ${stLabel}</div>
+          <div class="hint">Answer first, then check. ${stLabel}</div>
         </div>
         <div class="face back" aria-hidden="${!flipped}">
           <div class="tag">Answer <span class="muted">Card ${pos+1} of ${deck.length}</span></div>
           <div class="q-small">${d.sc?esc(d.sc)+" ":""}${esc(d.q)}</div>
           <div class="a">${fmtAnswer(d.a,d.id)}</div>${whyHTML(d)}
+          ${flipTyped?`<div class="flip-mine"><span class="muted">Your answer:</span> ${esc(flipTyped)}</div>`:""}
         </div>
       </div>
     </div>
+    ${flipped?"":`<div class="flip-commit"><input id="flipIn" class="search" autocomplete="off" placeholder="Type your answer (a few words is fine)…" value="${esc(flipTyped)}" aria-label="Type your answer before checking"><button class="btn ghost" id="flipSaid">🗣️ I said it out loud</button></div>`}
     <div class="card-actions">
       <div class="nav"><button id="prevC" aria-label="Previous card" ${pos===0?"disabled":""}>‹</button><button id="nextC" aria-label="Skip to next card">›</button></div>
       <span id="acts" style="display:contents">${actionsHTML()}</span>
@@ -1445,16 +1453,61 @@ function renderCard(){
   const dg=$("#dueGo"); if(dg) dg.onclick=()=>setFilter("due");
   const card=$("#card");
   card.onclick=flip; card.onkeydown=e=>{ if(e.key==="Enter"){e.preventDefault();flip();} };
-  $("#prevC").onclick=()=>{ if(pos>0){pos--;flipped=false;renderCard();} };
-  $("#nextC").onclick=()=>{ pos++;flipped=false;renderCard(); };
+  $("#prevC").onclick=()=>{ if(pos>0){pos--;flipped=false;flipSaid=false;flipTyped="";renderCard();} };
+  $("#nextC").onclick=()=>{ pos++;flipped=false;flipSaid=false;flipTyped="";renderCard(); };
+  const fi=$("#flipIn"); if(fi){ fi.oninput=()=>{ flipTyped=fi.value; const b=$("#flipBtn"); if(b) b.disabled=!flipReady(); };
+    fi.onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); flip(); } }; }
+  const fs=$("#flipSaid"); if(fs) fs.onclick=()=>{ flipSaid=true; flip(); };
   wireActions();
 }
+const flipReady = () => flipSaid || flipTyped.trim().length>=2;
+let mcCur=null;
+function renderMcCard(){
+  const area=$("#cardArea"), d=BY_ID[deck[pos]], t=TMAP[d.t], st=status(d.id), gold=golds.has(d.id), due=isDue(d.id), dn=dueCount();
+  if(mcPicked===null || !mcCur || mcCur.id!==d.id){ const m=mcFor(d, rngFrom("fc-"+d.id+"-"+pos)); mcCur={id:d.id, opts:m.opts, correct:m.correct}; }
+  const stLabel = st==="k"?'<span class="pill k">Known</span>':st==="l"?'<span class="pill l">Still learning</span>':'';
+  const done=mcPicked!==null, ok=done && mcPicked===mcCur.correct;
+  area.innerHTML=`${filter!=="due"&&dn?`<div class="duebar">📅 <span><b>${dn} card${dn>1?"s":""}</b> due for review today</span><button class="btn" id="dueGo" style="padding:7px 14px">Review now</button></div>`:""}
+    <div class="progressline"><i style="width:${pos/deck.length*100}%"></i></div>
+    <div class="quiz-q mc-card ${gold?"golden":""}" style="--c:${t.c}">
+      <div class="tag">${gold?'<span class="goldtag">✨ Golden card · 5× XP</span>':esc(t.name)+(due?' <span class="pill k" style="margin-left:6px">Review</span>':"")} <span class="muted">Card ${pos+1} of ${deck.length}</span> ${stLabel}</div>
+      ${scHTML(d)}<div class="q ${d.sc?"has-sc":""}">${esc(d.q)}</div>
+      <div class="opts">${mcCur.opts.map((o,i)=>`<button class="opt ${done?(i===mcCur.correct?"right":i===mcPicked?"wrong":"dim"):""}" data-mc="${i}" ${done?"disabled":""}><span class="k">${i+1}</span><span>${esc(o)}</span></button>`).join("")}</div>
+      ${done?(ok?`<div class="gapfb"><b style="color:var(--good)">✓ Correct!</b></div>${whyHTML(d)}`:`<div class="gapfb"><b style="color:var(--warn)">Not quite.</b> <span class="muted">Added to still learning.</span></div>${d.wrong?"":`<div class="why" style="background:var(--good-bg)"><b>Answer:</b> ${esc(d.a)}</div>`}${whyHTML(d)}`):""}
+    </div>
+    <div class="card-actions">
+      <div class="nav"><button id="prevC" aria-label="Previous card" ${pos===0?"disabled":""}>‹</button><button id="nextC" aria-label="Skip to next card">›</button></div>
+      ${done?`<button class="btn" id="mcNext">Next card<kbd>Enter</kbd></button>`:`<span class="muted" style="font-size:14px">Pick an answer: tap it or press 1–4</span>`}
+    </div>`;
+  const dg=$("#dueGo"); if(dg) dg.onclick=()=>setFilter("due");
+  area.querySelectorAll("[data-mc]").forEach(b=>b.onclick=()=>mcPick(+b.dataset.mc));
+  $("#prevC").onclick=()=>{ if(pos>0){ pos--; mcPicked=null; renderCard(); } };
+  $("#nextC").onclick=()=>{ pos++; mcPicked=null; renderCard(); };
+  const nx=$("#mcNext"); if(nx){ nx.onclick=mcNext; nx.focus({preventScroll:true}); }
+}
+function mcPick(i){
+  if(mcPicked!==null || !mcCur) return;
+  mcPicked=i; const ok=i===mcCur.correct, id=deck[pos];
+  const el=document.querySelector(`[data-mc="${i}"]`);
+  // record the result like the other modes, but stay on the card so they can read the answer
+  const wasDue=isDue(id); sessionRes[id]=ok?"k":"l";
+  if(!ok){ G.st.learnMarks=(G.st.learnMarks||0)+1; G.lcount[id]=(G.lcount[id]||0)+1; } else if((G.lcount[id]||0)>=3) G.flags.finally=1;
+  mark(id, ok?"k":"l"); trackMistake(id, ok);
+  deckXP+=answer({ok, el, mode:"cards", gold:golds.has(id), review:wasDue&&ok, topic:BY_ID[id].t});
+  deckCombo = ok ? deckCombo+1 : 0; if(deckCombo>deckBest) deckBest=deckCombo;
+  renderCard();
+  if(ok && !BY_ID[id].why) setTimeout(()=>{ if(cardMode==="mc" && mcPicked!==null && deck[pos]===id) mcNext(); }, 900);
+}
+function mcNext(){ if(mcPicked===null) return; pos++; mcPicked=null; renderCard(); }
 function actionsHTML(){ return flipped
   ? `<button class="btn warn" id="learnBtn">Still learning<kbd>1</kbd></button><button class="btn good" id="gotBtn">Got it<kbd>2</kbd></button>`
-  : `<button class="btn" id="flipBtn">Show answer<kbd>Space</kbd></button>`; }
+  : `<button class="btn" id="flipBtn" ${flipReady()?"":"disabled"}>Check my answer<kbd>Enter</kbd></button>`; }
 function wireActions(){ if(flipped){ $("#learnBtn").onclick=()=>rate("l"); $("#gotBtn").onclick=()=>rate("k"); } else $("#flipBtn").onclick=flip; }
 function flip(){
   const c=$("#card"); if(!c) return;
+  if(!flipped && !flipReady()){ const fi=$("#flipIn"); if(fi){ fi.focus(); fi.classList.remove("shake"); void fi.offsetWidth; fi.classList.add("shake"); fi.placeholder="Have a go first: type a few words, or tap 'I said it out loud'"; } return; }
+  if(!flipped){ const fc=$(".flip-commit"); if(fc) fc.remove();
+    const back=c.querySelector(".back"); if(back && flipTyped.trim() && !back.querySelector(".flip-mine")) back.insertAdjacentHTML("beforeend", `<div class="flip-mine"><span class="muted">Your answer:</span> ${esc(flipTyped)}</div>`); }
   const hadFocus = document.activeElement && ["flipBtn","gotBtn","learnBtn"].includes(document.activeElement.id);
   flipped=!flipped; c.classList.toggle("flipped",flipped);
   c.querySelector(".front").setAttribute("aria-hidden",flipped); c.querySelector(".back").setAttribute("aria-hidden",!flipped);
@@ -1466,10 +1519,11 @@ function rate(s){ const id=deck[pos], wasDue=isDue(id); sessionRes[id]=s; if(s==
   mark(id,s); trackMistake(id, s==="k");
   deckXP+=answer({ok:s==="k", el:$(s==="k"?"#gotBtn":"#learnBtn"), mode:"cards", gold:golds.has(id), review:wasDue&&s==="k", topic:BY_ID[id].t});
   deckCombo = s==="k" ? deckCombo+1 : 0; if(deckCombo>deckBest) deckBest=deckCombo;
-  pos++; flipped=false; renderCard(); const b=$("#flipBtn"); if(b) b.focus({preventScroll:true}); }
+  pos++; flipped=false; flipSaid=false; flipTyped=""; mcPicked=null; renderCard(); const b=$("#flipIn")||$("#flipBtn"); if(b) b.focus({preventScroll:true}); }
 document.addEventListener("keydown",e=>{
   if(tab!=="cards" || cardMode==="gap" || e.target.matches("input,textarea") || e.metaKey||e.ctrlKey||e.altKey) return;
   if(pos>=deck.length) return;
+  if(cardMode==="mc"){ if(mcPicked===null && /^[1-4]$/.test(e.key)){ e.preventDefault(); mcPick(+e.key-1); } else if(mcPicked!==null && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); mcNext(); } return; }
   if(e.key===" "){ e.preventDefault(); flip(); }
   else if(flipped && e.key==="1") rate("l");
   else if(flipped && e.key==="2") rate("k");
@@ -4218,7 +4272,7 @@ if(!TEACHER && !standalone() && (isIOS || "serviceWorker" in navigator)) $("#ins
 $("#installBtn").onclick=async()=>{ if(installEvt){ installEvt.prompt(); const c=await installEvt.userChoice.catch(()=>null); installEvt=null; if(c&&c.outcome==="accepted") $("#installBtn").hidden=true; } else showInstallHelp(); };
 
 if(TEACHER){ startTeacher(); }
-else { if(G.cardMode==="gap"){ cardMode="gap"; document.querySelectorAll("[data-cm]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.cm==="gap")); }
+else { if(G.cardMode==="gap"||G.cardMode==="flip"){ cardMode=G.cardMode; document.querySelectorAll("[data-cm]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.cm===cardMode)); }
   dateEggs(); checkStreak(); checkBadges(); save(); renderMeter(); renderChips(); newDeck(); renderQuiz(); renderHud(); renderArcade(); renderPlan(); renderEvents(); }
 
 $("#focusBtn").onclick=focusClick; if(G.focus && G.focus.end){ if(Date.now()>=G.focus.end) focusEnd(true); else { focusTimer=setInterval(focusTick,1000); focusBtnRender(); } }
