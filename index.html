@@ -670,6 +670,11 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .why{margin-top:8px;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,#E0A100 14%,var(--card));font-size:15px;line-height:1.4;color:var(--ink)}
 .flip-commit{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
 .flip-commit input{flex:1;min-width:200px}
+.flip-verdict{margin-top:8px;padding:8px 12px;border-radius:10px;font-weight:700;font-size:15px}
+.flip-verdict.yes{background:var(--good-bg);color:var(--good)}
+.flip-verdict.close{background:#FFF3C4;color:#7A5A00}
+.flip-verdict.no{background:var(--warn-bg);color:var(--warn)}
+mark.hit{background:#C8F2D9;color:inherit;border-radius:3px;padding:0 2px}
 .flip-mine{margin-top:10px;padding:8px 12px;border:1px dashed var(--line);border-radius:10px;font-size:15px}
 .mc-card .opts{margin-top:12px}
 .ord-done{margin:10px 0 12px;padding-left:28px;display:grid;gap:6px}
@@ -1310,8 +1315,41 @@ function setFilter(f){ filter=f; document.querySelectorAll("[data-filter]").forE
 document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>setFilter(b.dataset.filter)));
 $("#shuffleBtn").onclick=newDeck;
 let cardMode = "mc";
-let mcPicked = null, flipSaid = false, flipTyped = "";
-function setCardMode(m){ cardMode=m; G.cardMode=m; mcPicked=null; flipSaid=false; flipTyped=""; save(); document.querySelectorAll("[data-cm]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.cm===m)); newDeck(); }
+let mcPicked = null, flipSaid = false, flipTyped = "", flipVerdict = null, flipTries = 0;
+// fuzzy check of a typed answer against the card: key words matched, allowing small typos and word endings
+const STOPW = new Set("the a an and or of to in on at for with by from as is are was were be been it its this that these those their there they them he she his her we you your our not no but if so than then into out about over more most less can could would should will may might do does did has have had which who whom what when where why how such e g eg i e ie also only just very each other both all any some one two because being make makes made get got let set put use way own off too yes now new old".split(" ").filter(w=>!["new","old"].includes(w)));
+const SYN = {up:"increase",rise:"increase",rises:"increase",grow:"increase",grows:"increase",higher:"increase",increases:"increase",increased:"increase",bigger:"increase",
+  down:"decrease",fall:"decrease",falls:"decrease",drop:"decrease",drops:"decrease",lower:"decrease",decreases:"decrease",decreased:"decrease",smaller:"decrease",
+  remember:"recall",remembered:"recall",remembering:"recall",recalled:"recall",recalling:"recall",retrieve:"recall",retrieved:"recall",
+  stop:"block",stops:"block",prevent:"block",prevents:"block",blocks:"block",blocked:"block",
+  forget:"forgetting",forgot:"forgetting",info:"information",facts:"information",
+  copy:"imitate",copying:"imitate",imitating:"imitate",
+  change:"changing",changes:"changing",alter:"changing",
+  scared:"fear",frightened:"fear",afraid:"fear",
+  kids:"children",child:"children",people:"participants",
+  same:"same",identical:"same"};
+const canon = w => SYN[w] || w;
+const stemW = w => canon(w).replace(/(ing|ed|es|s|ly|al|tion|ment)$/,"");
+const keyWords = s => { const raw=String(s).replace(/[^A-Za-z0-9 ]/g," ").split(/\s+/).filter(Boolean);
+  return [...new Set(raw.filter(w=>/\d/.test(w) || /^[A-Z]{2,4}$/.test(w) || (w.length>=3 && !STOPW.has(w.toLowerCase()))).map(w=>w.toLowerCase()))]; };
+function wordHit(w, typedWords){ const a=stemW(w); return typedWords.some(t=>{ const b=stemW(t); if(a===b || w===t) return true;
+    if(t.length>=4 && w.startsWith(t)) return true;   /* short forms, e.g. "info" for "information" */
+    if(a.length>=5 && b.length>=5 && (a.startsWith(b.slice(0,5))||b.startsWith(a.slice(0,5)))) return true; return a.length>=5 && lev(a,b)<=1; }); }
+function checkTyped(typed, d){
+  const tw=String(typed).toLowerCase().replace(/[^a-z0-9 ]/g," ").split(/\s+/).filter(Boolean), aw=keyWords(d.a);
+  if(!aw.length) return {score: tw.length?1:0, hits:new Set()};
+  const term=TERM_BY_ID[d.id]; if(term && termMatch(typed, term)) return {score:1, hits:new Set(aw)};
+  const hits=new Set(aw.filter(w=>wordHit(w, tw)));
+  const need=Math.min(aw.length, 3);
+  let score=Math.min(1, hits.size/need);
+  // word order matters for pairs like proactive vs retroactive: penalise answers that reverse the key words
+  const seq=aw.filter(w=>hits.has(w)).map(w=>tw.findIndex(t=>wordHit(w,[t]))).filter(i=>i>=0);
+  let inv=0; for(let i=0;i<seq.length;i++) for(let j=i+1;j<seq.length;j++) if(seq[i]>seq[j]) inv++;
+  if(seq.length>=3 && inv>=seq.length-1) score=Math.min(score,0.5);
+  return {score, hits};
+}
+function markHits(text, hits){ return esc(text).replace(/[A-Za-z0-9]+/g, w => hits.has(w.toLowerCase()) ? `<mark class="hit">${w}</mark>` : w); }
+function setCardMode(m){ cardMode=m; G.cardMode=m; mcPicked=null; flipSaid=false; flipTyped=""; flipVerdict=null; flipTries=0; save(); document.querySelectorAll("[data-cm]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.cm===m)); newDeck(); }
 document.querySelectorAll("[data-cm]").forEach(b=>b.onclick=()=>setCardMode(b.dataset.cm));
 /* ---- gap-fill flashcards: type the key term for each definition, or the answer to a maths card ---- */
 const typeMaths = d => d.kind==="maths" && d.opt && !/higher mean/.test(d.opt);
@@ -1453,8 +1491,8 @@ function renderCard(){
   const dg=$("#dueGo"); if(dg) dg.onclick=()=>setFilter("due");
   const card=$("#card");
   card.onclick=flip; card.onkeydown=e=>{ if(e.key==="Enter"){e.preventDefault();flip();} };
-  $("#prevC").onclick=()=>{ if(pos>0){pos--;flipped=false;flipSaid=false;flipTyped="";renderCard();} };
-  $("#nextC").onclick=()=>{ pos++;flipped=false;flipSaid=false;flipTyped="";renderCard(); };
+  $("#prevC").onclick=()=>{ if(pos>0){pos--;flipped=false;flipTyped="";flipVerdict=null;flipTries=0;renderCard();} };
+  $("#nextC").onclick=()=>{ pos++;flipped=false;flipTyped="";flipVerdict=null;flipTries=0;renderCard(); };
   const fi=$("#flipIn"); if(fi){ fi.oninput=()=>{ flipTyped=fi.value; const b=$("#flipBtn"); if(b) b.disabled=!flipReady(); };
     fi.onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); flip(); } }; }
   wireActions();
@@ -1499,14 +1537,21 @@ function mcPick(i){
 }
 function mcNext(){ if(mcPicked===null) return; pos++; mcPicked=null; renderCard(); }
 function actionsHTML(){ return flipped
-  ? `<button class="btn warn" id="learnBtn">Still learning<kbd>1</kbd></button><button class="btn good" id="gotBtn">Got it<kbd>2</kbd></button>`
+  ? (flipVerdict==="yes" ? `<button class="btn good" id="gotBtn">✓ Next card<kbd>2</kbd></button>`
+    : flipVerdict==="no" ? `${flipTries<1?`<button class="btn ghost" id="retryBtn">Try again</button>`:""}<button class="btn warn" id="learnBtn">Still learning<kbd>1</kbd></button>`
+    : `<button class="btn warn" id="learnBtn">Still learning<kbd>1</kbd></button><button class="btn good" id="gotBtn">Got it<kbd>2</kbd></button>`)
   : `<button class="btn" id="flipBtn" ${flipReady()?"":"disabled"}>Check my answer<kbd>Enter</kbd></button>`; }
-function wireActions(){ if(flipped){ $("#learnBtn").onclick=()=>rate("l"); $("#gotBtn").onclick=()=>rate("k"); } else $("#flipBtn").onclick=flip; }
+function wireActions(){ if(flipped){ const l=$("#learnBtn"), g=$("#gotBtn"), r=$("#retryBtn"); if(l) l.onclick=()=>rate("l"); if(g) g.onclick=()=>rate("k");
+    if(r) r.onclick=()=>{ flipTries++; flipVerdict=null; flipTyped=""; flipped=false; renderCard(); const fi=$("#flipIn"); if(fi) fi.focus(); }; } else $("#flipBtn").onclick=flip; }
 function flip(){
   const c=$("#card"); if(!c) return;
   if(!flipped && !flipReady()){ const fi=$("#flipIn"); if(fi){ fi.focus(); fi.classList.remove("shake"); void fi.offsetWidth; fi.classList.add("shake"); fi.placeholder="Have a go first: type a few words"; } return; }
-  if(!flipped){ const fc=$(".flip-commit"); if(fc) fc.remove();
-    const back=c.querySelector(".back"); if(back && flipTyped.trim() && !back.querySelector(".flip-mine")) back.insertAdjacentHTML("beforeend", `<div class="flip-mine"><span class="muted">Your answer:</span> ${esc(flipTyped)}</div>`); }
+  if(!flipped && !flipVerdict){ const fc=$(".flip-commit"); if(fc) fc.remove();
+    const d=BY_ID[deck[pos]], r=checkTyped(flipTyped, d);
+    flipVerdict = r.score>=0.66 ? "yes" : r.score>=0.3 ? "close" : "no";
+    const back=c.querySelector(".back");
+    if(back){ const a=back.querySelector(".a"); if(a && r.hits.size) a.innerHTML=markHits(d.a, r.hits);
+      back.insertAdjacentHTML("beforeend", `<div class="flip-mine"><span class="muted">Your answer:</span> ${esc(flipTyped)}</div><div class="flip-verdict ${flipVerdict}">${flipVerdict==="yes"?"✓ That matches!":flipVerdict==="close"?"≈ Close: you got some of the key words (highlighted). Be honest: did you have it?":"✗ That doesn't match the answer yet."}</div>`); } }
   const hadFocus = document.activeElement && ["flipBtn","gotBtn","learnBtn"].includes(document.activeElement.id);
   flipped=!flipped; c.classList.toggle("flipped",flipped);
   c.querySelector(".front").setAttribute("aria-hidden",flipped); c.querySelector(".back").setAttribute("aria-hidden",!flipped);
@@ -1518,14 +1563,14 @@ function rate(s){ const id=deck[pos], wasDue=isDue(id); sessionRes[id]=s; if(s==
   mark(id,s); trackMistake(id, s==="k");
   deckXP+=answer({ok:s==="k", el:$(s==="k"?"#gotBtn":"#learnBtn"), mode:"cards", gold:golds.has(id), review:wasDue&&s==="k", topic:BY_ID[id].t});
   deckCombo = s==="k" ? deckCombo+1 : 0; if(deckCombo>deckBest) deckBest=deckCombo;
-  pos++; flipped=false; flipSaid=false; flipTyped=""; mcPicked=null; renderCard(); const b=$("#flipIn")||$("#flipBtn"); if(b) b.focus({preventScroll:true}); }
+  pos++; flipped=false; flipSaid=false; flipTyped=""; flipVerdict=null; flipTries=0; mcPicked=null; renderCard(); const b=$("#flipIn")||$("#flipBtn"); if(b) b.focus({preventScroll:true}); }
 document.addEventListener("keydown",e=>{
   if(tab!=="cards" || cardMode==="gap" || e.target.matches("input,textarea") || e.metaKey||e.ctrlKey||e.altKey) return;
   if(pos>=deck.length) return;
   if(cardMode==="mc"){ if(mcPicked===null && /^[1-4]$/.test(e.key)){ e.preventDefault(); mcPick(+e.key-1); } else if(mcPicked!==null && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); mcNext(); } return; }
   if(e.key===" "){ e.preventDefault(); flip(); }
-  else if(flipped && e.key==="1") rate("l");
-  else if(flipped && e.key==="2") rate("k");
+  else if(flipped && e.key==="1" && flipVerdict!=="yes") rate("l");
+  else if(flipped && e.key==="2" && flipVerdict!=="no") rate("k");
   else if(e.key==="ArrowRight"){ pos++; flipped=false; renderCard(); }
   else if(e.key==="ArrowLeft" && pos>0){ pos--; flipped=false; renderCard(); }
 });
