@@ -1445,7 +1445,7 @@ function renderCard(){
         </div>
       </div>
     </div>
-    ${flipped?"":`<div class="flip-commit"><input id="flipIn" class="search" autocomplete="off" placeholder="Type your answer (a few words is fine)…" value="${esc(flipTyped)}" aria-label="Type your answer before checking"><button class="btn ghost" id="flipSaid">🗣️ I said it out loud</button></div>`}
+    ${flipped?"":`<div class="flip-commit"><input id="flipIn" class="search" autocomplete="off" placeholder="Type your answer (a few words is fine)…" value="${esc(flipTyped)}" aria-label="Type your answer before checking"></div>`}
     <div class="card-actions">
       <div class="nav"><button id="prevC" aria-label="Previous card" ${pos===0?"disabled":""}>‹</button><button id="nextC" aria-label="Skip to next card">›</button></div>
       <span id="acts" style="display:contents">${actionsHTML()}</span>
@@ -1457,10 +1457,9 @@ function renderCard(){
   $("#nextC").onclick=()=>{ pos++;flipped=false;flipSaid=false;flipTyped="";renderCard(); };
   const fi=$("#flipIn"); if(fi){ fi.oninput=()=>{ flipTyped=fi.value; const b=$("#flipBtn"); if(b) b.disabled=!flipReady(); };
     fi.onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); flip(); } }; }
-  const fs=$("#flipSaid"); if(fs) fs.onclick=()=>{ flipSaid=true; flip(); };
   wireActions();
 }
-const flipReady = () => flipSaid || flipTyped.trim().length>=2;
+const flipReady = () => flipTyped.trim().length>=2;
 let mcCur=null;
 function renderMcCard(){
   const area=$("#cardArea"), d=BY_ID[deck[pos]], t=TMAP[d.t], st=status(d.id), gold=golds.has(d.id), due=isDue(d.id), dn=dueCount();
@@ -1505,7 +1504,7 @@ function actionsHTML(){ return flipped
 function wireActions(){ if(flipped){ $("#learnBtn").onclick=()=>rate("l"); $("#gotBtn").onclick=()=>rate("k"); } else $("#flipBtn").onclick=flip; }
 function flip(){
   const c=$("#card"); if(!c) return;
-  if(!flipped && !flipReady()){ const fi=$("#flipIn"); if(fi){ fi.focus(); fi.classList.remove("shake"); void fi.offsetWidth; fi.classList.add("shake"); fi.placeholder="Have a go first: type a few words, or tap 'I said it out loud'"; } return; }
+  if(!flipped && !flipReady()){ const fi=$("#flipIn"); if(fi){ fi.focus(); fi.classList.remove("shake"); void fi.offsetWidth; fi.classList.add("shake"); fi.placeholder="Have a go first: type a few words"; } return; }
   if(!flipped){ const fc=$(".flip-commit"); if(fc) fc.remove();
     const back=c.querySelector(".back"); if(back && flipTyped.trim() && !back.querySelector(".flip-mine")) back.insertAdjacentHTML("beforeend", `<div class="flip-mine"><span class="muted">Your answer:</span> ${esc(flipTyped)}</div>`); }
   const hadFocus = document.activeElement && ["flipBtn","gotBtn","learnBtn"].includes(document.activeElement.id);
