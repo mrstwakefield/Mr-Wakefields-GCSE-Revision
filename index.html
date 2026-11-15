@@ -1008,7 +1008,7 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
   </section>
 
   <footer class="foot">
-    <span>Your progress is saved in this browser only. <button class="linkbtn" id="backupLink" style="padding:0">Back it up</button> · <button class="linkbtn" id="tourLink" style="padding:0">📖 How it works</button> · <button class="linkbtn" id="parentLink" style="padding:0">👪 Parent mode</button></span>
+    <span>Your progress is saved in this browser only. <button class="linkbtn" id="backupLink" style="padding:0">Back it up</button> · <button class="linkbtn" id="tourLink" style="padding:0">📖 How it works</button> · <a class="linkbtn" href="guide.html" style="padding:0">🖨️ Guide for parents</a> · <button class="linkbtn" id="parentLink" style="padding:0">👪 Parent mode</button></span>
     <button class="btn ghost install-btn" id="installBtn" hidden>📲 Install as an app</button>
     <button class="linkbtn" id="resetBtn">Reset my progress</button>
   </footer>
@@ -4141,7 +4141,7 @@ function renderParent(){
       <h4>How many?</h4>
       <div class="seg" role="group" aria-label="Number of questions">${[5,10,20].map(n=>`<button aria-pressed="${pm.n===n}" data-pn="${n}">${n} questions</button>`).join("")}</div>
       <div class="card-actions"><button class="btn" id="pmGo" ${pm.topics.length?"":"disabled"}>Start testing</button></div>
-      <p class="muted" style="font-size:14px;margin:8px 0 0">Questions they find hardest come up first: ones they're still learning, have got wrong before, or are due to review.</p></div>`;
+      <p class="muted" style="font-size:14px;margin:8px 0 0">Questions they find hardest come up first: ones they're still learning, have got wrong before, or are due to review. <a href="guide.html">Printable guide for parents</a>.</p></div>`;
     area.querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>{ const k=b.dataset.pt; pm.topics=pm.topics.includes(k)?pm.topics.filter(x=>x!==k):[...pm.topics,k]; renderParent(); });
     area.querySelectorAll("[data-pk]").forEach(b=>b.onclick=()=>{ pm.kind=b.dataset.pk; renderParent(); });
     area.querySelectorAll("[data-pn]").forEach(b=>b.onclick=()=>{ pm.n=+b.dataset.pn; renderParent(); });
