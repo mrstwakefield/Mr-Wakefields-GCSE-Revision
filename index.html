@@ -516,6 +516,20 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .ext-lvl[aria-pressed="true"]{border-color:var(--good);background:var(--good-bg)}
 
 /* event banner */
+.nudge{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;background:var(--warn-bg);color:var(--ink);border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);border-radius:16px;padding:10px 14px;margin:0 0 14px;font-size:15px;line-height:1.35}
+.nudge[hidden]{display:none}
+.nudge .nd-ico{font-size:24px;flex:none}
+.nudge .nd-txt{flex:1;min-width:200px}
+.nudge .btn{padding:6px 12px;font-size:14px}
+.tour{max-width:440px;text-align:left}
+.tour .tour-ico{font-size:52px;text-align:center;line-height:1.1}
+.tour h3{text-align:center}
+.tour p,.tour li{color:var(--ink)!important;font-size:16px;line-height:1.5}
+.tour ul{padding-left:1.2em;margin:0 0 16px}
+.tour .tour-dots{display:flex;justify-content:center;gap:6px;margin:0 0 14px}
+.tour .tour-dots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.tour .tour-dots i.on{background:var(--ink)}
+.tour .tour-nav{display:flex;justify-content:space-between;gap:10px}
 .evbar{display:flex;flex-wrap:wrap;gap:8px;margin:-6px 0 14px}
 .evbar[hidden]{display:none}
 .ev{flex:1 1 260px;background:linear-gradient(90deg,#7B5BE0,#D6478F);color:#fff;border-radius:12px;padding:8px 14px;font-weight:700;font-size:15px;animation:evGlow 3s ease-in-out infinite}
@@ -897,6 +911,7 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
   </div>
 
   <button class="petstrip" id="petStrip" hidden></button>
+  <div class="nudge" id="nudge" role="status" hidden></div>
   <div class="evbar" id="evbar" hidden></div>
   <div class="plan" id="plan" aria-live="polite"></div>
 
@@ -969,7 +984,7 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
   </section>
 
   <footer class="foot">
-    <span>Your progress is saved in this browser only. <button class="linkbtn" id="backupLink" style="padding:0">Back it up</button> · <button class="linkbtn" id="parentLink" style="padding:0">👪 Parent mode</button></span>
+    <span>Your progress is saved in this browser only. <button class="linkbtn" id="backupLink" style="padding:0">Back it up</button> · <button class="linkbtn" id="tourLink" style="padding:0">📖 How it works</button> · <button class="linkbtn" id="parentLink" style="padding:0">👪 Parent mode</button></span>
     <button class="btn ghost install-btn" id="installBtn" hidden>📲 Install as an app</button>
     <button class="linkbtn" id="resetBtn">Reset my progress</button>
   </footer>
@@ -3044,8 +3059,8 @@ async function loadSave(code){
 }
 function wireSave(){
   const msg=$("#saveMsg");
-  $("#saveCopy").onclick=async()=>{ flag("backup"); const c=await makeSave(); try{ await navigator.clipboard.writeText(c); msg.textContent=`Save code copied (${c.length.toLocaleString()} characters). Paste it somewhere safe, like an email to yourself or your notes app.`; }catch(e){ $("#saveIn").value=c; $("#saveIn").select(); msg.textContent="Couldn't copy automatically. Your code is in the box: select it all and copy it."; } };
-  $("#saveFile").onclick=async()=>{ flag("backup"); const c=await makeSave(), a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([c],{type:"text/plain"})); a.download=`fount-save-level-${lvlFor(G.xp)}-${today()}.txt`; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); msg.textContent="Backup file downloaded."; };
+  $("#saveCopy").onclick=async()=>{ flag("backup"); markBackup(); const c=await makeSave(); try{ await navigator.clipboard.writeText(c); msg.textContent=`Save code copied (${c.length.toLocaleString()} characters). Paste it somewhere safe, like an email to yourself or your notes app.`; }catch(e){ $("#saveIn").value=c; $("#saveIn").select(); msg.textContent="Couldn't copy automatically. Your code is in the box: select it all and copy it."; } };
+  $("#saveFile").onclick=async()=>{ flag("backup"); markBackup(); const c=await makeSave(), a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([c],{type:"text/plain"})); a.download=`fount-save-level-${lvlFor(G.xp)}-${today()}.txt`; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); msg.textContent="Backup file downloaded."; };
   $("#saveLoad").onclick=()=>{ const v=$("#saveIn").value; if(v.trim()) loadSave(v); };
   $("#saveUp").onchange=e=>{ const f=e.target.files[0]; if(f) f.text().then(loadSave); };
 }
@@ -3209,7 +3224,7 @@ function parseReport(code){
 
 /* ================= TEACHER PAGE (hidden: index.html?teacher) ================= */
 // Only a SHA-256 hash of the passcode lives here. To change it, replace this hash.
-const TEACHER_HASH = "7a4a8b070142725a18b5d331858e69013cd0960681ad55e530e6fa4127aa85e0";
+const TEACHER_HASH = "ccae82e419401c6a9e526f456e8e71352ef42ac1d1538c660b3b5c8a9c746006";
 const T = {reports:new Map(), sort:{key:"name", dir:1}};
 const TKEY = "fount-teacher-codes";
 async function sha256hex(s){ const b=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join(""); }
@@ -4311,6 +4326,58 @@ function dateEggs(){
   if(lvlFor(G.xp)>=79 && !G.scrolls.handover) setTimeout(()=>foundScroll("handover"),1800);
 }
 
+/* ================= BACK-UP REMINDER ================= */
+// progress lives only in this browser, so nudge once a week to save a backup
+function markBackup(){ G.backupAt=today(); delete G.backupSnooze; save(); nudgeCheck(); }
+function nudgeCheck(){
+  const n=$("#nudge"); if(!n) return; if(TEACHER){ n.hidden=true; return; }
+  const t=today(), since=G.backupAt ? dayNum(t)-dayNum(G.backupAt) : 999, snoozed=G.backupSnooze && dayNum(t)-dayNum(G.backupSnooze)<3;
+  const due=(G.st.cards||0)>=40 && since>=7 && !snoozed;
+  n.hidden=!due; if(!due){ n.innerHTML=""; return; }
+  const pet=(G.pet&&G.pet.name)||"your lab rat";
+  n.innerHTML=`<span class="nd-ico" aria-hidden="true">💾</span><span class="nd-txt"><b>${G.backupAt?`It's been ${since} days since your last backup.`:"You haven't backed up yet."}</b> Your level ${lvlFor(G.xp)} progress, badges and ${esc(pet)} only live in this browser. It takes 30 seconds.</span>
+    <button class="btn" id="ndGo">Back up now</button><button class="linkbtn" id="ndLater">Not now</button>`;
+  $("#ndGo").onclick=()=>{ goTab("trophies","save"); setTimeout(()=>{ const b=$("#saveCopy"); if(b){ b.scrollIntoView({behavior:reduced()?"auto":"smooth",block:"center"}); b.focus({preventScroll:true}); } },60); };
+  $("#ndLater").onclick=()=>{ G.backupSnooze=t; save(); nudgeCheck(); };
+}
+
+/* ================= WELCOME TOUR + WHAT'S NEW ================= */
+const TOUR = [
+  ["🧠","Welcome to the Fount!","<p>Everything you need for GCSE Psychology, in one place. Every question comes from Mr Wakefield's booklets.</p><p>Here's a 30-second tour. You can find it again any time from <b>📖 How it works</b> at the bottom of the page.</p>"],
+  ["🗂️","Flashcards","<p>Pick your topics, then answer each card.</p><ul><li><b>Multiple choice</b>: press A–D or tap an answer.</li><li><b>🔤 Gap fill</b> and <b>✍️ Type it</b>: type your answer and it's marked for you. These earn <b>2× XP</b>.</li></ul><p>Cards you get wrong come back until you know them.</p>"],
+  ["📝","Quiz","<p>Quick quizzes, 9-mark practice, <b>🧩 Exam skills</b> (2× XP) and full <b>mock papers</b> for Paper 1 and Paper 2.</p><p>Parents can test you too in <b>👪 Parent mode</b>.</p>"],
+  ["🕹️","Arcade","<p>Boss battles, Psychle, Swipe Sort, Which Study?, Study Matcher, Spot the Flaw and more.</p><p>Check the <b>Game of the day</b> for bonus XP.</p>"],
+  ["🐀","Level up","<p>Every answer earns XP. Climb 80 levels, keep your 🔥 streak, collect badges and unlock themes.</p><p>Your lab rat, <b>Professor Squeaks</b>, grows as you revise and gets sleepy if you stay away.</p><p>Psst… there are secret scrolls hidden around the site. 📜</p>"],
+  ["💾","Keep your progress safe","<p>Your progress is saved in <b>this browser only</b>. Nothing goes online.</p><p>Back it up in the <b>💾 Save</b> tab every week or so, especially before you change phone or clear your browser.</p><p>Good luck. Keep right on! 💙</p>"],
+];
+// bump WHATS_NEW_V and edit WHATS_NEW when you add features; returning students see it once
+const WHATS_NEW_V = 1;
+const WHATS_NEW = ["🃏 Flashcards now ask you to answer: multiple choice, gap fill or type it (typed answers earn 2× XP)","🐀 Meet Professor Squeaks, your revision lab rat","🕹️ New arcade games: Psychle, Swipe Sort, Which Study? and hard-mode boss rematches","📝 Mock papers and 🧩 Exam skills in the Quiz tab","🎨 80 levels and loads of new themes to unlock","💾 A weekly reminder to back up your progress"];
+function showTour(steps, onDone){
+  let i=0; const o=document.createElement("div"); o.className="overlay";
+  const close=()=>{ o.remove(); document.removeEventListener("keydown",kd,true); if(onDone) onDone(); };
+  const draw=()=>{ const [ico,title,body]=steps[i], last=i===steps.length-1;
+    o.innerHTML=`<div class="levelup tour" role="dialog" aria-modal="true" aria-labelledby="tourH"><div class="tour-ico" aria-hidden="true">${ico}</div><h3 id="tourH">${title}</h3>${body}
+      ${steps.length>1?`<div class="tour-dots" aria-label="Step ${i+1} of ${steps.length}">${steps.map((_,j)=>`<i class="${j===i?"on":""}"></i>`).join("")}</div>`:""}
+      <div class="tour-nav">${i>0?`<button class="btn ghost" id="tourBack">Back</button>`:`<button class="linkbtn" id="tourSkip">${steps.length>1?"Skip tour":""}</button>`}<button class="btn" id="tourNext">${last?"Let's go!":"Next"}</button></div></div>`;
+    $("#tourNext").onclick=()=>{ last ? close() : (i++, draw()); };
+    const b=$("#tourBack"); if(b) b.onclick=()=>{ i--; draw(); };
+    const s=$("#tourSkip"); if(s) s.onclick=close;
+    $("#tourNext").focus(); };
+  const kd=e=>{ if(e.key==="Escape"){ e.preventDefault(); e.stopPropagation(); close(); } else if(e.key==="ArrowRight"){ e.stopPropagation(); $("#tourNext").click(); } else if(e.key==="ArrowLeft" && i>0){ e.stopPropagation(); i--; draw(); } else if(e.key!=="Tab"&&e.key!=="Enter"&&e.key!==" ") e.stopPropagation(); };
+  document.addEventListener("keydown",kd,true);
+  o.onclick=e=>{ if(e.target===o) close(); };
+  document.body.appendChild(o); draw();
+}
+function welcomeCheck(){
+  if(TEACHER || /(^|[?&#])parent\b/i.test(location.search+location.hash)) return;
+  const fresh=!G.xp && !(G.st.cards||0);
+  if(!G.toured && fresh){ G.toured=1; G.newsSeen=WHATS_NEW_V; save(); setTimeout(()=>showTour(TOUR),400); return; }
+  if((G.newsSeen||0)<WHATS_NEW_V){ G.toured=1; G.newsSeen=WHATS_NEW_V; save();
+    setTimeout(()=>showTour([["✨","What's new",`<ul>${WHATS_NEW.map(x=>`<li>${x}</li>`).join("")}</ul><p class="muted" style="font-size:14px">Want the full tour? Tap <b>📖 How it works</b> at the bottom of the page.</p>`]]),500); }
+}
+$("#tourLink").onclick=()=>showTour(TOUR);
+
 /* ================= INSTALL AS AN APP (PWA) ================= */
 if("serviceWorker" in navigator && location.protocol.startsWith("http")) addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 let installEvt=null;
@@ -4340,7 +4407,7 @@ $("#focusBtn").onclick=focusClick; if(G.focus && G.focus.end){ if(Date.now()>=G.
 $("#parentLink").onclick=()=>{ goTab("quiz"); setQuizMode("parent"); $("#parentArea").scrollIntoView({behavior:reduced()?"auto":"smooth"}); };
 if(!TEACHER && /(^|[?&#])parent\b/i.test(location.search+location.hash)){ goTab("quiz"); setQuizMode("parent"); }
 $("#petStrip").onclick=()=>{ goTab("trophies","progress"); };
-if(!TEACHER) petCheck();
+if(!TEACHER){ petCheck(); nudgeCheck(); welcomeCheck(); }
 </script>
 </body>
 </html>
