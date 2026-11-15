@@ -659,6 +659,12 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .race-sq{aspect-ratio:1;display:grid;place-items:center;border-radius:8px;background:var(--soft);border:2px solid var(--line);font-size:clamp(14px,1.6vw,22px)}
 .race-sq.up{background:#DDF3E8}.race-sq.down{background:#FDE3D3}.race-sq.fin{background:#FFF3C4;border-color:#E0A100}
 .race-tok{font-style:normal;width:80%;height:80%;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;background:hsl(var(--h) 70% 45%);box-shadow:0 2px 6px rgba(0,0,0,.25);animation:bump .3s}
+.gotd-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:linear-gradient(90deg,#FFF3C4,#FFE7A0);border:2px solid #E0A100;border-radius:16px;padding:12px 16px;margin-bottom:14px;color:#3A2A00}
+.gotd-bar>div{flex:1;min-width:200px;display:flex;flex-direction:column;gap:2px}
+.gotd-bar span{font-size:14px}
+.gotd-ico{font-size:30px}
+.mode.gotd{outline:3px solid #E0A100;outline-offset:2px}
+.gotd-tag{background:#E0A100!important;color:#3A2A00!important}
 .ord-done{margin:10px 0 12px;padding-left:28px;display:grid;gap:6px}
 .ord-done li{background:var(--good-bg);border-radius:10px;padding:8px 12px;font-size:16px}
 .ord-done li.ord-empty{background:var(--soft);min-height:38px;border:2px dashed var(--line)}
@@ -1691,6 +1697,7 @@ function answer({ok, el, mode, gold, x2, review, topic, boss}){
   const base = mode==="quiz" ? (ok?15:4) : mode==="arcade" ? (ok?6:1) : (ok?10:3);
   let mult = (ok ? comboMult() : 1) * ((x2 || topic==="Exam skills") ? 2 : 1) * eventMult(topic, boss);   // exam skills always earn double XP
   if(gold && ok){ mult*=5; G.st.gold++; }
+  if(mode==="arcade") mult*=gotdMult();   // game of the day: double XP
   const xp=Math.round(base*mult)+(review?5:0);
   G.hist[t]=(G.hist[t]||0)+1;
   if(topic && TMAP[topic]){ G.tacc=G.tacc||{}; const ta=G.tacc[topic]=G.tacc[topic]||[0,0]; ta[1]++; if(ok) ta[0]++; }   // per-topic accuracy for Weak spots
@@ -1950,21 +1957,26 @@ const MODES = {
   match:{icon:"🔗", name:"Study Matcher", c:"#9A6324", hot:"2× XP", desc:"Match each study to its aim, procedure, finding or conclusion, against the clock. Pick a round type or play them all mixed."},
   order:{icon:"🔢", name:"Put it in Order", c:"#9A6324", hot:"2× XP", desc:"Tap the steps in the right order: synaptic transmission, MSM, CBT, sampling, AMRC, TDEE and more. 6 rounds."},
 };
+const GOTD_POOL=["exam","terms","maths","blitz","surv","flaw","order","match","swipe","which","boss"];
+const GOTD_ORDER = shuffleR(GOTD_POOL, rngFrom("gotd-order-v1"));
+function gotd(){ const n=dayNum(today()); return GOTD_ORDER[((n%GOTD_ORDER.length)+GOTD_ORDER.length)%GOTD_ORDER.length]; }
+const gotdMult = () => (typeof arc!=="undefined" && arc.mode===gotd()) ? 2 : 1;
 const arc={phase:"menu", mode:null, items:[], base:[], bi:0, i:0, score:0, right:0, lives:3, end:0, qEnd:0, timer:null, cur:null, locked:false, log:[], t0:0, xp:0, best:false, tries:0, hints:0};
 const dailyNo = () => dayNum(today())-dayNum("2026-01-01")+1;
 const ROUND10 = {exam:1, terms:1, maths:1, daily:1};
 const BOSS_HP=15;
 const BOSSES = {
-  "Memory":{icon:"🌀", name:"The Forgetting Fog", say:"What were we talking about again? Exactly."},
-  "Perception":{icon:"🎩", name:"The Illusionist", say:"Things aren't always what they seem…"},
-  "Development":{icon:"🧸", name:"Piaget's Puzzlemaster", say:"Not quite ready for that stage, are we?"},
-  "RM":{icon:"🧪", name:"The Confounding Variable", say:"You didn't control for ME!"},
-  "Social influence":{icon:"👮", name:"The Authority Figure", say:"The experiment requires that you continue."},
-  "Language, thought & communication":{icon:"🎭", name:"The Silent Mime", say:"…(folds arms in a closed posture)…"},
-  "Brain & neuropsychology":{icon:"🧠", name:"The Lobe Lord", say:"Your neurons are not firing today."},
-  "Psychological problems":{icon:"🌧️", name:"The Gloom", say:"Negative thoughts… so many negative thoughts…"},
-  "Exam skills":{icon:"📋", name:"The Chief Examiner", say:"That's a Level 1 answer at best."},
+  "Memory":{icon:"🌀", name:"The Forgetting Fog", says:["Your memory is short-term at best!","Rehearse all you like, it's already decayed.","That answer's been displaced. Try again."]},
+  "Perception":{icon:"🎩", name:"The Illusionist", says:["Things aren't always what they seem…","Your depth cues are deceiving you.","Ha! Fooled you, just like the Müller-Lyer."]},
+  "Development":{icon:"🧸", name:"Piaget's Puzzlemaster", says:["Not quite ready for that stage, are we?","Still a bit egocentric, I see.","Even naughty teddy saw that coming."]},
+  "RM":{icon:"🧪", name:"The Confounding Variable", says:["You didn't control for ME!","Your hypothesis is looking a bit null.","Correlation isn't causation, and that wasn't an answer."]},
+  "Social influence":{icon:"👮", name:"The Authority Figure", says:["The experiment requires that you continue.","It is absolutely essential that you get the next one right.","Everyone else got that. Just saying."]},
+  "Language, thought & communication":{icon:"🎭", name:"The Silent Mime", says:["…(folds arms in a closed posture)…","…(raises one eyebrow)…","…(mimes a waggle dance in the wrong direction)…"]},
+  "Brain & neuropsychology":{icon:"🧠", name:"The Lobe Lord", says:["Your neurons are not firing today.","That answer never made it across the synapse.","Fight or flight? You should probably fly."]},
+  "Psychological problems":{icon:"📕", name:"The ICD", says:["That answer doesn't meet the diagnostic criteria.","Symptoms for under two weeks? Not convinced.","Time to challenge that answer, CBT-style."]},
+  "Exam skills":{icon:"📋", name:"The Chief Examiner", says:["That's a Level 1 answer at best.","Where's your evaluation?","Term, Define, Evidence… and you forgot Explain."]},
 };
+const bossLine = B => B.says[Math.floor(Math.random()*B.says.length)];
 function bestLabel(k){
   const st=G.st, dd=G.daily[today()];
   return k==="blitz" ? (st.blitz?`Best: ${st.blitz.toLocaleString()} points`:"No score yet")
@@ -1986,12 +1998,16 @@ function renderArcade(){
   const area=$("#arcArea");
   if(arc.phase==="menu"){
     const dd=G.daily[today()], n=pool().length;
-    area.innerHTML=`<div class="modes">${Object.entries(MODES).map(([k,m])=>{
+    const gm0=MODES[gotd()];
+    area.innerHTML=`<div class="gotd-bar"><span class="gotd-ico">🌟</span><div><b>Game of the day: ${gm0.icon} ${esc(gm0.name)}</b><span>Double XP on every answer and the end-of-game bonus, today only. A new game tomorrow!</span></div><button class="btn" id="gotdGo">Play</button></div>
+      <div class="modes">${Object.entries(MODES).map(([k,m])=>{
       const dis = ((k==="blitz"||k==="surv") && !n) || (k==="fix" && !mistakeCount());
-      const tag = k==="daily"&&!(dd&&dd.done) ? '<span class="new">NEW</span>' : m.hot ? `<span class="new" style="background:#9A6324">${m.hot}</span>` : "";
-      return `<button class="mode ${k==="exam"?"featured":""}" style="--c:${m.c}" data-mode="${k}" ${dis?"disabled":""}>${tag}<span class="mi">${m.icon}</span><h3>${m.name}</h3><p>${m.desc}</p><span class="best">${bestLabel(k)}</span></button>`; }).join("")}</div>
+      const g=k===gotd();
+      const tag = g ? `<span class="new gotd-tag">🌟 Game of the day · ${m.hot?"4× XP":"2× XP"}</span>` : k==="daily"&&!(dd&&dd.done) ? '<span class="new">NEW</span>' : m.hot ? `<span class="new" style="background:#9A6324">${m.hot}</span>` : "";
+      return `<button class="mode ${k==="exam"?"featured":""} ${g?"gotd":""}" style="--c:${m.c}" data-mode="${k}" ${dis?"disabled":""}>${tag}<span class="mi">${m.icon}</span><h3>${m.name}</h3><p>${m.desc}</p><span class="best">${bestLabel(k)}</span></button>`; }).join("")}</div>
       <p class="arc-note">Blitz, Survival and Key Terms use the topics you've selected above${n?` (${n} questions)`:". Pick at least one"}. Wrong answers go into your still-learning pile. Use keys 1 to 4 to answer quickly.</p>`;
     area.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>startArc(b.dataset.mode));
+    $("#gotdGo").onclick=()=>startArc(gotd());
     return;
   }
   if(arc.phase==="bossmenu"){
@@ -2049,7 +2065,7 @@ function renderArcade(){
   }
   if(arc.mode==="boss"){ const B=BOSSES[arc.boss], win=arc.hp<=0;
     head = win ? `<div class="boss-ico big">${B.icon}</div><p class="score" style="font-size:48px">Victory!</p><p class="muted">You defeated ${esc(B.name)}${arc.lives===3?" without losing a life 👑":` with ${arc.lives} li${arc.lives>1?"ves":"fe"} left`}.</p>`
-      : `<div class="boss-ico big" style="filter:grayscale(.2)">${B.icon}</div><p class="score" style="font-size:48px">Defeated</p><p class="muted">${esc(B.name)} survived with ${arc.hp}/${BOSS_HP} HP. “${esc(B.say)}”</p>`; }
+      : `<div class="boss-ico big" style="filter:grayscale(.2)">${B.icon}</div><p class="score" style="font-size:48px">Defeated</p><p class="muted">${esc(B.name)} survived with ${arc.hp}/${BOSS_HP} HP. “${esc(bossLine(B))}”</p>`; }
   area.innerHTML=`<div class="empty">${arc.best?`<div class="newbest">${arc.mode==="boss"?"⚔️ BOSS DEFEATED":"🏆 NEW PERSONAL BEST"}</div>`:""}${arc.mode==="boss"?"":`<h3>${m.icon} ${m.name} over</h3>`}${head}
     <p style="margin-top:10px">+${arc.xp} XP earned${arc.mode==="daily"?". Next Daily 10 in "+untilMidnight()+".":""}</p>${extra}
     ${arc.mode!=="daily"?`<button class="btn" id="arcAgain">${arc.mode==="boss"?(arc.hp<=0?"Fight again":"Rematch"):"Play again"}</button> `:""}<button class="btn ghost" id="arcMenu">${arc.mode==="boss"?"All bosses":"Arcade menu"}</button>
@@ -2154,7 +2170,7 @@ function arcPick(i){
   else {
     if(arc.mode==="blitz"){ arc.end-=3000; floater("−3s", $("#arcTime"), "meh"); }
     if(arc.mode==="surv"||arc.mode==="boss") arc.lives--;
-    if(arc.mode==="boss"){ const say=$("#bossSay"); if(say) say.textContent=`“${BOSSES[arc.boss].say}”`; const a=$("#arcArea"); a.classList.remove("hurt"); void a.offsetWidth; a.classList.add("hurt"); const hs=document.querySelector(".bossbar .hearts"); if(hs) hs.textContent="❤️".repeat(Math.max(0,arc.lives))+"🖤".repeat(3-Math.max(0,arc.lives)); }
+    if(arc.mode==="boss"){ const say=$("#bossSay"); if(say) say.textContent=`“${bossLine(BOSSES[arc.boss])}”`; const a=$("#arcArea"); a.classList.remove("hurt"); void a.offsetWidth; a.classList.add("hurt"); const hs=document.querySelector(".bossbar .hearts"); if(hs) hs.textContent="❤️".repeat(Math.max(0,arc.lives))+"🖤".repeat(3-Math.max(0,arc.lives)); }
     if(i===-1) floater("Time's up!", btns[arc.cur.correct], "meh");
   }
   const wait = ok ? 380 : (d.sc ? 2200 : 1300);
@@ -2221,7 +2237,7 @@ function arcFinish(){
     if(win && arc.lives===1) G.flags.comeback=1;
     if(!win && arc.lives<=0 && arc.log.length<=3) G.flags.ouch=1;
     if(win){ const t=today(); G.bossDays={[t]:[...new Set([...(G.bossDays[t]||[]), arc.boss])]}; if(G.bossDays[t].length>=3) G.flags.bossrush=1; } }
-  arc.xp+=bonus; addXP(bonus,false); checkPal();
+  bonus*=gotdMult(); arc.xp+=bonus; addXP(bonus,false); checkPal();
   if(arc.best || (arc.mode==="daily" && G.daily[today()].score>=8)){ confetti(200); sfx("lvl"); }
   checkBadges(); save(); renderArcade();
 }
@@ -2361,7 +2377,7 @@ function gmFinish(){
   if(arc.phase!=="game") return; arc.phase="gdone";
   const key=gm.kind==="flaw"?"flawBest":"orderBest", best=gm.score>(G.st[key]||0);
   if(best) G.st[key]=gm.score;
-  const bonus=(10+gm.score*3)*2; gm.xp+=bonus; addXP(bonus,false);
+  const bonus=(10+gm.score*3)*2*gotdMult(); gm.xp+=bonus; addXP(bonus,false);
   if(best && gm.score>0){ confetti(150); sfx("lvl"); }
   checkBadges(); save();
   const m=MODES[gm.kind], missed=gm.log.filter(x=>!x.ok);
@@ -2448,7 +2464,7 @@ function mtFinish(quit){
   const prev=G.st.mtBest[mt.mode], best=!quit && (!prev || t<prev);
   if(best) G.st.mtBest[mt.mode]=t;
   if(!quit && mt.mode!=="mixed" && (!G.st.matchBest || t<G.st.matchBest)) G.st.matchBest=t;
-  const pairs=mt.rounds.length*5, bonus=quit?0:Math.max(10, Math.round(pairs*8-t))*2; mt.xp+=bonus; addXP(bonus,false);
+  const pairs=mt.rounds.length*5, bonus=quit?0:Math.max(10, Math.round(pairs*8-t))*2*gotdMult(); mt.xp+=bonus; addXP(bonus,false);
   if(best){ confetti(150); sfx("lvl"); }
   checkBadges(); save();
   const m=MT_MODES[mt.mode];
@@ -2585,7 +2601,7 @@ document.addEventListener("keydown",e=>{ if(arc.phase!=="swipe" || !$("#swCard")
 function swFinish(){
   if(arc.phase!=="swipe") return; clearInterval(sw.timer); arc.phase="swdone";
   G.st.swipe=G.st.swipe||{}; const best=sw.score>(G.st.swipe[sw.deck]||0); if(best) G.st.swipe[sw.deck]=sw.score;
-  const bonus=(5+sw.score*2)*2; sw.xp+=bonus; addXP(bonus,false); if(best&&sw.score>0){ confetti(150); sfx("lvl"); }
+  const bonus=(5+sw.score*2)*2*gotdMult(); sw.xp+=bonus; addXP(bonus,false); if(best&&sw.score>0){ confetti(150); sfx("lvl"); }
   checkBadges(); save();
   const d=SWIPE[sw.deck];
   $("#arcArea").innerHTML=`<div class="empty">${best&&sw.score>0?'<div class="newbest">🏆 NEW PERSONAL BEST</div>':""}<h3>👉 ${esc(d[0])}</h3><p class="score">${sw.score}</p><p class="muted">${sw.wrong} wrong · +${sw.xp} XP (2× exam skills XP)</p>
@@ -2646,7 +2662,7 @@ function wsPick(i, btn){
 function wsFinish(){
   if(arc.phase!=="which") return; arc.phase="wdone";
   const best=ws.score>(G.st.whichBest||0); if(best) G.st.whichBest=ws.score;
-  const bonus=(10+ws.score*2)*2; ws.xp+=bonus; addXP(bonus,false); if(best&&ws.score>0){ confetti(150); sfx("lvl"); }
+  const bonus=(10+ws.score*2)*2*gotdMult(); ws.xp+=bonus; addXP(bonus,false); if(best&&ws.score>0){ confetti(150); sfx("lvl"); }
   checkBadges(); save();
   const missed=ws.log.filter(x=>!x.ok);
   $("#arcArea").innerHTML=`<div class="empty">${best&&ws.score>0?'<div class="newbest">🏆 NEW PERSONAL BEST</div>':""}<h3>🕵️ Which Study? over</h3><p class="score">${ws.score}/40</p><p class="muted">+${ws.xp} XP (2× exam skills XP)</p>
