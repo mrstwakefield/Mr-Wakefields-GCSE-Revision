@@ -2702,7 +2702,7 @@ function petMood(){
 }
 const PET_MSG = {
   new:"Meet your new lab rat! Answer questions to help him grow.",
-  ecstatic:"is doing a happy dance 🎉 You smashed your daily goal!",
+  ecstatic:"is dancing! 🎉 You smashed your daily goal.",
   happy:"is happy you're revising today. Hit your goal to make him dance!",
   waiting:"is waiting for you. Answer a few questions to keep him happy.",
   sleepy:"is getting sleepy… 😴 He misses you. Revise today to perk him up.",
@@ -2770,7 +2770,7 @@ function petCheck(){
   if(TEACHER) return; const p=petInit(), st=petStage(), m=petMood();
   if(st>p.stage){ p.stage=st; save(); setTimeout(()=>{ toast("🐀",`${p.name} grew into a ${PET_STAGES[st][1].toLowerCase()}!`,st>=5?"He's wearing a graduation cap. Legendary.":st>=4?"Look, glasses! So wise.":st>=3?"He's got his own lab coat now.":"Keep revising to help him grow.",true); confetti(100); },600); }
   if((p.mood==="sleepy"||p.mood==="asleep") && (m==="happy"||m==="ecstatic")) setTimeout(()=>toast("🐀",`${p.name} woke up!`,"He's so happy to see you revising again.",true),400);
-  if(p.mood!=="ecstatic" && m==="ecstatic" && p.mood) setTimeout(()=>toast("🐀",`${p.name} is doing a happy dance!`,"Daily goal smashed. 🧀🧀🧀",true),800);
+  if(p.mood!=="ecstatic" && m==="ecstatic" && p.mood) setTimeout(()=>toast("🐀",`${p.name} is dancing!`,"Daily goal smashed. 🧀🧀🧀",true),800);
   if(p.mood!==m){ p.mood=m; save(); }
   petHud();
 }
