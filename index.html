@@ -4272,7 +4272,7 @@ function scrollBoxHTML(){
     </div>`;
 }
 function themeCard(th){ const open=themeOpen(th), on=(G.skin||"")===th.k;
-  return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b>${th.note?`<span class="th-note">${esc(th.note)}</span>`:""}<span>${open?(on?"✓ In use":"Tap to use"):th.scroll?"🔒 "+esc(SEALS[th.k].text):"🔒 Level "+th.lvl}</span></button>`; }
+  return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b><span>${open?(on?"✓ In use":"Tap to use"):th.scroll?"🔒 "+esc(SEALS[th.k].text):"🔒 Level "+th.lvl}</span></button>`; }
 function themesHTML(){
   const mine=THEMES.filter(th=>themeOpen(th)), sealed=THEMES.filter(th=>th.scroll && G.scrolls[th.scroll] && !themeOpen(th)), next=THEMES.filter(th=>!th.secret && !themeOpen(th));
   const hiddenSecrets=THEMES.filter(th=>th.secret && !themeOpen(th) && !(th.scroll && G.scrolls[th.scroll])).length;
