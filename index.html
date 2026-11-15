@@ -826,11 +826,13 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 :root[data-skin="lineup"],:root[data-skin="lineup"] body{overflow-x:clip}
 :root[data-skin="lineup"] .top .meter *{color:#D5D9DF!important}
 :root[data-skin="lineup"] .top h1 span:not(.h1t),:root[data-skin="lineup"] .top .muted,:root[data-skin="lineup"] .top b,:root[data-skin="lineup"] .top .meter{color:#E3E6EA}
-:root[data-skin="lanyard"]{--paper:#14213D;--card:#1C2D52;--ink:#E8ECF5;--muted:#A9B4CF;--line:#2B3F6B;--soft:#24375F;--good:#A3C63A;--good-bg:#2C3A1E;--warn:#FF8A8A;--warn-bg:#4A1E26;color-scheme:dark}
-:root[data-skin="lanyard"] body{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2230%22%20height%3D%22110%22%3E%3Crect%20width%3D%2230%22%20height%3D%22110%22%20fill%3D%22%23A3C63A%22/%3E%3Crect%20x%3D%220%22%20width%3D%221.5%22%20height%3D%22110%22%20fill%3D%22%238FB02E%22/%3E%3Crect%20x%3D%2228.5%22%20width%3D%221.5%22%20height%3D%22110%22%20fill%3D%22%238FB02E%22/%3E%3Ctext%20x%3D%2215%22%20y%3D%2255%22%20transform%3D%22rotate%2890%2015%2055%29%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%20font-family%3D%22Arial%2CHelvetica%2Csans-serif%22%20font-weight%3D%22800%22%20font-size%3D%2215%22%20letter-spacing%3D%222%22%20fill%3D%22%23D9DDCF%22%3ESTAFF%3C/text%3E%3C/svg%3E");background-repeat:repeat-y;background-size:30px 110px;background-position:0 0;background-attachment:fixed}
-@media (max-width:700px){:root[data-skin="lanyard"] body{background-image:linear-gradient(90deg,#A3C63A 0,#A3C63A 9px,transparent 9px)}}
+:root[data-skin="lanyard"]{--paper:#E9F1CF;--card:#FBFDF3;--ink:#1F2A10;--muted:#5A6B3A;--line:#D3E0A8;--soft:#E1ECBE;--good:#4F7410;--good-bg:#E0EDC0;--warn:#B4531B;--warn-bg:#FBE7D9;color-scheme:light}
+:root[data-skin="lanyard"],:root[data-skin="lanyard"] body{overflow-x:clip}
+:root[data-skin="lanyard"] .top{position:relative;background:#A3C63A;box-shadow:0 0 0 100vmax #A3C63A;clip-path:inset(-100vmax -100vmax 0 -100vmax);padding-bottom:48px;margin-bottom:22px}
+:root[data-skin="lanyard"] .top::after{content:"";position:absolute;left:-100vmax;right:-100vmax;bottom:0;height:30px;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22120%22%20height%3D%2230%22%3E%3Crect%20width%3D%22120%22%20height%3D%2230%22%20fill%3D%22%23A3C63A%22/%3E%3Crect%20width%3D%22120%22%20height%3D%222%22%20fill%3D%22%238FB02E%22/%3E%3Crect%20y%3D%2228%22%20width%3D%22120%22%20height%3D%222%22%20fill%3D%22%238FB02E%22/%3E%3Ctext%20x%3D%2260%22%20y%3D%2216%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%20font-family%3D%22Arial%2CHelvetica%2Csans-serif%22%20font-weight%3D%22800%22%20font-size%3D%2216%22%20letter-spacing%3D%223%22%20fill%3D%22%23D9DDCF%22%3ESTAFF%3C/text%3E%3C/svg%3E") repeat-x;background-size:120px 30px}
+:root[data-skin="lanyard"] .top .h1t{color:#1F2A10}
+:root[data-skin="lanyard"] .top h1 span:not(.h1t),:root[data-skin="lanyard"] .top .meter *{color:#2E3D14!important}
 :root[data-skin="lanyard"] .h1t::after{content:" 🪪"}
-:root[data-skin="lanyard"] .btn.good{color:#14213D}
 :root[data-skin="greens"]{--paper:#EEF6E4;--card:#FFFFFF;--ink:#1E3312;--muted:#5A7048;--line:#D3E6C0;--soft:#E2EFD3;--good:#3F8A12;--good-bg:#DDF0CC;--warn:#B4531B;--warn-bg:#FBE7D9;color-scheme:light}
 :root[data-skin="greens"] .h1t::after{content:" 🥦🥕"}
 :root[data-skin="volts"]{--paper:#101014;--card:#1A1A22;--ink:#FFF7D6;--muted:#BDB59A;--line:#2E2E3A;--soft:#23232D;--good:#FFD60A;--good-bg:#3A3410;--warn:#FF6B4A;--warn-bg:#3E1E16;color-scheme:dark}
@@ -1835,7 +1837,7 @@ const THEMES = [
   {k:"bullring", name:"🐂 Bullring", lvl:1, secret:true, scroll:"blues", sw:["#143A86","#D5DAE2","#C68A4A"]},
   {k:"inner", name:"🤫 Inner Circle", lvl:1, secret:true, scroll:"title", sw:["#2E0B18","#F5E9D0","#D4AF37"]},
   {k:"lineup", name:"🤐 Silent Line-up", lvl:1, secret:true, scroll:"stan", sw:["#3E434A","#FFFFFF","#F2C230"]},
-  {k:"lanyard", name:"🪪 Mr W's Lanyard", lvl:1, secret:true, scroll:"handover", sw:["#14213D","#E8ECF5","#A3C63A"]},
+  {k:"lanyard", name:"🪪 Mr W's Lanyard", lvl:1, secret:true, scroll:"handover", sw:["#A3C63A","#1F2A10","#D9DDCF"]},
   {k:"greens", name:"🥦 Eat Your Greens", lvl:1, secret:true, scroll:"wakefield", sw:["#EEF6E4","#1E3312","#4C9A1C"]},
   {k:"volts", name:"⚡ 450 Volts", lvl:1, secret:true, scroll:"milgram", sw:["#101014","#FFF7D6","#FFD60A"]},
   {k:"nap", name:"😴 Nap Time", lvl:1, secret:true, scroll:"ring", sw:["#1A1830","#E9E6FA","#A99BFF"]},
