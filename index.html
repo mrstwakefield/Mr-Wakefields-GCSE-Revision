@@ -731,11 +731,11 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 :root[data-skin="stan"]{--paper:#FFE9F3;--card:#FFFFFF;--ink:#3D0F2A;--muted:#85506D;--line:#F5C6DC;--soft:#FBD9E8;--good:#1C8A5E;--good-bg:#DDF3E8;--warn:#C2185B;--warn-bg:#FCE0EC;color-scheme:light}
 :root[data-skin="stan"] .h1t::after{content:" 💘"}
 :root[data-skin="uniform"]{--paper:#E9E9E9;--card:#FFFFFF;--ink:#141414;--muted:#5A5A5A;--line:#D2D2D2;--soft:#EFEFEF;--good:#1C7A4E;--good-bg:#DCEFE3;--warn:#A3191F;--warn-bg:#F8DEDF;color-scheme:light}
-:root[data-skin="uniform"] .top{position:relative;background:#A3191F;box-shadow:0 0 0 100vmax #A3191F;clip-path:inset(-100vmax -100vmax 0 -100vmax);padding-bottom:22px;margin-bottom:22px}
+:root[data-skin="uniform"] .top{position:relative;background:linear-gradient(118deg,transparent 0,transparent 80%,#E56B63 80%,#E56B63 84%,transparent 84%),repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 2px,transparent 2px 6px),#4E5A65;box-shadow:0 0 0 100vmax #4E5A65;clip-path:inset(-100vmax -100vmax 0 -100vmax);padding-bottom:22px;margin-bottom:22px}
 :root[data-skin="uniform"],:root[data-skin="uniform"] body{overflow-x:clip}
-:root[data-skin="uniform"] .top::after{content:"";position:absolute;left:-100vmax;right:-100vmax;bottom:0;height:8px;background:#BDBDBD}
+:root[data-skin="uniform"] .top::after{content:"";position:absolute;left:-100vmax;right:-100vmax;bottom:0;height:7px;background:#A3191F}
 :root[data-skin="uniform"] .top .h1t{color:#FFFFFF}
-:root[data-skin="uniform"] .top h1 span:not(.h1t),:root[data-skin="uniform"] .top .meter *{color:#F3D6D7!important}
+:root[data-skin="uniform"] .top h1 span:not(.h1t),:root[data-skin="uniform"] .top .meter *{color:#DCE2E8!important}
 :root[data-skin="uniform"] .hud,:root[data-skin="uniform"] .box,:root[data-skin="uniform"] .tabs{border:2px solid #A3191F}
 :root[data-skin="uniform"] .h1t::after{content:" 🎒"}
 :root[data-skin="aurora"]{--paper:#0B1026;--card:#141B38;--ink:#E8F0FF;--muted:#9FB0D6;--line:#26305A;--soft:#1C2448;--good:#3DF5B0;--good-bg:#123A35;--warn:#FF8FB1;--warn-bg:#3E1A2E;color-scheme:dark}
@@ -755,6 +755,14 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 :root[data-skin="gold"] .h1t{background:linear-gradient(180deg,#FFF1C2,#E2B53E 55%,#A9801F);-webkit-background-clip:text;background-clip:text;color:transparent}
 :root[data-skin="gold"] h1::before{content:"🥇 "}
 :root[data-skin="gold"] .btn.good{color:#16140F}
+:root[data-skin="cork"]{--paper:#E3C49A;--card:#FFFDF4;--ink:#3A2614;--muted:#76583A;--line:#D9B98E;--soft:#F4E9D3;--good:#2E7D4F;--good-bg:#DDEFE2;--warn:#C0392B;--warn-bg:#F8DEDA;color-scheme:light}
+:root[data-skin="cork"] body{background-image:radial-gradient(rgba(120,80,40,.22) 1.2px,transparent 1.4px),radial-gradient(rgba(255,240,210,.35) 1px,transparent 1.2px);background-size:9px 9px,13px 13px;background-position:0 0,4px 6px}
+:root[data-skin="cork"] .box,:root[data-skin="cork"] .hud{box-shadow:2px 4px 0 rgba(90,60,30,.18)}
+:root[data-skin="cork"] .h1t::after{content:" 📌"}
+:root[data-skin="library"]{--paper:#17241C;--card:#2A1F17;--ink:#F3E9D2;--muted:#C6B596;--line:#3E2F22;--soft:#33261C;--good:#C9A24A;--good-bg:#3A3018;--warn:#E8957A;--warn-bg:#3E2418;color-scheme:dark}
+:root[data-skin="library"] .h1t{font-family:Georgia,"Times New Roman",serif;font-weight:700;letter-spacing:0;color:#F3E9D2}
+:root[data-skin="library"] .h1t::after{content:" 📚"}
+:root[data-skin="library"] .btn.good{color:#17241C}
 :root[data-skin="examhall"]{--paper:#F2F3F5;--card:#FFFFFF;--ink:#22262E;--muted:#5E6573;--line:#D8DBE1;--soft:#E7E9ED;--good:#1C8A5E;--good-bg:#DDF3E8;--warn:#B4531B;--warn-bg:#FBE7D9;color-scheme:light}
 :root[data-skin="chalk"]{--paper:#1F2E28;--card:#273A32;--ink:#F1F4EE;--muted:#B5C2B9;--line:#38503F;--soft:#304539;--good:#E8D88A;--good-bg:#3A3A22;--warn:#F3A37A;--warn-bg:#40291E;color-scheme:dark}
 :root[data-skin="chalk"] h1{font-family:"Comic Sans MS","Chalkboard SE",var(--display);letter-spacing:.01em}
@@ -1797,14 +1805,16 @@ const THEMES = [
   {k:"ocean", name:"Deep Ocean", lvl:15, sw:["#E4F0FA","#0F2A44","#2563EB"]},
   {k:"lavender", name:"Lavender Haze", lvl:18, sw:["#F3EFFB","#2A2140","#7B5BE0"]},
   {k:"forest", name:"Forest Floor", lvl:20, sw:["#0F1F17","#E6F2EA","#4CC896"]},
+  {k:"cork", name:"Corkboard", lvl:22, sw:["#E3C49A","#3A2614","#D6453D"]},
   {k:"kro", name:"Keep Right On", lvl:25, sw:["#12308F","#FFFFFF","#FFD23F"]},
   {k:"neon", name:"Neon Synapse", lvl:30, sw:["#0B0B14","#F2F2FF","#39FF9E"]},
+  {k:"library", name:"The Library", lvl:28, sw:["#17241C","#F3E9D2","#C9A24A"]},
   {k:"castle", name:"Tamworth Castle", lvl:35, sw:["#F6EBDD","#3B2416","#9A3B1F"]},
   {k:"pinkpen", name:"Wakefield's Pink Pen", lvl:40, sw:["#FFF5FA","#2A1530","#E4007C"]},
   {k:"royale", name:"Wakefield Royale", lvl:45, sw:["#1A1033","#F7F0FF","#FFD54A"]},
   {k:"midnight", name:"Midnight Revision", lvl:50, sw:["#0A1020","#E8ECF7","#F5B942"]},
   {k:"coral", name:"Coral Reef", lvl:55, sw:["#FFF1EC","#2E1A16","#0F8F86"]},
-  {k:"uniform", name:"School Uniform", lvl:60, sw:["#A3191F","#FFFFFF","#BDBDBD"]},
+  {k:"uniform", name:"School Uniform", lvl:60, sw:["#4E5A65","#E56B63","#A3191F"]},
   {k:"aurora", name:"Aurora", lvl:65, sw:["#0B1026","#E8F0FF","#3DF5B0"]},
   {k:"school", name:"The School Building", lvl:70, sw:["#F4DD1E","#1F3FD6","#6E4B35"]},
   {k:"gold", name:"Gold Standard", lvl:75, sw:["#16140F","#F6F0DE","#E2B53E"]},
@@ -2847,8 +2857,7 @@ function renderTrophies(){
       const has=G.badges[id]; if(!has && secret) return `<div class="badge locked secret"><div class="bi">❓</div><b>Secret badge</b><span>“${esc(typeof secret==="string"?secret:"Keep revising to find it")}”</span></div>`;
       return `<div class="badge ${has?"got":"locked"}"><div class="bi">${ic}</div><b>${esc(name)}</b><span>${esc(desc)}</span></div>`; }).join("")}</div></div>`,
     scrolls:`${scrollBoxHTML()}`,
-    looks:`<div class="box"><h3>Themes <small>Level up to unlock new looks. Secret scrolls reveal sealed themes</small></h3><div class="themes">${THEMES.filter(th=>!th.secret||themeOpen(th)||(th.scroll&&G.scrolls[th.scroll])).map(th=>{ const open=themeOpen(th), on=(G.skin||"")===th.k;
-      return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b><span>${open?(on?"In use":"Tap to use"):th.scroll?"🔒 Sealed: "+esc(SEALS[th.k].text):"🔒 Level "+th.lvl}</span></button>`; }).join("")}</div></div>`,
+    looks:themesHTML(),
     save:`<div class="box"><h3>Move or back up your progress <small>Your progress only lives in this browser</small></h3>
       <p class="muted" style="margin:0 0 12px">To carry on using another device (school computer, phone, laptop), copy your save code and paste it there. Keep a copy somewhere safe in case your browser data gets cleared.</p>
       <div class="card-actions" style="margin-top:0"><button class="btn" id="saveCopy">Copy save code</button><button class="btn ghost" id="saveFile">Download backup file</button></div>
@@ -4017,6 +4026,16 @@ function scrollBoxHTML(){
       ? `<button class="scrollcard got" data-scroll="${s.id}"><span class="si">📜</span><b>${esc(s.title)}</b><span>Tap to read again</span>${sealHTML(THEMES.find(t=>t.scroll===s.id))}</button>`
       : `<div class="scrollcard"><span class="si">🔒</span><b>Sealed scroll</b><span>“${esc(s.hint)}”</span></div>`).join("")}</div>
     </div>`;
+}
+function themeCard(th){ const open=themeOpen(th), on=(G.skin||"")===th.k;
+  return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b><span>${open?(on?"✓ In use":"Tap to use"):th.scroll?"🔒 "+esc(SEALS[th.k].text):"🔒 Level "+th.lvl}</span></button>`; }
+function themesHTML(){
+  const mine=THEMES.filter(th=>themeOpen(th)), sealed=THEMES.filter(th=>th.scroll && G.scrolls[th.scroll] && !themeOpen(th)), next=THEMES.filter(th=>!th.secret && !themeOpen(th));
+  const hiddenSecrets=THEMES.filter(th=>th.secret && !themeOpen(th) && !(th.scroll && G.scrolls[th.scroll])).length;
+  return `<div class="box"><h3>🎨 Your themes <small>${mine.length} unlocked · tap one to use it</small></h3><div class="themes">${mine.map(themeCard).join("")}</div></div>
+    ${sealed.length?`<div class="box"><h3>🔒 Sealed secret themes <small>You found these in secret scrolls. Break the seal to unlock them</small></h3><div class="themes">${sealed.map(themeCard).join("")}</div></div>`:""}
+    ${next.length?`<div class="box"><h3>⬆️ Still to unlock <small>Level up to earn these</small></h3><div class="themes">${next.map(themeCard).join("")}</div></div>`:""}
+    ${hiddenSecrets?`<p class="muted" style="text-align:center;font-size:15px">✨ ${hiddenSecrets} more secret theme${hiddenSecrets===1?" is":"s are"} hidden in the 📜 Secret scrolls…</p>`:""}`;
 }
 function sealHTML(t){
   if(!t) return "";
