@@ -677,6 +677,7 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--ink);font-weight:800;border-bottom:3px solid var(--good);border-radius:3px;padding:0 2px}
 .flip-mine{margin-top:10px;padding:8px 12px;border:1px dashed var(--line);border-radius:10px;font-size:15px}
 .mc-card .opts{margin-top:12px}
+.th-note{font-size:12px!important;font-style:italic;line-height:1.3;margin:2px 0 4px}
 .ord-done{margin:10px 0 12px;padding-left:28px;display:grid;gap:6px}
 .ord-done li{background:var(--good-bg);border-radius:10px;padding:8px 12px;font-size:16px}
 .ord-done li.ord-empty{background:var(--soft);min-height:38px;border:2px dashed var(--line)}
@@ -931,7 +932,7 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
         <button aria-pressed="false" data-filter="mistakes">🩹 Mistakes <span id="mistN"></span></button>
       </div>
       <span class="spacer"></span>
-      <div class="seg" role="group" aria-label="Card mode"><button aria-pressed="true" data-cm="mc">🔘 Multiple choice</button><button aria-pressed="false" data-cm="gap">🔤 Gap fill</button><button aria-pressed="false" data-cm="flip">🃏 Flip</button></div>
+      <div class="seg" role="group" aria-label="Card mode"><button aria-pressed="true" data-cm="mc">🔘 Multiple choice</button><button aria-pressed="false" data-cm="gap">🔤 Gap fill <span class="x2">2× XP</span></button><button aria-pressed="false" data-cm="flip">✍️ Type it <span class="x2">2× XP</span></button></div>
       <button class="btn ghost" id="shuffleBtn" style="padding:8px 14px">Shuffle a new deck</button>
     </div>
     <div id="cardArea"></div>
@@ -1454,7 +1455,7 @@ function renderCard(){
   const area=$("#cardArea");
   if(!store.sel.length){ area.innerHTML=`<div class="empty"><h3>Pick a topic to start</h3><p>Tap one or more topics above and your flashcards will appear here.</p></div>`; return; }
   if(!deck.length){
-    const msg = cardMode==="gap" && (filter==="all"||filter==="notknown") ? ["No key terms here","Gap fills are made from key-term definitions. Try different topics, or switch back to 🃏 Flip."] : filter==="mistakes" ? ["No mistakes to fix 🎉","Anything you get wrong, anywhere on the site, lands here. Get it right twice in a row and it's fixed."] : filter==="due" ? ["Nothing due today 🎉","Cards you know come back for a quick review after 1, 3, 7, 21 and 45 days, just before you'd forget them. Come back tomorrow."] : filter==="learning" ? ["Nothing marked as still learning","When you mark a card as still learning, it will show up here so you can go over it again."] : ["You know every card here","Every question in these topics is marked as known. Try another topic, or switch to all cards for a refresher."];
+    const msg = cardMode==="gap" && (filter==="all"||filter==="notknown") ? ["No key terms here","Gap fills are made from key-term definitions. Try different topics, or switch to 🔘 Multiple choice."] : filter==="mistakes" ? ["No mistakes to fix 🎉","Anything you get wrong, anywhere on the site, lands here. Get it right twice in a row and it's fixed."] : filter==="due" ? ["Nothing due today 🎉","Cards you know come back for a quick review after 1, 3, 7, 21 and 45 days, just before you'd forget them. Come back tomorrow."] : filter==="learning" ? ["Nothing marked as still learning","When you mark a card as still learning, it will show up here so you can go over it again."] : ["You know every card here","Every question in these topics is marked as known. Try another topic, or switch to all cards for a refresher."];
     area.innerHTML=`<div class="empty"><h3>${msg[0]}</h3><p>${msg[1]}</p></div>`; return;
   }
   if(pos>=deck.length){
@@ -1549,7 +1550,7 @@ function flipRecord(id, ok){
   const wasDue=isDue(id); sessionRes[id]=ok?"k":"l";
   if(!ok){ G.st.learnMarks=(G.st.learnMarks||0)+1; G.lcount[id]=(G.lcount[id]||0)+1; } else if((G.lcount[id]||0)>=3) G.flags.finally=1;
   mark(id, ok?"k":"l"); trackMistake(id, ok);
-  deckXP+=answer({ok, el:$("#card"), mode:"cards", gold:golds.has(id), review:wasDue&&ok, topic:BY_ID[id].t});
+  deckXP+=answer({ok, el:$("#card"), mode:"cards", gold:golds.has(id), review:wasDue&&ok, topic:BY_ID[id].t, typed:true});
   deckCombo = ok ? deckCombo+1 : 0; if(deckCombo>deckBest) deckBest=deckCombo;
 }
 function flipNext(){ pos++; flipped=false; flipTyped=""; flipVerdict=null; flipTries=0; renderCard(); const fi=$("#flipIn"); if(fi) fi.focus({preventScroll:true}); }
@@ -1572,7 +1573,7 @@ function flip(){
 }
 function rate(s){ const id=deck[pos], wasDue=isDue(id); sessionRes[id]=s; if(s==="l"){ G.st.learnMarks=(G.st.learnMarks||0)+1; G.lcount[id]=(G.lcount[id]||0)+1; } else if((G.lcount[id]||0)>=3) G.flags.finally=1;
   mark(id,s); trackMistake(id, s==="k");
-  deckXP+=answer({ok:s==="k", el:$(s==="k"?"#gotBtn":"#learnBtn"), mode:"cards", gold:golds.has(id), review:wasDue&&s==="k", topic:BY_ID[id].t});
+  deckXP+=answer({ok:s==="k", el:$(s==="k"?"#gotBtn":"#learnBtn")||$("#cgIn"), mode:"cards", gold:golds.has(id), review:wasDue&&s==="k", topic:BY_ID[id].t, typed:cardMode==="gap"});
   deckCombo = s==="k" ? deckCombo+1 : 0; if(deckCombo>deckBest) deckBest=deckCombo;
   pos++; flipped=false; flipSaid=false; flipTyped=""; flipVerdict=null; flipTries=0; mcPicked=null; renderCard(); const b=$("#flipIn")||$("#flipBtn"); if(b) b.focus({preventScroll:true}); }
 document.addEventListener("keydown",e=>{
@@ -1812,7 +1813,7 @@ function goalMet(){
   addXP(50,false);
   if(G.streak%7===0 && G.freeze<2){ G.freeze++; setTimeout(()=>toast("🧊","Streak freeze earned","It saves your streak if you miss a day."),1200); }
 }
-function answer({ok, el, mode, gold, x2, review, topic, boss}){
+function answer({ok, el, mode, gold, x2, review, topic, boss, typed}){
   checkStreak();
   const t=today();
   G.st.cards++; if(ok) G.st.right++;
@@ -1820,7 +1821,7 @@ function answer({ok, el, mode, gold, x2, review, topic, boss}){
   if(t==="2026-12-03"||t==="2026-12-10") G.flags.nightbefore=1;
   if(t.slice(5)==="12-25") G.flags.festive=1;
   if(ok){ combo++; if(combo>G.st.combo) G.st.combo=combo; } else combo=0;
-  const base = mode==="quiz" ? (ok?15:4) : mode==="arcade" ? (ok?6:1) : (ok?10:3);
+  const base = (mode==="quiz" ? (ok?15:4) : mode==="arcade" ? (ok?6:1) : (ok?10:3)) * (typed && ok ? 2 : 1);   // typed answers earn double
   let mult = (ok ? comboMult() : 1) * ((x2 || topic==="Exam skills") ? 2 : 1) * eventMult(topic, boss);   // exam skills always earn double XP
   if(gold && ok){ mult*=5; G.st.gold++; }
   if(mode==="arcade") mult*=gotdMult();   // game of the day: double XP
@@ -1943,15 +1944,15 @@ function checkBadges(){
 /* ---- unlockable themes ---- */
 const THEMES = [
   {k:"", name:"Classic", lvl:1, sw:["#EEF1F7","#18203A","#7B5BE0"]},
-  {k:"night", name:"Night Shift", lvl:3, sw:["#121829","#E9EDF7","#4CC896"]},
+  {k:"night", name:"Circadian Rhythm", note:"Your body clock: why late-night cramming hurts memory", lvl:3, sw:["#121829","#E9EDF7","#4CC896"]},
   {k:"examhall", name:"Exam Hall", lvl:5, sw:["#F2F3F5","#22262E","#5B6B82"]},
-  {k:"mint", name:"Mint Condition", lvl:6, sw:["#E6F4EE","#12312A","#13805A"]},
+  {k:"mint", name:"Tabula Rasa", note:"The 'blank slate' idea in the nature–nurture debate", lvl:6, sw:["#E6F4EE","#12312A","#13805A"]},
   {k:"chalk", name:"Chalkboard", lvl:8, sw:["#1F2E28","#F1F4EE","#E8D88A"]},
-  {k:"sunset", name:"Golden Hour", lvl:10, sw:["#FFF0E6","#3A1F1A","#C2410C"]},
+  {k:"sunset", name:"Halo Effect", note:"One good trait makes us see someone in a golden glow", lvl:10, sw:["#FFF0E6","#3A1F1A","#C2410C"]},
   {k:"highlighter", name:"Highlighter", lvl:12, sw:["#FFFBE0","#2B2A12","#9BB80F"]},
-  {k:"ocean", name:"Deep Ocean", lvl:15, sw:["#E4F0FA","#0F2A44","#2563EB"]},
-  {k:"lavender", name:"Lavender Haze", lvl:18, sw:["#F3EFFB","#2A2140","#7B5BE0"]},
-  {k:"forest", name:"Forest Floor", lvl:20, sw:["#0F1F17","#E6F2EA","#4CC896"]},
+  {k:"ocean", name:"Goluboy · голубой", note:"Russian has a separate word for light blue: Sapir-Whorf in action", lvl:15, sw:["#E4F0FA","#0F2A44","#2563EB"]},
+  {k:"lavender", name:"Synaesthesia", note:"When senses blend, e.g. seeing words as colours", lvl:18, sw:["#F3EFFB","#2A2140","#7B5BE0"]},
+  {k:"forest", name:"Natural Experiment", note:"An IV that occurs naturally, out in the wild", lvl:20, sw:["#0F1F17","#E6F2EA","#4CC896"]},
   {k:"cork", name:"Corkboard", lvl:22, sw:["#E3C49A","#3A2614","#D6453D"]},
   {k:"kro", name:"Keep Right On", lvl:25, sw:["#12308F","#FFFFFF","#FFD23F"]},
   {k:"neon", name:"Neon Synapse", lvl:30, sw:["#0B0B14","#F2F2FF","#39FF9E"]},
@@ -1960,14 +1961,14 @@ const THEMES = [
   {k:"pinkpen", name:"Wakefield's Pink Pen", lvl:40, sw:["#FFF5FA","#2A1530","#E4007C"]},
   {k:"royale", name:"Wakefield Royale", lvl:45, sw:["#1A1033","#F7F0FF","#FFD54A"]},
   {k:"midnight", name:"Midnight Revision", lvl:50, sw:["#0A1020","#E8ECF7","#F5B942"]},
-  {k:"coral", name:"Coral Reef", lvl:55, sw:["#FFF1EC","#2E1A16","#0F8F86"]},
+  {k:"coral", name:"Deep Dive", note:"Godden and Baddeley's divers: context and recall", lvl:55, sw:["#FFF1EC","#2E1A16","#0F8F86"]},
   {k:"uniform", name:"School Uniform", lvl:60, sw:["#4E5A65","#E56B63","#A3191F"]},
-  {k:"aurora", name:"Aurora", lvl:65, sw:["#0B1026","#E8F0FF","#3DF5B0"]},
+  {k:"aurora", name:"Brainwaves", note:"Electrical activity in the brain, measured by EEG", lvl:65, sw:["#0B1026","#E8F0FF","#3DF5B0"]},
   {k:"school", name:"The School Building", lvl:70, sw:["#F4DD1E","#1F3FD6","#6E4B35"]},
   {k:"gold", name:"Gold Standard", lvl:75, sw:["#16140F","#F6F0DE","#E2B53E"]},
   {k:"stan", name:"Stan Mode", lvl:80, sw:["#FFE9F3","#3D0F2A","#E11D74"]},
   {k:"wakefield", name:"✦ Wakefield Mode", lvl:1, secret:true, sw:["#0D2A1E","#F6F0DC","#E6C35C"]},
-  {k:"retro", name:"👾 Retro Arcade", lvl:1, secret:true, scroll:"konami", sw:["#0A0A12","#39FF14","#FF2BD6"]},
+  {k:"retro", name:"👾 Reward Pathway", note:"Why games (and XP) feel so rewarding: dopamine", lvl:1, secret:true, scroll:"konami", sw:["#0A0A12","#39FF14","#FF2BD6"]},
   {k:"snowdome", name:"❄️ Snowdome", lvl:1, secret:true, scroll:"tamworth", sw:["#EFEBDD","#4E9C8E","#2B54C8"]},
   {k:"bullring", name:"🐂 Bullring", lvl:1, secret:true, scroll:"blues", sw:["#143A86","#D5DAE2","#C68A4A"]},
   {k:"inner", name:"🤫 Inner Circle", lvl:1, secret:true, scroll:"title", sw:["#2E0B18","#F5E9D0","#D4AF37"]},
@@ -1977,7 +1978,7 @@ const THEMES = [
   {k:"volts", name:"⚡ 450 Volts", lvl:1, secret:true, scroll:"milgram", sw:["#101014","#FFF7D6","#FFD60A"]},
   {k:"nap", name:"😴 Nap Time", lvl:1, secret:true, scroll:"ring", sw:["#1A1830","#E9E6FA","#A99BFF"]},
   {k:"pavlov", name:"🔔 Pavlov's Bell", lvl:1, secret:true, scroll:"pavlov", sw:["#FBF3E4","#3A2A14","#C8902A"]},
-  {k:"fool", name:"🃏 April Fool", lvl:1, secret:true, scroll:"april", sw:["#FFF6FB","#2B1A3A","#FF4FA3"]},
+  {k:"fool", name:"🃏 Deception", note:"An ethical issue, but fine for an April Fool", lvl:1, secret:true, scroll:"april", sw:["#FFF6FB","#2B1A3A","#FF4FA3"]},
 ];
 // scroll themes are found by the scroll, then "sealed" until a piece of revision breaks the seal
 const SEALS = {
@@ -4271,7 +4272,7 @@ function scrollBoxHTML(){
     </div>`;
 }
 function themeCard(th){ const open=themeOpen(th), on=(G.skin||"")===th.k;
-  return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b><span>${open?(on?"✓ In use":"Tap to use"):th.scroll?"🔒 "+esc(SEALS[th.k].text):"🔒 Level "+th.lvl}</span></button>`; }
+  return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b>${th.note?`<span class="th-note">${esc(th.note)}</span>`:""}<span>${open?(on?"✓ In use":"Tap to use"):th.scroll?"🔒 "+esc(SEALS[th.k].text):"🔒 Level "+th.lvl}</span></button>`; }
 function themesHTML(){
   const mine=THEMES.filter(th=>themeOpen(th)), sealed=THEMES.filter(th=>th.scroll && G.scrolls[th.scroll] && !themeOpen(th)), next=THEMES.filter(th=>!th.secret && !themeOpen(th));
   const hiddenSecrets=THEMES.filter(th=>th.secret && !themeOpen(th) && !(th.scroll && G.scrolls[th.scroll])).length;
