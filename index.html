@@ -1751,7 +1751,7 @@ const BADGES = [
   ["boss1","⚔️","Boss slayer","Defeat your first boss",()=>Object.values(G.bosses).some(b=>b.won)],
   ["flawless","👑","Flawless victory","Defeat a boss without losing a life",()=>Object.values(G.bosses).some(b=>b.flawless)],
   ["bossall","🐉","Dungeon cleared","Defeat every boss",()=>Object.keys(BOSSES).every(k=>G.bosses[k]&&G.bosses[k].won)],
-  ["match45","🔗","Lightning matcher","Finish the Study Matcher in under 45 seconds",()=>(G.st.matchBest||999)<45],
+  ["match45","🔗","Lightning matcher","Finish a 3-round Study Matcher in under 45 seconds",()=>(G.st.matchBest||999)<45],
   ["mock1","📝","Exam conditions","Finish a mock paper",()=>Object.keys((G.mocks||{}).done||{}).length>=1],
   ["mock4","🏅","Mock marathon","Finish all four mock papers",()=>Object.keys((G.mocks||{}).done||{}).length>=4],
   ["parent3","👪","Family quiz night","Get tested by a parent or carer 3 times",()=>(G.st.parent||0)>=3],
@@ -1947,7 +1947,7 @@ const MODES = {
   psychle:{icon:"🔤", name:"Psychle", c:"#1C8A5E", desc:"Today's mystery key term. Six guesses, Wordle-style, with a clue after three. Same word for everyone. Share your result."},
   swipe:{icon:"👉", name:"Swipe Sort", c:"#9A6324", hot:"2× XP", desc:"Theory or study? Strength or weakness? Nature or nurture? AO1 or AO3? S or C? Swipe as many as you can in 45 seconds."},
   which:{icon:"🕵️", name:"Which Study?", c:"#9A6324", hot:"2× XP", desc:"Clues appear one at a time. Name the study as early as you can: 5 points on the first clue, 1 on the last."},
-  match:{icon:"🔗", name:"Study Matcher", c:"#9A6324", hot:"2× XP", desc:"Match each researcher to their finding, against the clock. 3 rounds of 5. Wrong matches add 5 seconds."},
+  match:{icon:"🔗", name:"Study Matcher", c:"#9A6324", hot:"2× XP", desc:"Match each study to its aim, procedure, finding or conclusion, against the clock. Pick a round type or play them all mixed."},
   order:{icon:"🔢", name:"Put it in Order", c:"#9A6324", hot:"2× XP", desc:"Tap the steps in the right order: synaptic transmission, MSM, CBT, sampling, AMRC, TDEE and more. 6 rounds."},
 };
 const arc={phase:"menu", mode:null, items:[], base:[], bi:0, i:0, score:0, right:0, lives:3, end:0, qEnd:0, timer:null, cur:null, locked:false, log:[], t0:0, xp:0, best:false, tries:0, hints:0};
@@ -1976,7 +1976,7 @@ function bestLabel(k){
     : k==="psychle" ? (G.psychle&&G.psychle[today()]&&G.psychle[today()].done ? (G.psychle[today()].won?`Done today: ${G.psychle[today()].g.length}/6 ✓`:"Done today: X/6") : `Psychle #${psyNo()} is ready`)
     : k==="swipe" ? (Object.keys(G.st.swipe||{}).length?`Best: ${Math.max(...Object.values(G.st.swipe))}`:"No score yet")
     : k==="which" ? (G.st.whichBest?`Best: ${G.st.whichBest}/40`:"No score yet")
-    : k==="match" ? (st.matchBest?`Fastest: ${st.matchBest}s`:"No time yet")
+    : k==="match" ? ((st.mtBest||{}).mixed?`Mixed fastest: ${st.mtBest.mixed}s`:st.matchBest?`Fastest: ${st.matchBest}s`:"No time yet")
     : k==="flaw" ? (st.flawBest?`Best: ${st.flawBest}/16`:"No score yet")
     : k==="order" ? (st.orderBest?`Best: ${st.orderBest}/18`:"No score yet")
     : k==="fix" ? (mistakeCount()?`${mistakeCount()} mistake${mistakeCount()===1?"":"s"} to fix`:"Nothing to fix right now 🎉")
@@ -2373,49 +2373,60 @@ function gmFinish(){
 }
 
 /* ================= STUDY MATCHER ================= */
-const MATCHES = [
- ["Milgram","65% went all the way to 450V"],
- ["Asch","75% conformed at least once on the line task"],
- ["Piliavin","Cane victim helped 95% of the time, drunk victim 50%"],
- ["Murdock","Words at the start and end of a list recalled best"],
- ["Bartlett","'Canoe' became 'boat' as the story was retold"],
- ["Bruner and Minturn","92% who saw letters reported a B; 83% who saw numbers reported 13"],
- ["Gilchrist and Nesberg","Hungry participants rated food pictures as brighter"],
- ["Hughes","90% of children aged 3½–5 hid the boy doll from the policemen"],
- ["McGarrigle and Donaldson","More children conserved when 'naughty teddy' moved the counters"],
- ["Piaget","Pre-operational children chose their own view in the three mountains task"],
- ["Gibson and Walk","Babies wouldn't crawl over the deep side of the visual cliff"],
- ["Hudson","Schooled participants were more likely to see depth in 2D pictures"],
- ["Von Frisch","Round dance for close food, waggle dance for far food"],
- ["Yuki","Japanese students focused on the eyes, Americans on the mouth"],
- ["Penfield","Stimulating the temporal lobe brought back vivid memories in about 8%"],
- ["Tulving","Episodic memories lit up the front of the brain, semantic the back"],
- ["Kaij","54% concordance for alcohol abuse in MZ twins vs 28% in DZ"],
- ["Wiles","CBT plus antidepressants beat antidepressants alone"],
- ["Maguire","London taxi drivers had a larger hippocampus"],
- ["Whorf","Claimed the Hopi think about time differently because of their language"],
- ["Zahn","People kept more personal space from higher-status colleagues"],
- ["Dweck","Praising effort encourages a growth mindset"],
- ["Willingham","Matching teaching to learning styles doesn't improve learning"],
- ["Adorno","Obedient, authoritarian personalities come from a strict upbringing"],
+// [study, aim, procedure, finding, conclusion]
+const STUDY_FACTS = [
+ ["Milgram","To see if ordinary people would obey an order to harm an innocent person","Volunteers gave 'shocks' up to 450V to a learner when told to by a man in a lab coat","All went to 300V and 65% went all the way to 450V","Obedience is due to the situation (a legitimate authority), not personality"],
+ ["Asch","To see if people would conform to a majority giving an obviously wrong answer","Students judged which of three lines matched a standard line, alongside confederates","75% conformed at least once; conformity rose with group size up to 3","People conform to group pressure even when the group is clearly wrong"],
+ ["Piliavin","To see whether the type of victim affects whether bystanders help","A man collapsed on a New York subway train, carrying either a cane or a bottle","The cane victim was helped 95% of the time, the 'drunk' victim 50%","People weigh up the costs of helping, and there was no diffusion of responsibility"],
+ ["Murdock","To find out whether there are separate STM and LTM stores","Participants heard lists of 10–40 words and recalled them in any order","Words at the start and end of a list were recalled best","The serial position effect supports separate short- and long-term stores"],
+ ["Bartlett","To see whether culture and schemas affect how we recall a story","English students retold a Native American folk tale several times over months","The story got shorter and unfamiliar details changed, e.g. canoe became boat","Memory is reconstructive: we change memories to fit our schemas"],
+ ["Bruner and Minturn","To see whether expectation affects perceptual set","Participants saw letters or numbers, then an ambiguous 'broken B' for under a second","92% who saw letters said B; 83% who saw numbers said 13","Expectation shapes what we perceive"],
+ ["Gilchrist and Nesberg","To see whether motivation (hunger) affects perception","Food-deprived and fed participants adjusted the brightness of pictures of meals","Hungry participants saw food pictures as brighter, more so the longer without food","Motivation affects perceptual set: we notice the things we need"],
+ ["Hughes","To see whether children under 7 are as egocentric as Piaget claimed","Children hid a boy doll from policeman dolls behind two crossed walls","90% of children aged 3½–5 hid the doll correctly","Young children can decentre when the task makes sense to them"],
+ ["McGarrigle and Donaldson","To see whether children conserve earlier if the change looks accidental","A toy teddy 'accidentally' messed up one of two rows of counters","62% conserved when teddy moved the counters vs 16% when an adult did","Piaget underestimated children's ability to conserve"],
+ ["Piaget (three mountains)","To find out when children stop being egocentric","Children picked a picture of what a doll could see from across a model of mountains","Most 4-year-olds chose their own view; most 7-year-olds chose the doll's","Pre-operational children are egocentric"],
+ ["Gibson and Walk","To see whether depth perception is innate","Mothers called their babies across a glass table with a 'shallow' and a 'deep' side","27 of 36 babies crawled on the shallow side; only 3 crossed the deep side","Depth perception may be innate, supporting Gibson"],
+ ["Hudson","To see whether culture affects how people perceive depth in pictures","People from different backgrounds were shown 2D drawings of a hunter, antelope and elephant","Schooled participants were more likely to see depth in the drawings","Perception is affected by experience and culture, supporting Gregory"],
+ ["Von Frisch","To find out how bees tell each other where food is","Paint-marked bees were watched at a glass hive with sugar water at different distances","Round dance for food close by, waggle dance for food further away","Bees communicate the distance and direction of food through dance"],
+ ["Yuki","To see whether cultures differ in how they read facial expressions","Japanese and American students rated emoticons with different eyes and mouths","Japanese students focused on the eyes, Americans on the mouth","Reading facial expressions is partly learned through culture"],
+ ["Penfield","To see what happens when areas of the brain are stimulated","Awake patients having brain surgery had their cortex stimulated with a mild current","About 8% relived vivid memories when the temporal lobe was stimulated","The temporal lobe has an interpretive cortex: evidence for localisation"],
+ ["Tulving","To see whether episodic and semantic memories use different brain areas","6 participants injected with radioactive gold had PET scans while recalling memories","Episodic memories lit up the front of the brain, semantic memories the back","Different types of LTM are stored in different areas of the brain"],
+ ["Kaij","To see whether there is a genetic vulnerability to alcohol abuse","Male twin pairs in Sweden were interviewed about their drinking","54% concordance in identical twins vs 28% in non-identical twins","Alcohol abuse has a genetic component, but genes aren't the whole story"],
+ ["Wiles","To see whether adding CBT helps when depression hasn't responded to medication","469 patients were randomly given antidepressants alone or antidepressants plus CBT","The CBT group was about twice as likely to improve (46% vs 22%)","CBT plus antidepressants works better than antidepressants alone"],
+ ["Maguire","To see whether learning changes the structure of the brain","Brain scans compared London taxi drivers with people who weren't taxi drivers","Taxi drivers had a larger hippocampus, especially the back part","Practice changes the brain, supporting Hebb's theory"],
 ];
-const mt = {rounds:[], r:0, sel:null, done:new Set(), wrong:0, t0:0, pen:0, timer:null, xp:0, missed:new Set()};
-function mtStart(){
+const MT_TYPES = {aim:["🎯","Aims",1], method:["🧪","Procedures",2], find:["📊","Findings",3], conc:["💡","Conclusions",4]};
+const MT_MODES = {mixed:["🔀","Mixed","One round each of aims, procedures, findings and conclusions"], aim:["🎯","Aims","Match each study to what it was trying to find out"], method:["🧪","Procedures","Match each study to what the researchers did"], find:["📊","Findings","Match each study to its results"], conc:["💡","Conclusions","Match each study to what it showed"]};
+const mt = {mode:"mixed", rounds:[], r:0, sel:null, done:new Set(), wrong:0, t0:0, pen:0, timer:null, xp:0, missed:[], right:[]};
+const mtBestKey = m => "mt_"+m;
+function mtStart(mode){
   clearInterval(arc.timer); clearInterval(mt.timer); arc.phase="match"; arc.mode="match";
-  const pick=shuffle(MATCHES).slice(0,15);
-  Object.assign(mt,{rounds:[pick.slice(0,5),pick.slice(5,10),pick.slice(10,15)], r:0, sel:null, done:new Set(), wrong:0, t0:Date.now(), pen:0, xp:0, missed:new Set()});
+  if(!mode){ mtMenu(); return; }
+  const types = mode==="mixed" ? shuffle(Object.keys(MT_TYPES)) : [mode,mode,mode];
+  const used=new Set();
+  const rounds=types.map(ty=>{ let pool=shuffle(STUDY_FACTS.filter(s=>!used.has(s[0]))); if(pool.length<5) pool=shuffle(STUDY_FACTS); const pick=pool.slice(0,5); pick.forEach(s=>used.add(s[0])); return {ty, items:pick}; });
+  Object.assign(mt,{mode, rounds, r:0, sel:null, done:new Set(), wrong:0, t0:Date.now(), pen:0, xp:0, missed:[]});
   mt.right=shuffle([0,1,2,3,4]); resetCombo();
   mt.timer=setInterval(mtTick,200); mtRender(); arcToTop();
+}
+function mtMenu(){
+  arc.phase="match";
+  const best=k=>(G.st.mtBest||{})[k];
+  $("#arcArea").innerHTML=`<div class="arc-top"><span class="big">🔗 Study Matcher</span><span class="spacer"></span><button class="btn ghost" id="arcMenu" style="padding:7px 14px">Back</button></div>
+    <p class="muted">Match each study to its aim, procedure, finding or conclusion, against the clock. Wrong matches add 5 seconds.</p>
+    <div class="modes">${Object.entries(MT_MODES).map(([k,m])=>`<button class="mode" style="--c:#9A6324" data-mt="${k}"><span class="mi">${m[0]}</span><h3>${m[1]}</h3><p>${m[2]}. ${k==="mixed"?"4 rounds":"3 rounds"} of 5.</p><span class="best">${best(k)?`Fastest: ${best(k)}s`:"No time yet"}</span></button>`).join("")}</div>`;
+  $("#arcMenu").onclick=()=>{ arc.phase="menu"; renderArcade(); };
+  document.querySelectorAll("[data-mt]").forEach(b=>b.onclick=()=>mtStart(b.dataset.mt));
 }
 const mtTime = () => (Date.now()-mt.t0)/1000 + mt.pen;
 function mtTick(){ const el=$("#mtTime"); if(!el || arc.phase!=="match"){ clearInterval(mt.timer); return; } el.textContent=mtTime().toFixed(1)+"s"; }
 function mtRender(){
-  const R=mt.rounds[mt.r], m=MODES.match;
-  $("#arcArea").innerHTML=`<div class="arc-top"><span class="big">${m.icon} ${m.name}</span><span class="spacer"></span><span>Round</span><span class="big">${mt.r+1}/3</span><span class="big" id="mtTime">${mtTime().toFixed(1)}s</span></div>
-    <div class="progressline"><i style="width:${(mt.r*5+mt.done.size)/15*100}%"></i></div>
-    <p class="muted" style="margin:6px 0 10px">Tap a researcher, then their finding. Wrong matches add 5 seconds.</p>
-    <div class="mt-grid"><div class="mt-col">${R.map((x,i)=>`<button class="opt mt-l ${mt.done.has(i)?"right":""} ${mt.sel===i?"sel":""}" data-l="${i}" ${mt.done.has(i)?"disabled":""}><span>${esc(x[0])}</span></button>`).join("")}</div>
-      <div class="mt-col">${mt.right.map(i=>`<button class="opt mt-r ${mt.done.has(i)?"right":""}" data-r="${i}" ${mt.done.has(i)?"disabled":""}><span>${esc(R[i][1])}</span></button>`).join("")}</div></div>
+  const R=mt.rounds[mt.r], ty=MT_TYPES[R.ty], col=MT_TYPES[R.ty][2], n=mt.rounds.length;
+  $("#arcArea").innerHTML=`<div class="arc-top"><span class="big">🔗 ${ty[0]} ${ty[1]}</span><span class="spacer"></span><span class="big">${mt.r+1}/${n}</span><span class="big" id="mtTime">${mtTime().toFixed(1)}s</span></div>
+    <div class="progressline"><i style="width:${(mt.r*5+mt.done.size)/(n*5)*100}%"></i></div>
+    <p class="muted" style="margin:6px 0 10px">Tap a study, then its <b>${ty[1].toLowerCase().replace(/s$/,"")}</b>. Wrong matches add 5 seconds.</p>
+    <div class="mt-grid"><div class="mt-col">${R.items.map((x,i)=>`<button class="opt mt-l ${mt.done.has(i)?"right":""} ${mt.sel===i?"sel":""}" data-l="${i}" ${mt.done.has(i)?"disabled":""}><span>${esc(x[0])}</span></button>`).join("")}</div>
+      <div class="mt-col">${mt.right.map(i=>`<button class="opt mt-r ${mt.done.has(i)?"right":""}" data-r="${i}" ${mt.done.has(i)?"disabled":""}><span>${esc(R.items[i][col])}</span></button>`).join("")}</div></div>
     <p style="text-align:right;margin-top:10px"><button class="linkbtn" id="arcQuit">End game</button></p>`;
   document.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{ mt.sel=+b.dataset.l; sfx("tick"); document.querySelectorAll("[data-l]").forEach(z=>z.classList.toggle("sel", z===b)); });
   document.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>mtPick(+b.dataset.r, b));
@@ -2423,27 +2434,29 @@ function mtRender(){
 }
 function mtPick(i, btn){
   if(mt.sel===null){ btn.classList.remove("shake"); void btn.offsetWidth; btn.classList.add("shake"); return; }
-  const ok = i===mt.sel, R=mt.rounds[mt.r];
-  if(!ok){ mt.missed.add(R[mt.sel][0]); }
+  const R=mt.rounds[mt.r], ok=i===mt.sel;
+  if(!ok){ const s=R.items[mt.sel]; if(!mt.missed.some(m=>m.s===s && m.ty===R.ty)) mt.missed.push({s, ty:R.ty}); }
   mt.xp+=answer({ok, el:btn, mode:"arcade", topic:"Exam skills"});
   if(ok){ mt.done.add(i); mt.sel=null;
-    if(mt.done.size===5){ mt.r++; mt.done=new Set(); mt.right=shuffle([0,1,2,3,4]); if(mt.r>=3) return mtFinish(false); }
+    if(mt.done.size===5){ mt.r++; mt.done=new Set(); mt.right=shuffle([0,1,2,3,4]); if(mt.r>=mt.rounds.length) return mtFinish(false); }
     mtRender();
   } else { mt.wrong++; mt.pen+=5; floater("+5s", btn, "meh"); btn.classList.remove("shake"); void btn.offsetWidth; btn.classList.add("shake","wrong"); setTimeout(()=>btn.classList.remove("wrong"),500); }
 }
 function mtFinish(quit){
   if(arc.phase!=="match") return; clearInterval(mt.timer); arc.phase="mdone";
-  const t=Math.round(mtTime()*10)/10, best=!quit && (!G.st.matchBest || t<G.st.matchBest);
-  if(best) G.st.matchBest=t;
-  const bonus=quit?0:Math.max(10, Math.round(120-t))*2; mt.xp+=bonus; addXP(bonus,false);
+  const t=Math.round(mtTime()*10)/10; G.st.mtBest=G.st.mtBest||{};
+  const prev=G.st.mtBest[mt.mode], best=!quit && (!prev || t<prev);
+  if(best) G.st.mtBest[mt.mode]=t;
+  if(!quit && mt.mode!=="mixed" && (!G.st.matchBest || t<G.st.matchBest)) G.st.matchBest=t;
+  const pairs=mt.rounds.length*5, bonus=quit?0:Math.max(10, Math.round(pairs*8-t))*2; mt.xp+=bonus; addXP(bonus,false);
   if(best){ confetti(150); sfx("lvl"); }
   checkBadges(); save();
-  const miss=[...mt.missed].map(n=>MATCHES.find(x=>x[0]===n));
-  $("#arcArea").innerHTML=`<div class="empty">${best?'<div class="newbest">🏆 NEW FASTEST TIME</div>':""}<h3>🔗 Study Matcher ${quit?"stopped":"complete"}</h3><p class="score">${quit?"—":t+"s"}</p>
-    <p class="muted">${mt.wrong} wrong match${mt.wrong===1?"":"es"}${G.st.matchBest?` · Fastest: ${G.st.matchBest}s`:""}</p><p style="margin-top:10px">+${mt.xp} XP earned (2× exam skills XP)</p>
-    <button class="btn" id="arcAgain">Play again</button> <button class="btn ghost" id="arcMenu">Arcade menu</button>
-    ${miss.length?`<ul class="results" style="margin-top:22px"><li style="padding-left:14px;background:none;border:0"><b>Learn from these:</b></li>${miss.map(x=>`<li class="no"><b>${esc(x[0])}</b><div class="ans">${esc(x[1])}</div></li>`).join("")}</ul>`:""}</div>`;
-  $("#arcAgain").onclick=mtStart; $("#arcMenu").onclick=()=>{ arc.phase="menu"; renderArcade(); };
+  const m=MT_MODES[mt.mode];
+  $("#arcArea").innerHTML=`<div class="empty">${best?'<div class="newbest">🏆 NEW FASTEST TIME</div>':""}<h3>🔗 Study Matcher: ${m[0]} ${m[1]} ${quit?"stopped":"complete"}</h3><p class="score">${quit?"—":t+"s"}</p>
+    <p class="muted">${mt.wrong} wrong match${mt.wrong===1?"":"es"}${G.st.mtBest[mt.mode]?` · Fastest: ${G.st.mtBest[mt.mode]}s`:""}</p><p style="margin-top:10px">+${mt.xp} XP earned (2× exam skills XP)</p>
+    <button class="btn" id="arcAgain">Play again</button> <button class="btn ghost" id="mtOther">Other rounds</button> <button class="btn ghost" id="arcMenu">Arcade menu</button>
+    ${mt.missed.length?`<ul class="results" style="margin-top:22px"><li style="padding-left:14px;background:none;border:0"><b>Learn from these:</b></li>${mt.missed.map(x=>`<li class="no"><b>${esc(x.s[0])}: ${esc(MT_TYPES[x.ty][1].replace(/s$/,"").toLowerCase())}</b><div class="ans">${esc(x.s[MT_TYPES[x.ty][2]])}</div></li>`).join("")}</ul>`:""}</div>`;
+  $("#arcAgain").onclick=()=>mtStart(mt.mode); $("#mtOther").onclick=()=>mtStart(); $("#arcMenu").onclick=()=>{ arc.phase="menu"; renderArcade(); };
 }
 
 /* ================= SWIPE SORT ================= */
