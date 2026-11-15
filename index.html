@@ -645,8 +645,8 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .pet-msg{margin:0;font-size:17px}
 .pet-info h3{display:flex;align-items:baseline;gap:8px;justify-content:flex-start}
 @media (max-width:560px){.petbtn svg{width:34px;height:26px}.hud{gap:6px!important}.hud .iconbtn{width:36px;min-width:36px;height:38px;padding:0}.hud .petbtn{width:auto;padding:0 2px}.hud .focusbtn{width:auto;min-width:36px;padding:0 6px}.hud .hud-stat{padding-left:8px;padding-right:8px}.hud #hudGoal .goalring{display:none}}
-.pet-svg.ecstatic g:first-of-type{animation:petdance .7s ease-in-out infinite alternate;transform-origin:80px 110px}
-.pet-svg.happy .pet-tail{animation:petwag 1s ease-in-out infinite alternate;transform-origin:118px 96px}
+.pet-svg.ecstatic .pet-body{animation:petdance .7s ease-in-out infinite alternate;transform-origin:80px 110px;transform-box:view-box}
+.pet-svg.happy .pet-tail{animation:petwag 1s ease-in-out infinite alternate;transform-origin:118px 96px;transform-box:view-box}
 .pet-z text{animation:petz 2.4s ease-in-out infinite}
 .pet-z text:nth-child(2){animation-delay:.4s}.pet-z text:nth-child(3){animation-delay:.8s}
 @keyframes petdance{from{transform:translateY(0) rotate(-3deg)}to{transform:translateY(-6px) rotate(3deg)}}
@@ -2713,7 +2713,7 @@ function petSVG(stage, mood, px){
   const eye = x => sleepy ? `<path d="M${x-5} 50 q5 ${mood==="asleep"?4:3} 10 0" stroke="#2A2230" stroke-width="2.6" fill="none" stroke-linecap="round"/>`
                           : `<circle cx="${x}" cy="49" r="4.4" fill="#2A2230"/><circle cx="${x+1.5}" cy="47.4" r="1.4" fill="#fff"/>`;
   return `<svg class="pet-svg ${mood}" viewBox="0 0 160 120" width="${px}" height="${px*.75}" role="img" aria-label="Your lab rat, ${esc(PET_STAGES[stage][1])}, ${mood}">
-    <g transform="translate(80 118) scale(${sc}) translate(-80 -118)">
+    <g class="pet-body"><g transform="translate(80 118) scale(${sc}) translate(-80 -118)">
       <path d="M118 96 q32 -4 30 -30 q-2 -14 -12 -12" stroke="#E8A3B4" stroke-width="5" fill="none" stroke-linecap="round" class="pet-tail"/>
       <ellipse cx="88" cy="88" rx="38" ry="28" fill="#C9CCD6"/>
       ${stage>=3?`<path d="M62 70 q26 18 52 0 l6 40 h-64z" fill="#FFFFFF" opacity=".95"/><path d="M88 74 v34" stroke="#D6DAE2" stroke-width="2"/>`:""}
@@ -2729,8 +2729,8 @@ function petSVG(stage, mood, px){
       <g stroke="#9AA0AE" stroke-width="1.4"><path d="M46 63 l-20 -3"/><path d="M46 66 l-20 3"/><path d="M74 63 l20 -3"/><path d="M74 66 l20 3"/></g>
       ${stage>=5?`<g><path d="M36 22 l24 -10 l24 10 l-24 10z" fill="#1E2233"/><rect x="48" y="22" width="24" height="9" fill="#1E2233"/><path d="M84 22 v12" stroke="#E2B53E" stroke-width="2"/><circle cx="84" cy="35" r="2.5" fill="#E2B53E"/></g>`:""}
       ${stage===2?`<path d="M52 84 l8 -5 l8 5 l-8 5z" fill="#E11D74"/>`:""}
-    </g>
-    ${sleepy?`<g class="pet-z" fill="#7B8BB8" font-family="var(--display)" font-weight="800"><text x="104" y="34" font-size="16">z</text><text x="116" y="22" font-size="20">Z</text>${mood==="asleep"?'<text x="130" y="12" font-size="24">Z</text>':""}</g>`:""}
+    </g></g>
+    ${sleepy?`<g class="pet-z" fill="#7B8BB8" font-family="var(--display)" font-weight="800"><text x="102" y="42" font-size="15">z</text><text x="114" y="31" font-size="19">Z</text>${mood==="asleep"?'<text x="128" y="22" font-size="22">Z</text>':""}</g>`:""}
     ${mood==="ecstatic"?`<g class="pet-spark" font-size="16"><text x="12" y="24">✨</text><text x="128" y="44">🎉</text></g>`:""}
   </svg>`;
 }
