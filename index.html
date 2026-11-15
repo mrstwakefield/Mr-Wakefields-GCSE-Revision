@@ -626,6 +626,16 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .psy-kr{display:flex;gap:4px;justify-content:center}
 .psy-k{flex:1;min-width:0;max-width:44px;height:48px;border:0;border-radius:8px;background:var(--soft);font-weight:800;font-size:15px;color:var(--ink)}
 .psy-k.wide{max-width:72px;flex:1.6;font-size:13px}
+.petstrip{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:2px 14px 2px 4px;margin:0 0 14px;color:var(--ink);font-size:16px;line-height:1.35}
+.petstrip[hidden]{display:none}
+.petstrip:hover{background:var(--soft)}
+.petstrip .ps-art{flex:none;display:block;line-height:0}
+.petstrip .ps-txt{flex:1;min-width:0}
+.petstrip .ps-cheese{flex:none;font-size:18px;letter-spacing:2px}
+.petstrip .ps-cheese i{font-style:normal;opacity:.25}
+.petstrip.sleepy,.petstrip.asleep{border-style:dashed}
+.petstrip.ecstatic{border-color:var(--good);background:var(--good-bg)}
+@media (max-width:560px){.petstrip{font-size:14px;gap:8px}.petstrip .ps-art svg{width:84px;height:63px}.petstrip .ps-cheese{font-size:14px}}
 .petbtn{width:auto;padding:0 4px;overflow:hidden}
 .petbtn svg{display:block}
 .petbtn.sleepy{filter:saturate(.6)}
@@ -855,11 +865,11 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
     <div class="hud-stat" id="hudStreak"><span class="ico">🔥</span><span><span id="hudStreakN">0</span><span class="lab">streak</span></span></div>
     <button class="hud-stat" id="hudGoal" aria-label="Today's goal. Open progress"><svg class="goalring" viewBox="0 0 30 30"><circle class="ring-bg" cx="15" cy="15" r="12" style="stroke-width:4"/><circle class="ring-fg" id="hudGoalRing" cx="15" cy="15" r="12" style="stroke-width:4" stroke-dasharray="75.4" stroke-dashoffset="75.4"/></svg><span><span id="hudGoalN">0/30</span><span class="lab">today</span></span></button>
     <div class="combo" id="combo" aria-live="polite"></div>
-    <button class="iconbtn petbtn" id="petBtn" aria-label="Your lab rat"></button>
     <button class="iconbtn focusbtn" id="focusBtn" aria-label="Start a 25-minute focus session" title="Focus timer: 25 minutes">🎯</button>
     <button class="iconbtn" id="soundBtn" aria-label="Mute sounds">🔊</button>
   </div>
 
+  <button class="petstrip" id="petStrip" hidden></button>
   <div class="evbar" id="evbar" hidden></div>
   <div class="plan" id="plan" aria-live="polite"></div>
 
@@ -2691,12 +2701,12 @@ function petMood(){
   return "asleep";
 }
 const PET_MSG = {
-  new:"Meet your new lab rat! Answer questions to help them grow.",
+  new:"Meet your new lab rat! Answer questions to help him grow.",
   ecstatic:"is doing a happy dance 🎉 You smashed your daily goal!",
-  happy:"is happy you're revising today. Hit your daily goal for a happy dance!",
-  waiting:"is waiting for you. Answer a few questions to keep them happy.",
-  sleepy:"is getting sleepy… 😴 They miss you. Revise today to perk them up.",
-  asleep:"has fallen fast asleep 💤 Answer some questions to wake them up!",
+  happy:"is happy you're revising today. Hit your goal to make him dance!",
+  waiting:"is waiting for you. Answer a few questions to keep him happy.",
+  sleepy:"is getting sleepy… 😴 He misses you. Revise today to perk him up.",
+  asleep:"has fallen fast asleep 💤 Answer some questions to wake him up!",
 };
 function petSVG(stage, mood, px){
   const sc=.62+stage*.076, sleepy=mood==="sleepy"||mood==="asleep", happy=mood==="ecstatic"||mood==="happy"||mood==="new";
@@ -2734,12 +2744,32 @@ function petBoxHTML(){
       <p class="pet-msg"><b>${esc(p.name)}</b> ${esc(PET_MSG[mood])}</p>
       <p class="muted" style="margin:6px 0 0;font-size:15px">Cheese today: ${"🧀".repeat(cheese)}${"<span style='opacity:.25'>🧀</span>".repeat(3-cheese)} <span style="font-size:13px">(one for every 10 answers)</span></p></div></div>`;
 }
-function wirePet(){ const b=$("#petRename"); if(b) b.onclick=()=>{ const n=prompt("Name your lab rat:", G.pet.name); if(n && n.trim()){ G.pet.name=n.trim().slice(0,20); save(); renderTrophies(); petHud(); } }; }
-function petHud(){ const b=$("#petBtn"); if(!b||TEACHER) return; petInit(); const m=petMood(); b.innerHTML=petSVG(petStage(),m,46); b.setAttribute("aria-label",`${G.pet.name} the lab rat: ${PET_MSG[m]}`); b.title=`${G.pet.name} ${PET_MSG[m]}`; b.classList.toggle("sleepy", m==="sleepy"||m==="asleep"); }
+const NAME_BLOCK = (()=>{ try{ return JSON.parse(atob("W1siZnVjayIsICJmdWsiLCAiZmNrIiwgInNoaXQiLCAiY3VudCIsICJiaXRjaCIsICJiYXN0YXJkIiwgIndhbmsiLCAidHdhdCIsICJwdXNzeSIsICJzbHV0IiwgIndob3JlIiwgIm5pZ2ciLCAibmlnZ2EiLCAiZmFnZyIsICJmYWdnb3QiLCAicmV0YXJkIiwgInJhcGUiLCAicmFwaXN0IiwgInBvcm4iLCAicGVuaXMiLCAidmFnaW5hIiwgImRpbGRvIiwgImJvbGxvY2siLCAiYmVsbGVuZCIsICJ0b3NzZXIiLCAibm9uY2UiLCAic3Bhc3RpYyIsICJuYXppIiwgImhpdGxlciIsICJqaXp6IiwgImJ1a2tha2UiLCAiY2xpdCIsICJzaGFnIiwgImJ1Z2dlciIsICJtaW5nZSIsICJrbm9iIiwgIm1vdGhlcmYiLCAic2gxdCIsICJwYWVkbyIsICJwZWRvIiwgImluY2VsIiwgImhvcm55IiwgImJvb2IiLCAidGVzdGljbGUiLCAic2Nyb3QiLCAiZGlja2hlYWQiLCAiY29ja3N1Y2siLCAiYXJzZWhvbGUiLCAiYXNzaG9sZSIsICJ3YW5rZXIiLCAibWlsZiIsICJvbmx5ZmFucyIsICJreXMiLCAia2lsbHlvdXJzZWxmIiwgInN1aWNpZGUiLCAiY29vbiIsICJjaGluayIsICJnb29rIiwgImtpa2UiLCAid29nIiwgInRyYW5ueSIsICJkeWtlIiwgImhvbW8iXSwgWyJkaWNrIiwgImNvY2siLCAiYXJzZSIsICJhc3MiLCAidGl0IiwgInRpdHMiLCAidGl0dHkiLCAiY3VtIiwgInNleCIsICJzZXh5IiwgImFuYWwiLCAiYW51cyIsICJwb28iLCAicG9vcCIsICJwZWUiLCAicGlzcyIsICJwcmljayIsICJjcmFwIiwgInNsYWciLCAic2thbmsiLCAiaG9lIiwgImhvIiwgInNwYXoiLCAicGFraSIsICJnYXkiLCAibGVzYm8iLCAiYnV0dCIsICJidW0iLCAiYmFsbHMiLCAibnV0IiwgIm51dHMiLCAiZmFydCIsICJ0dXJkIiwgImRhbW4iLCAiaGVsbCIsICJ3aWxseSIsICJ3ZWUiLCAiYmoiLCAiZGsiLCAic3RmdSIsICJ3dGYiLCAiZnUiLCAiZm1sIiwgImxtZmFvIiwgImhvcmUiLCAidGhvdCIsICJzaW1wIiwgImR1bWIiLCAiaWRpb3QiLCAic3R1cGlkIiwgInVnbHkiLCAiZmF0IiwgImxvc2VyIiwgIm1vcm9uIiwgInN1Y2tzIiwgInNtZWxseSIsICJzdGlua3kiLCAia2lsbCIsICJkaWUiLCAiZGVhZCIsICJtdXJkZXIiLCAiZ3VuIiwgImJvbWIiLCAiZHJ1Z3MiLCAid2VlZCIsICJjcmFjayJdXQ==")); }catch(e){ return [[],[]]; } })();
+function cleanName(raw){
+  // returns a tidy name, or null if it's empty, uses odd characters or contains a rude word
+  const n=String(raw||"").replace(/\s+/g," ").trim().slice(0,20);
+  if(n.length<2 || !/^[A-Za-zÀ-ÿ' .-]+$/.test(n)) return null;
+  const leet=s=>s.toLowerCase().replace(/[0@]/g,m=>m==="0"?"o":"a").replace(/1|!|\|/g,"i").replace(/3/g,"e").replace(/4/g,"a").replace(/5|\$/g,"s").replace(/7/g,"t");
+  const squash=s=>s.replace(/(.)\1+/g,"$1");
+  const flat=squash(leet(n).replace(/[^a-z]/g,""));
+  if(NAME_BLOCK[0].some(w=>flat.includes(squash(w)))) return null;
+  const words=leet(n).split(/[^a-z]+/).filter(Boolean).map(squash);
+  if(words.some(w=>NAME_BLOCK[1].some(b=>squash(b)===w)) || NAME_BLOCK[1].some(b=>squash(b)===flat)) return null;
+  return n;
+}
+function wirePet(){ const b=$("#petRename"); if(b) b.onclick=()=>{
+  let n=prompt("Name your lab rat (letters only, up to 20):", G.pet.name);
+  while(n!==null){ const ok=cleanName(n); if(ok){ G.pet.name=ok; save(); renderTrophies(); petHud(); return; }
+    n=prompt("Let's keep it friendly! Pick a different name (letters only, 2–20 characters):", "Professor Squeaks"); }
+}; }
+function petHud(){ const b=$("#petStrip"); if(!b||TEACHER) return; petInit(); const m=petMood(), st=petStage(), td=(G.hist||{})[today()]||0, cheese=Math.min(3,Math.floor(td/10));
+  b.hidden=false; b.className="petstrip "+m;
+  b.innerHTML=`<span class="ps-art">${petSVG(st,m,120)}</span><span class="ps-txt"><b>${esc(G.pet.name)}</b> ${esc(PET_MSG[m])}</span><span class="ps-cheese" aria-label="${cheese} of 3 cheese today">${"🧀".repeat(cheese)}${"<i>🧀</i>".repeat(3-cheese)}</span>`;
+  b.setAttribute("aria-label",`${G.pet.name} the lab rat: ${PET_MSG[m]} Open progress`); }
 function petCheck(){
   if(TEACHER) return; const p=petInit(), st=petStage(), m=petMood();
-  if(st>p.stage){ p.stage=st; save(); setTimeout(()=>{ toast("🐀",`${p.name} grew into a ${PET_STAGES[st][1].toLowerCase()}!`,st>=5?"They're wearing a graduation cap. Legendary.":st>=4?"Look, glasses! So wise.":st>=3?"They've got their own lab coat now.":"Keep revising to help them grow.",true); confetti(100); },600); }
-  if((p.mood==="sleepy"||p.mood==="asleep") && (m==="happy"||m==="ecstatic")) setTimeout(()=>toast("🐀",`${p.name} woke up!`,"They're so happy to see you revising again.",true),400);
+  if(st>p.stage){ p.stage=st; save(); setTimeout(()=>{ toast("🐀",`${p.name} grew into a ${PET_STAGES[st][1].toLowerCase()}!`,st>=5?"He's wearing a graduation cap. Legendary.":st>=4?"Look, glasses! So wise.":st>=3?"He's got his own lab coat now.":"Keep revising to help him grow.",true); confetti(100); },600); }
+  if((p.mood==="sleepy"||p.mood==="asleep") && (m==="happy"||m==="ecstatic")) setTimeout(()=>toast("🐀",`${p.name} woke up!`,"He's so happy to see you revising again.",true),400);
   if(p.mood!=="ecstatic" && m==="ecstatic" && p.mood) setTimeout(()=>toast("🐀",`${p.name} is doing a happy dance!`,"Daily goal smashed. 🧀🧀🧀",true),800);
   if(p.mood!==m){ p.mood=m; save(); }
   petHud();
@@ -4095,7 +4125,7 @@ else { if(G.cardMode==="gap"){ cardMode="gap"; document.querySelectorAll("[data-
 $("#focusBtn").onclick=focusClick; if(G.focus && G.focus.end){ if(Date.now()>=G.focus.end) focusEnd(true); else { focusTimer=setInterval(focusTick,1000); focusBtnRender(); } }
 $("#parentLink").onclick=()=>{ goTab("quiz"); setQuizMode("parent"); $("#parentArea").scrollIntoView({behavior:reduced()?"auto":"smooth"}); };
 if(!TEACHER && /(^|[?&#])parent\b/i.test(location.search+location.hash)){ goTab("quiz"); setQuizMode("parent"); }
-$("#petBtn").onclick=()=>{ goTab("trophies","progress"); scrollTo({top:0,behavior:reduced()?"auto":"smooth"}); };
+$("#petStrip").onclick=()=>{ goTab("trophies","progress"); };
 if(!TEACHER) petCheck();
 </script>
 </body>
