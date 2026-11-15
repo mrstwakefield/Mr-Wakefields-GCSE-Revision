@@ -739,7 +739,7 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 :root[data-skin="royale"]{--paper:#1A1033;--card:#251845;--ink:#F7F0FF;--muted:#BBA9DD;--line:#3A2A63;--soft:#2F2056;--good:#4CC896;--good-bg:#173A30;--warn:#FFB86B;--warn-bg:#3E2A1A;color-scheme:dark}
 :root[data-skin="royale"] h1{background:linear-gradient(90deg,#FFD54A,#F7F0FF);-webkit-background-clip:text;background-clip:text;color:transparent}
 :root[data-skin="stan"]{--paper:#FFE9F3;--card:#FFFFFF;--ink:#3D0F2A;--muted:#85506D;--line:#F5C6DC;--soft:#FBD9E8;--good:#1C8A5E;--good-bg:#DDF3E8;--warn:#C2185B;--warn-bg:#FCE0EC;color-scheme:light}
-:root[data-skin="stan"] .h1t::after{content:" 💘"}
+:root[data-skin="stan"] .h1t::after{content:" ⭐"}
 :root[data-skin="uniform"]{--paper:#E9E9E9;--card:#FFFFFF;--ink:#141414;--muted:#5A5A5A;--line:#D2D2D2;--soft:#EFEFEF;--good:#1C7A4E;--good-bg:#DCEFE3;--warn:#A3191F;--warn-bg:#F8DEDF;color-scheme:light}
 :root[data-skin="uniform"] .top{position:relative;background:linear-gradient(118deg,transparent 0,transparent 80%,#E56B63 80%,#E56B63 84%,transparent 84%),repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 2px,transparent 2px 6px),#4E5A65;box-shadow:0 0 0 100vmax #4E5A65;clip-path:inset(-100vmax -100vmax 0 -100vmax);padding-bottom:22px;margin-bottom:22px}
 :root[data-skin="uniform"],:root[data-skin="uniform"] body{overflow-x:clip}
@@ -841,7 +841,7 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 :root[data-skin="nap"] .h1t::after{content:" 💤"}
 :root[data-skin="nap"] .btn.good{color:#1A1830}
 :root[data-skin="pavlov"]{--paper:#FBF3E4;--card:#FFFDF8;--ink:#3A2A14;--muted:#7D6744;--line:#EBDCBF;--soft:#F4E7CF;--good:#9A6A10;--good-bg:#F6E7C4;--warn:#B4531B;--warn-bg:#FBE7D9;color-scheme:light}
-:root[data-skin="pavlov"] .h1t::after{content:" 🔔🐶"}
+:root[data-skin="pavlov"] .h1t::after{content:" 🔔"}
 :root[data-skin="fool"]{--paper:#FFF6FB;--card:#FFFFFF;--ink:#2B1A3A;--muted:#7A6585;--line:#F3D6E8;--soft:#FBE6F2;--good:#1C8A5E;--good-bg:#DDF3E8;--warn:#C2185B;--warn-bg:#FCE0EC;color-scheme:light}
 :root[data-skin="fool"] .h1t{background:linear-gradient(90deg,#FF4FA3,#FFB627,#2EC4B6,#7B5BE0,#FF4FA3);-webkit-background-clip:text;background-clip:text;color:transparent}
 :root[data-skin="fool"] h1::before{content:"🃏 "}
@@ -860,7 +860,7 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
   <div class="hud" id="hud">
     <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="xpGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7B5BE0"/><stop offset=".55" stop-color="#D6478F"/><stop offset="1" stop-color="#F39A3C"/></linearGradient></defs></svg>
     <button class="lvl" id="hudLvl" aria-label="Your level. Open progress"><svg viewBox="0 0 50 50"><circle class="ring-bg" cx="25" cy="25" r="20"/><circle class="ring-fg" id="hudLvlRing" cx="25" cy="25" r="20" stroke-dasharray="125.7" stroke-dashoffset="125.7"/></svg><b id="hudLvlNum">1</b><small>LVL</small></button>
-    <div class="xpbox"><div class="xprow"><b id="rankName">Lab Rat</b><span id="xpText"></span></div><div class="xpbar"><i id="xpFill"></i></div></div>
+    <div class="xpbox"><div class="xprow"><b id="rankName">Lab Newbie</b><span id="xpText"></span></div><div class="xpbar"><i id="xpFill"></i></div></div>
     <span class="hud-spacer" aria-hidden="true"></span>
     <div class="hud-stat" id="hudStreak"><span class="ico">🔥</span><span><span id="hudStreakN">0</span><span class="lab">streak</span></span></div>
     <button class="hud-stat" id="hudGoal" aria-label="Today's goal. Open progress"><svg class="goalring" viewBox="0 0 30 30"><circle class="ring-bg" cx="15" cy="15" r="12" style="stroke-width:4"/><circle class="ring-fg" id="hudGoalRing" cx="15" cy="15" r="12" style="stroke-width:4" stroke-dasharray="75.4" stroke-dashoffset="75.4"/></svg><span><span id="hudGoalN">0/30</span><span class="lab">today</span></span></button>
@@ -1571,7 +1571,7 @@ const dueCount = () => pool().filter(d=>isDue(d.id)).length;
 Object.keys(store.p).forEach(id=>{ if(store.p[id]==="k" && !G.srs[id]) G.srs[id]={b:1, d:addDays(1+Math.floor(Math.random()*14))}; });
 let combo = 0;
 
-const RANKS = [[1,"Lab Rat"],[2,"Wakefield Minion"],[3,"Naive Participant"],[4,"Professional Guesser"],[5,"Short-Term Memory Loss"],[6,"Chunking Champion"],[7,"Procrastination Survivor"],[8,"Placebo Effect"],[9,"Flashcard Fanatic"],[10,"Certified Overthinker"],[11,"Wakefield's Favourite (Allegedly)"],[12,"Baby Freud"],[13,"Wakefield's Teacher's Pet"],[14,"Neuron Whisperer"],[15,"Mr Wallace"],[16,"Research Assistant"],[17,"Fount Sipper"],[18,"Brain Cell Collector"],[19,"Bystander (Not Helping)"],[20,"Agentic State Survivor"],[21,"Wakefield's Homework Hero"],[22,"Mind Palace Builder"],[23,"Serial Position Specialist"],[24,"Fount Paddler"],[25,"Schema Smasher"],[26,"Synapse Surfer"],[27,"Wakefield's Wildcard"],[28,"Shockingly Obedient"],[29,"Pavlov's Star Pupil"],[30,"Walking Visual Illusion"],[31,"Top-Down Thinker"],[32,"Wakefield's Lab Partner"],[33,"Graduate Researcher"],[34,"Myelin Sheath Enthusiast"],[35,"Fount Swimmer"],[36,"Piaget's Problem Child"],[37,"Wakefield's Favourite (Confirmed)"],[38,"Doctor of Psychology"],[39,"Ethical Guidelines Enforcer"],[40,"Wakefield's Pink Pen"],[41,"Wakefield's Deputy"],[42,"Freud's Worst Nightmare"],[43,"Head of Department"],[44,"Hippocampus Hero"],[45,"Wakefield Whisperer"],[46,"Guardian of the Fount"],[47,"Mark Scheme Mind-Reader"],[48,"Wakefield's Successor (In Training)"],[49,"Grand Master of the Mind"],[50,"Keeper of the Sacred Mark Scheme"],[51,"Wakefield Cardboard Cutout Owner"],[52,"Walking Revision Guide"],[53,"Fount Overlord"],[54,"Examiner's Nightmare"],[55,"Wakefield Fan Club President"],[56,"Living Legend"],[57,"Psychology Final Boss"],[58,"Long-Term Memory Legend"],[59,"Wakefield's Seating Plan VIP"],[60,"Grade 9 Energy"],[61,"Neuroplasticity Ninja"],[62,"Sapir-Whorf Wordsmith"],[63,"Wakefield's Register Regular"],[64,"Confounding Variable Crusher"],[65,"Bee Dance Choreographer"],[66,"Keeper of Wakefield's Spare Pen"],[67,"Classically Conditioned to Revise"],[68,"Ethics Committee Chair"],[69,"Peer Reviewer"],[70,"Fount Lifeguard"],[71,"Mock Exam Menace"],[72,"Professor Emeritus"],[73,"Wakefield's Stunt Double"],[74,"The Chief Examiner's Rival"],[75,"Freud Who?"],[76,"Hall of Fame Inductee"],[77,"Wakefield's Understudy"],[78,"Wakefield's Mini-Me"],[79,"Basically Mr Wakefield"],[80,"Dedicated Wakefield Stan"]];
+const RANKS = [[1,"Lab Newbie"],[2,"Wakefield Minion"],[3,"Naive Participant"],[4,"Professional Guesser"],[5,"Working Memory Warm-Up"],[6,"Chunking Champion"],[7,"Procrastination Survivor"],[8,"Placebo Effect"],[9,"Flashcard Fanatic"],[10,"Certified Deep Thinker"],[11,"Wakefield's Rising Star"],[12,"Junior Psychologist"],[13,"Wakefield's Star Student"],[14,"Neuron Navigator"],[15,"Mr Wallace"],[16,"Research Assistant"],[17,"Fount Sipper"],[18,"Brain Cell Collector"],[19,"Bystander (Not Helping)"],[20,"Agentic State Survivor"],[21,"Wakefield's Homework Hero"],[22,"Mind Palace Builder"],[23,"Serial Position Specialist"],[24,"Fount Paddler"],[25,"Schema Builder"],[26,"Synapse Surfer"],[27,"Wakefield's Wildcard"],[28,"Shockingly Brilliant"],[29,"Classical Conditioning Champ"],[30,"Walking Visual Illusion"],[31,"Big-Picture Thinker"],[32,"Lab Technician"],[33,"Graduate Researcher"],[34,"Myelin Master"],[35,"Fount Swimmer"],[36,"Piaget's Prodigy"],[37,"Wakefield's MVP"],[38,"Doctor of Psychology"],[39,"Ethical Guidelines Enforcer"],[40,"Wakefield's Pink Pen"],[41,"Wakefield's Deputy"],[42,"Theory Titan"],[43,"Head of Department"],[44,"Hippocampus Hero"],[45,"Wakefield's Right Hand"],[46,"Guardian of the Fount"],[47,"Mark Scheme Mind-Reader"],[48,"Wakefield's Successor (In Training)"],[49,"Grand Master of the Mind"],[50,"Keeper of the Sacred Mark Scheme"],[51,"Revision Royalty"],[52,"Walking Revision Guide"],[53,"Fount Overlord"],[54,"Examiner's Nightmare"],[55,"Psychology Society President"],[56,"Living Legend"],[57,"Psychology Final Boss"],[58,"Long-Term Memory Legend"],[59,"Wakefield's Seating Plan VIP"],[60,"Grade 9 Energy"],[61,"Neuroplasticity Ninja"],[62,"Sapir-Whorf Wordsmith"],[63,"Wakefield's Register Regular"],[64,"Confounding Variable Controller"],[65,"Bee Dance Choreographer"],[66,"Keeper of Wakefield's Spare Pen"],[67,"Classically Conditioned to Revise"],[68,"Ethics Committee Chair"],[69,"Peer Reviewer"],[70,"Fount Lifeguard"],[71,"Mock Exam Menace"],[72,"Professor Emeritus"],[73,"Wakefield's Stunt Double"],[74,"The Chief Examiner's Rival"],[75,"Study Superstar"],[76,"Hall of Fame Inductee"],[77,"Wakefield's Understudy"],[78,"Wakefield's Mini-Me"],[79,"Basically Mr Wakefield"],[80,"Dedicated Wakefield Stan"]];
 const lvlStart = n => 50*(n-1)*n;           // XP needed to reach level n
 function lvlFor(xp){ let n=1; while(xp>=lvlStart(n+1)) n++; return n; }
 function rankFor(n){ let r=RANKS[0][1]; RANKS.forEach(([l,name])=>{ if(n>=l) r=name; }); return r; }
@@ -1737,25 +1737,25 @@ const BADGES = [
   ["kall","⛲","Fount of wisdom","Know every single card",()=>knownTotal()>=DATA.length],
   ["topic","🥇","Topic master","Know every card in one topic",()=>TOPICS.some(t=>DATA.filter(d=>d.t===t.key).every(d=>status(d.id)==="k"))],
   ["perfect","💯","Flawless","Full marks in a quiz",()=>G.st.perfect>=1],
-  ["blitz20","⏱️","Speed demon","20 right in one Blitz",()=>G.st.blitzR>=20],
+  ["blitz20","⏱️","Quick thinker","20 right in one Blitz",()=>G.st.blitzR>=20],
   ["surv25","❤️","Survivor","Reach 25 in Survival",()=>G.st.surv>=25],
   ["daily","📰","Daily driver","Finish a Daily 10",()=>Object.keys(G.daily).some(k=>G.daily[k].done)],
   ["daily10","🎯","Daily perfection","Score 10/10 on a Daily 10",()=>Object.values(G.daily).some(v=>v.done&&v.score===10)],
   ["exam10","🎓","Exam ready","Score 10/10 in Exam Skills",()=>G.st.exam>=10],
-  ["examR","📝","Examiner's dream","Get 50 exam-skills questions right",()=>G.st.examR>=50],
+  ["examR","📝","Exam technique pro","Get 50 exam-skills questions right",()=>G.st.examR>=50],
   ["terms30","🔤","Wordsmith","Score a perfect 30 in Key Terms",()=>G.st.terms>=30],
   ["maths25","🧮","Number cruncher","Get 25 RM maths questions right",()=>G.st.maths>=25],
   ["review50","📅","Memory keeper","Review 50 cards when they're due",()=>G.st.reviews>=50],
   ["boss1","⚔️","Boss slayer","Defeat your first boss",()=>Object.values(G.bosses).some(b=>b.won)],
   ["flawless","👑","Flawless victory","Defeat a boss without losing a life",()=>Object.values(G.bosses).some(b=>b.flawless)],
   ["bossall","🐉","Dungeon cleared","Defeat every boss",()=>Object.keys(BOSSES).every(k=>G.bosses[k]&&G.bosses[k].won)],
-  ["match45","🔗","Speed matcher","Finish the Study Matcher in under 45 seconds",()=>(G.st.matchBest||999)<45],
+  ["match45","🔗","Lightning matcher","Finish the Study Matcher in under 45 seconds",()=>(G.st.matchBest||999)<45],
   ["mock1","📝","Exam conditions","Finish a mock paper",()=>Object.keys((G.mocks||{}).done||{}).length>=1],
   ["mock4","🏅","Mock marathon","Finish all four mock papers",()=>Object.keys((G.mocks||{}).done||{}).length>=4],
   ["parent3","👪","Family quiz night","Get tested by a parent or carer 3 times",()=>(G.st.parent||0)>=3],
-  ["psy5","🔤","Word nerd","Win Psychle 5 times",()=>(G.st.psyWins||0)>=5],
+  ["psy5","🔤","Word wizard","Win Psychle 5 times",()=>(G.st.psyWins||0)>=5],
   ["which30","🕵️","Super sleuth","Score 30+ in Which Study?",()=>(G.st.whichBest||0)>=30],
-  ["petwise","🐀","Rat whisperer","Raise your lab rat to a wise rat",()=>(G.st.cards||0)>=2500],
+  ["petwise","🐀","Squeaks' best friend","Help Professor Squeaks grow into a wise rat",()=>(G.st.cards||0)>=2500],
   ["focus5","🎯","Deep focus","Complete 5 focus sessions",()=>(G.st.focus||0)>=5],
   ["flaw14","🔍","Flaw finder","Score 14+ in Spot the Flaw",()=>(G.st.flawBest||0)>=14],
   ["order15","🔢","Sequence master","Score 15+ in Put it in Order",()=>(G.st.orderBest||0)>=15],
@@ -1768,26 +1768,26 @@ const BADGES = [
   ["l20","🏆","Elite","Reach level 20",()=>lvlFor(G.xp)>=20],
   ["l2","🫡","Wakefield Minion","Reach level 2 and join the ranks",()=>lvlFor(G.xp)>=2],
   ["l60","🎓","Grade 9 Energy","Reach level 60",()=>lvlFor(G.xp)>=60],
-  ["l80","💘","Dedicated Wakefield Stan","Reach level 80. True devotion",()=>lvlFor(G.xp)>=80],
+  ["l80","👑","Dedicated Wakefield Stan","Reach level 80, the very top",()=>lvlFor(G.xp)>=80],
   // ---- secret badges: the last item is the cryptic hint shown while locked ----
   ["gold1","✨","Lucky find","Get a golden card right",()=>G.st.gold>=1, "Not all cards are created equal…"],
-  ["gold10","💰","Gold digger","Get 10 golden cards right",()=>G.st.gold>=10, "…and some people collect them"],
+  ["gold10","🪙","Treasure hunter","Get 10 golden cards right",()=>G.st.gold>=10, "…and some people collect them"],
   ["weekend","🛋️","Weekend warrior","Revise on a Saturday or Sunday",()=>[0,6].includes(new Date().getDay()) && G.st.cards>0, "Saturday? Sunday? Still here."],
   ["lark","🐦","Early bird","Revise before 7am",()=>new Date().getHours()<7 && G.st.cards>0, "The early bird catches the… mark scheme"],
   ["miller","🧠","Miller's magic number","End a run of correct answers at exactly 7",()=>!!G.flags.miller, "7 ± 2"],
   ["shock450","⚡","Shockingly precise","Score exactly 450 in a Blitz game",()=>!!G.flags.shock450, "How high did the dial go?"],
-  ["comeback","💪","Comeback kid","Defeat a boss with only 1 life left",()=>!!G.flags.comeback, "Hanging on by a thread"],
+  ["comeback","💪","Comeback kid","Defeat a boss with only 1 life left",()=>!!G.flags.comeback, "Down to your last life"],
   ["ouch","🙈","Ouch","Lose all 3 lives in a boss's first 3 questions",()=>!!G.flags.ouch, "That escalated quickly"],
   ["finally","🔁","Finally!","Get a card right after marking it still learning 3+ times",()=>!!G.flags.finally, "Fourth time lucky"],
-  ["honest","😇","Honest Abe","Mark 50 cards as still learning",()=>(G.st.learnMarks||0)>=50, "Honesty is the best policy"],
+  ["honest","😇","Honesty pays","Mark 50 cards as still learning",()=>(G.st.learnMarks||0)>=50, "Honesty is the best policy"],
   ["ragequit","🏃","Rage quit","End an Arcade game within 5 seconds",()=>!!G.flags.ragequit, "Nope. Not today."],
   ["fashion","🎨","Fashionista","Try 4 different themes",()=>Object.keys(G.skinsTried||{}).length>=4, "Dress for the job you want"],
   ["backup","💾","Backup buddy","Copy or download a save code",()=>!!G.flags.backup, "Better safe than sorry"],
-  ["stan","🎂","Stan in training","Click the site title 5 times",()=>!!G.flags.stan, "Show the title some love"],
+  ["stan","⭐","Title clicker","Click the site title 5 times",()=>!!G.flags.stan, "Show the title some love"],
   ["ring","👆","Ring the bell","Tap the level ring 10 times",()=>!!G.flags.ring, "Is this thing on?"],
   ["nightbefore","🌙","Night before","Revise the day before a mock",()=>!!G.flags.nightbefore, "Big day tomorrow…"],
   ["survivor","🎯","Mock survivor","Come back on or after mock day",()=>!!G.flags.survivor, "You made it through"],
-  ["festive","🎄","Festive swot","Revise on Christmas Day",()=>!!G.flags.festive, "Even Santa does revision"],
+  ["festive","🎄","Festive scholar","Revise on Christmas Day",()=>!!G.flags.festive, "Even Santa does revision"],
   ["bossrush","⚔️","Boss rush","Defeat 3 different bosses in one day",()=>!!G.flags.bossrush, "Three in a day? Brave."],
   ["palindrome","🔢","Palindrome","Finish with an XP total that reads the same backwards",()=>!!G.flags.palindrome, "Racecar, kayak, 12321"],
   ["keeper","📜","Keeper of the Scrolls","Find every secret scroll",()=>!!G.flags.keeper, "Collect them all"],
