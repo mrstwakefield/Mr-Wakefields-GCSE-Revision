@@ -643,7 +643,7 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .pet-art{flex:none}
 .pet-info{flex:1;min-width:220px}
 .pet-msg{margin:0;font-size:17px}
-.pet-info h3{display:flex;align-items:baseline;gap:8px;justify-content:flex-start}
+.box .pet-info h3{display:flex;align-items:baseline;gap:8px;justify-content:flex-start}
 @media (max-width:560px){.petbtn svg{width:34px;height:26px}.hud{gap:6px!important}.hud .iconbtn{width:36px;min-width:36px;height:38px;padding:0}.hud .petbtn{width:auto;padding:0 2px}.hud .focusbtn{width:auto;min-width:36px;padding:0 6px}.hud .hud-stat{padding-left:8px;padding-right:8px}.hud #hudGoal .goalring{display:none}}
 .pet-svg.ecstatic .pet-body{animation:petdance .7s ease-in-out infinite alternate;transform-origin:80px 110px;transform-box:view-box}
 .pet-svg.happy .pet-tail{animation:petwag 1s ease-in-out infinite alternate;transform-origin:118px 96px;transform-box:view-box}
@@ -2734,6 +2734,7 @@ function petSVG(stage, mood, px){
     ${mood==="ecstatic"?`<g class="pet-spark" font-size="16"><text x="12" y="24">✨</text><text x="128" y="44">🎉</text></g>`:""}
   </svg>`;
 }
+function petLine(m){ return m==="new" ? `Meet <b>${esc(G.pet.name)}</b>, your new lab rat! Answer questions to help him grow.` : `<b>${esc(G.pet.name)}</b> ${esc(PET_MSG[m])}`; }
 function petBoxHTML(){
   const p=petInit(), st=petStage(), mood=petMood(), n=G.st.cards||0, next=PET_STAGES[st+1];
   const td=(G.hist||{})[today()]||0, cheese=Math.min(3,Math.floor(td/10));
@@ -2741,7 +2742,7 @@ function petBoxHTML(){
     <div class="pet-info"><h3 style="margin:0">🐀 <span id="petName">${esc(p.name)}</span> <button class="linkbtn" id="petRename" style="font-size:14px">Rename</button></h3>
       <p class="muted" style="margin:2px 0 8px">${esc(PET_STAGES[st][1])}${next?` · ${next[0]-n} more answers to become a ${esc(next[1].toLowerCase())}`:" · fully grown legend 🎓"}</p>
       ${next?`<div class="xpbar" style="margin-bottom:10px"><i style="width:${(n-PET_STAGES[st][0])/(next[0]-PET_STAGES[st][0])*100}%"></i></div>`:""}
-      <p class="pet-msg"><b>${esc(p.name)}</b> ${esc(PET_MSG[mood])}</p>
+      <p class="pet-msg">${petLine(mood)}</p>
       <p class="muted" style="margin:6px 0 0;font-size:15px">Cheese today: ${"🧀".repeat(cheese)}${"<span style='opacity:.25'>🧀</span>".repeat(3-cheese)} <span style="font-size:13px">(one for every 10 answers)</span></p></div></div>`;
 }
 const NAME_BLOCK = (()=>{ try{ return JSON.parse(atob("W1siZnVjayIsICJmdWsiLCAiZmNrIiwgInNoaXQiLCAiY3VudCIsICJiaXRjaCIsICJiYXN0YXJkIiwgIndhbmsiLCAidHdhdCIsICJwdXNzeSIsICJzbHV0IiwgIndob3JlIiwgIm5pZ2ciLCAibmlnZ2EiLCAiZmFnZyIsICJmYWdnb3QiLCAicmV0YXJkIiwgInJhcGUiLCAicmFwaXN0IiwgInBvcm4iLCAicGVuaXMiLCAidmFnaW5hIiwgImRpbGRvIiwgImJvbGxvY2siLCAiYmVsbGVuZCIsICJ0b3NzZXIiLCAibm9uY2UiLCAic3Bhc3RpYyIsICJuYXppIiwgImhpdGxlciIsICJqaXp6IiwgImJ1a2tha2UiLCAiY2xpdCIsICJzaGFnIiwgImJ1Z2dlciIsICJtaW5nZSIsICJrbm9iIiwgIm1vdGhlcmYiLCAic2gxdCIsICJwYWVkbyIsICJwZWRvIiwgImluY2VsIiwgImhvcm55IiwgImJvb2IiLCAidGVzdGljbGUiLCAic2Nyb3QiLCAiZGlja2hlYWQiLCAiY29ja3N1Y2siLCAiYXJzZWhvbGUiLCAiYXNzaG9sZSIsICJ3YW5rZXIiLCAibWlsZiIsICJvbmx5ZmFucyIsICJreXMiLCAia2lsbHlvdXJzZWxmIiwgInN1aWNpZGUiLCAiY29vbiIsICJjaGluayIsICJnb29rIiwgImtpa2UiLCAid29nIiwgInRyYW5ueSIsICJkeWtlIiwgImhvbW8iXSwgWyJkaWNrIiwgImNvY2siLCAiYXJzZSIsICJhc3MiLCAidGl0IiwgInRpdHMiLCAidGl0dHkiLCAiY3VtIiwgInNleCIsICJzZXh5IiwgImFuYWwiLCAiYW51cyIsICJwb28iLCAicG9vcCIsICJwZWUiLCAicGlzcyIsICJwcmljayIsICJjcmFwIiwgInNsYWciLCAic2thbmsiLCAiaG9lIiwgImhvIiwgInNwYXoiLCAicGFraSIsICJnYXkiLCAibGVzYm8iLCAiYnV0dCIsICJidW0iLCAiYmFsbHMiLCAibnV0IiwgIm51dHMiLCAiZmFydCIsICJ0dXJkIiwgImRhbW4iLCAiaGVsbCIsICJ3aWxseSIsICJ3ZWUiLCAiYmoiLCAiZGsiLCAic3RmdSIsICJ3dGYiLCAiZnUiLCAiZm1sIiwgImxtZmFvIiwgImhvcmUiLCAidGhvdCIsICJzaW1wIiwgImR1bWIiLCAiaWRpb3QiLCAic3R1cGlkIiwgInVnbHkiLCAiZmF0IiwgImxvc2VyIiwgIm1vcm9uIiwgInN1Y2tzIiwgInNtZWxseSIsICJzdGlua3kiLCAia2lsbCIsICJkaWUiLCAiZGVhZCIsICJtdXJkZXIiLCAiZ3VuIiwgImJvbWIiLCAiZHJ1Z3MiLCAid2VlZCIsICJjcmFjayJdXQ==")); }catch(e){ return [[],[]]; } })();
@@ -2764,7 +2765,7 @@ function wirePet(){ const b=$("#petRename"); if(b) b.onclick=()=>{
 }; }
 function petHud(){ const b=$("#petStrip"); if(!b||TEACHER) return; petInit(); const m=petMood(), st=petStage(), td=(G.hist||{})[today()]||0, cheese=Math.min(3,Math.floor(td/10));
   b.hidden=false; b.className="petstrip "+m;
-  b.innerHTML=`<span class="ps-art">${petSVG(st,m,120)}</span><span class="ps-txt"><b>${esc(G.pet.name)}</b> ${esc(PET_MSG[m])}</span><span class="ps-cheese" aria-label="${cheese} of 3 cheese today">${"🧀".repeat(cheese)}${"<i>🧀</i>".repeat(3-cheese)}</span>`;
+  b.innerHTML=`<span class="ps-art">${petSVG(st,m,120)}</span><span class="ps-txt">${petLine(m)}</span><span class="ps-cheese" aria-label="${cheese} of 3 cheese today">${"🧀".repeat(cheese)}${"<i>🧀</i>".repeat(3-cheese)}</span>`;
   b.setAttribute("aria-label",`${G.pet.name} the lab rat: ${PET_MSG[m]} Open progress`); }
 function petCheck(){
   if(TEACHER) return; const p=petInit(), st=petStage(), m=petMood();
@@ -2852,9 +2853,10 @@ function renderTrophies(){
   let tp=G.tpage||"progress";
   if(!["progress","weak","badges","scrolls","looks","save"].includes(tp)) tp=G.tpage="progress";
   const pages={
-    progress:`${petBoxHTML()}<div class="profile"><div class="bigring"><svg viewBox="0 0 110 110"><circle class="ring-bg" cx="55" cy="55" r="48" style="stroke-width:9"/><circle class="ring-fg" cx="55" cy="55" r="48" style="stroke-width:9" ${ring(48,frac)}/></svg><b>${n}</b></div>
+    progress:`<div class="profile"><div class="bigring"><svg viewBox="0 0 110 110"><circle class="ring-bg" cx="55" cy="55" r="48" style="stroke-width:9"/><circle class="ring-fg" cx="55" cy="55" r="48" style="stroke-width:9" ${ring(48,frac)}/></svg><b>${n}</b></div>
       <div><h2>${esc(rankFor(n))}</h2><p>Level ${n} · ${G.xp.toLocaleString()} XP total · ${e-G.xp} XP to level ${n+1}</p>
       <p>${(()=>{const nx=RANKS.find(r=>r[0]>n); return nx?`Next rank: <b>${esc(nx[1])}</b> at level ${nx[0]}`:"You've reached the top rank. Legend."})()}</p></div></div>
+    ${petBoxHTML()}
     <h3 class="tp-h">Your stats</h3><div class="tiles"><div class="tile"><b>🔥 ${G.last===t||(G.last&&dayNum(t)-dayNum(G.last)===1)?G.streak:0}</b><span>Day streak (best ${G.best})</span></div>
       <div class="tile"><b>🧊 ${G.freeze}</b><span>Streak freezes (earn one every 7 days)</span></div>
       <div class="tile"><b>${knownTotal()}</b><span>Cards known of ${DATA.length}</span></div>
