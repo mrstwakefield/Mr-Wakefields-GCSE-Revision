@@ -684,6 +684,31 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 :root[data-skin="royale"] h1{background:linear-gradient(90deg,#FFD54A,#F7F0FF);-webkit-background-clip:text;background-clip:text;color:transparent}
 :root[data-skin="stan"]{--paper:#FFE9F3;--card:#FFFFFF;--ink:#3D0F2A;--muted:#85506D;--line:#F5C6DC;--soft:#FBD9E8;--good:#1C8A5E;--good-bg:#DDF3E8;--warn:#C2185B;--warn-bg:#FCE0EC;color-scheme:light}
 :root[data-skin="stan"] .h1t::after{content:" 💘"}
+:root[data-skin="uniform"]{--paper:#E9E9E9;--card:#FFFFFF;--ink:#141414;--muted:#5A5A5A;--line:#D2D2D2;--soft:#EFEFEF;--good:#1C7A4E;--good-bg:#DCEFE3;--warn:#A3191F;--warn-bg:#F8DEDF;color-scheme:light}
+:root[data-skin="uniform"] .top{position:relative;background:#A3191F;box-shadow:0 0 0 100vmax #A3191F;clip-path:inset(-100vmax -100vmax 0 -100vmax);padding-bottom:22px;margin-bottom:22px}
+:root[data-skin="uniform"],:root[data-skin="uniform"] body{overflow-x:clip}
+:root[data-skin="uniform"] .top::after{content:"";position:absolute;left:-100vmax;right:-100vmax;bottom:0;height:8px;background:#BDBDBD}
+:root[data-skin="uniform"] .top .h1t{color:#FFFFFF}
+:root[data-skin="uniform"] .top h1 span:not(.h1t),:root[data-skin="uniform"] .top .meter *{color:#F3D6D7!important}
+:root[data-skin="uniform"] .hud,:root[data-skin="uniform"] .box,:root[data-skin="uniform"] .tabs{border:2px solid #A3191F}
+:root[data-skin="uniform"] .h1t::after{content:" 🎒"}
+:root[data-skin="aurora"]{--paper:#0B1026;--card:#141B38;--ink:#E8F0FF;--muted:#9FB0D6;--line:#26305A;--soft:#1C2448;--good:#3DF5B0;--good-bg:#123A35;--warn:#FF8FB1;--warn-bg:#3E1A2E;color-scheme:dark}
+:root[data-skin="aurora"] body{background-image:radial-gradient(ellipse 80% 40% at 20% 0%,rgba(61,245,176,.18),transparent 70%),radial-gradient(ellipse 70% 40% at 85% 5%,rgba(150,110,255,.20),transparent 70%)}
+:root[data-skin="aurora"] .h1t{background:linear-gradient(90deg,#3DF5B0,#7FD6FF 50%,#B48CFF);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-skin="aurora"] .btn.good{color:#0B1026}
+:root[data-skin="school"]{--paper:#F7F3DA;--card:#FFFFFF;--ink:#1A1F3A;--muted:#5C5F72;--line:#E3DDB3;--soft:#F1ECCB;--good:#1F3FD6;--good-bg:#DDE4FB;--warn:#A4512E;--warn-bg:#F5E1D6;color-scheme:light}
+:root[data-skin="school"] .top{position:relative;background:#F4DD1E;box-shadow:0 0 0 100vmax #F4DD1E;clip-path:inset(-16px -100vmax 0 -100vmax);padding-bottom:22px;margin-bottom:22px}
+:root[data-skin="school"],:root[data-skin="school"] body{overflow-x:clip}
+:root[data-skin="school"] .top{padding-top:18px;margin-top:16px}
+:root[data-skin="school"] .top::before{content:"";position:absolute;top:-16px;left:-100vmax;right:-100vmax;height:16px;background:#6E4B35}
+:root[data-skin="school"] .top .h1t{color:#1F3FD6;font-variant:small-caps;letter-spacing:.02em}
+:root[data-skin="school"] .top h1 span:not(.h1t),:root[data-skin="school"] .top .meter *{color:#3A3A20!important}
+:root[data-skin="school"] body{background-image:linear-gradient(270deg,#1F3FD6 0,#1F3FD6 18px,#A7ADB4 18px,#A7ADB4 22px,transparent 22px);background-attachment:fixed}
+@media (max-width:700px){:root[data-skin="school"] body{background-image:linear-gradient(270deg,#1F3FD6 0,#1F3FD6 7px,transparent 7px)}}
+:root[data-skin="gold"]{--paper:#16140F;--card:#211E16;--ink:#F6F0DE;--muted:#C2B796;--line:#3A3424;--soft:#2A261C;--good:#E2B53E;--good-bg:#3A3014;--warn:#FF9B7A;--warn-bg:#3E2418;color-scheme:dark}
+:root[data-skin="gold"] .h1t{background:linear-gradient(180deg,#FFF1C2,#E2B53E 55%,#A9801F);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-skin="gold"] h1::before{content:"🥇 "}
+:root[data-skin="gold"] .btn.good{color:#16140F}
 :root[data-skin="examhall"]{--paper:#F2F3F5;--card:#FFFFFF;--ink:#22262E;--muted:#5E6573;--line:#D8DBE1;--soft:#E7E9ED;--good:#1C8A5E;--good-bg:#DDF3E8;--warn:#B4531B;--warn-bg:#FBE7D9;color-scheme:light}
 :root[data-skin="chalk"]{--paper:#1F2E28;--card:#273A32;--ink:#F1F4EE;--muted:#B5C2B9;--line:#38503F;--soft:#304539;--good:#E8D88A;--good-bg:#3A3A22;--warn:#F3A37A;--warn-bg:#40291E;color-scheme:dark}
 :root[data-skin="chalk"] h1{font-family:"Comic Sans MS","Chalkboard SE",var(--display);letter-spacing:.01em}
@@ -1481,7 +1506,7 @@ const dueCount = () => pool().filter(d=>isDue(d.id)).length;
 Object.keys(store.p).forEach(id=>{ if(store.p[id]==="k" && !G.srs[id]) G.srs[id]={b:1, d:addDays(1+Math.floor(Math.random()*14))}; });
 let combo = 0;
 
-const RANKS = [[1,"Lab Rat"],[2,"Wakefield Minion"],[3,"Naive Participant"],[4,"Professional Guesser"],[5,"Short-Term Memory Loss"],[6,"Chunking Champion"],[7,"Procrastination Survivor"],[8,"Placebo Effect"],[9,"Flashcard Fanatic"],[10,"Certified Overthinker"],[11,"Wakefield's Favourite (Allegedly)"],[12,"Baby Freud"],[13,"Wakefield's Teacher's Pet"],[14,"Neuron Whisperer"],[15,"Mr Wallace"],[16,"Research Assistant"],[17,"Fount Sipper"],[18,"Brain Cell Collector"],[19,"Bystander (Not Helping)"],[20,"Agentic State Survivor"],[21,"Wakefield's Homework Hero"],[22,"Mind Palace Builder"],[23,"Serial Position Specialist"],[24,"Fount Paddler"],[25,"Schema Smasher"],[26,"Synapse Surfer"],[27,"Wakefield's Wildcard"],[28,"Shockingly Obedient"],[29,"Pavlov's Star Pupil"],[30,"Walking Visual Illusion"],[31,"Top-Down Thinker"],[32,"Wakefield's Lab Partner"],[33,"Graduate Researcher"],[34,"Myelin Sheath Enthusiast"],[35,"Fount Swimmer"],[36,"Piaget's Problem Child"],[37,"Wakefield's Favourite (Confirmed)"],[38,"Doctor of Psychology"],[39,"Ethical Guidelines Enforcer"],[40,"Wakefield's Pink Pen"],[41,"Wakefield's Deputy"],[42,"Freud's Worst Nightmare"],[43,"Head of Department"],[44,"Hippocampus Hero"],[45,"Wakefield Whisperer"],[46,"Guardian of the Fount"],[47,"Mark Scheme Mind-Reader"],[48,"Wakefield's Successor (In Training)"],[49,"Grand Master of the Mind"],[50,"Keeper of the Sacred Mark Scheme"],[51,"Wakefield Cardboard Cutout Owner"],[52,"Walking Revision Guide"],[53,"Fount Overlord"],[54,"Examiner's Nightmare"],[55,"Wakefield Fan Club President"],[56,"Living Legend"],[57,"Psychology Final Boss"],[58,"Wakefield's Mini-Me"],[59,"Basically Mr Wakefield"],[60,"Dedicated Wakefield Stan"]];
+const RANKS = [[1,"Lab Rat"],[2,"Wakefield Minion"],[3,"Naive Participant"],[4,"Professional Guesser"],[5,"Short-Term Memory Loss"],[6,"Chunking Champion"],[7,"Procrastination Survivor"],[8,"Placebo Effect"],[9,"Flashcard Fanatic"],[10,"Certified Overthinker"],[11,"Wakefield's Favourite (Allegedly)"],[12,"Baby Freud"],[13,"Wakefield's Teacher's Pet"],[14,"Neuron Whisperer"],[15,"Mr Wallace"],[16,"Research Assistant"],[17,"Fount Sipper"],[18,"Brain Cell Collector"],[19,"Bystander (Not Helping)"],[20,"Agentic State Survivor"],[21,"Wakefield's Homework Hero"],[22,"Mind Palace Builder"],[23,"Serial Position Specialist"],[24,"Fount Paddler"],[25,"Schema Smasher"],[26,"Synapse Surfer"],[27,"Wakefield's Wildcard"],[28,"Shockingly Obedient"],[29,"Pavlov's Star Pupil"],[30,"Walking Visual Illusion"],[31,"Top-Down Thinker"],[32,"Wakefield's Lab Partner"],[33,"Graduate Researcher"],[34,"Myelin Sheath Enthusiast"],[35,"Fount Swimmer"],[36,"Piaget's Problem Child"],[37,"Wakefield's Favourite (Confirmed)"],[38,"Doctor of Psychology"],[39,"Ethical Guidelines Enforcer"],[40,"Wakefield's Pink Pen"],[41,"Wakefield's Deputy"],[42,"Freud's Worst Nightmare"],[43,"Head of Department"],[44,"Hippocampus Hero"],[45,"Wakefield Whisperer"],[46,"Guardian of the Fount"],[47,"Mark Scheme Mind-Reader"],[48,"Wakefield's Successor (In Training)"],[49,"Grand Master of the Mind"],[50,"Keeper of the Sacred Mark Scheme"],[51,"Wakefield Cardboard Cutout Owner"],[52,"Walking Revision Guide"],[53,"Fount Overlord"],[54,"Examiner's Nightmare"],[55,"Wakefield Fan Club President"],[56,"Living Legend"],[57,"Psychology Final Boss"],[58,"Long-Term Memory Legend"],[59,"Wakefield's Seating Plan VIP"],[60,"Grade 9 Energy"],[61,"Neuroplasticity Ninja"],[62,"Sapir-Whorf Wordsmith"],[63,"Wakefield's Register Regular"],[64,"Confounding Variable Crusher"],[65,"Bee Dance Choreographer"],[66,"Keeper of Wakefield's Spare Pen"],[67,"Classically Conditioned to Revise"],[68,"Ethics Committee Chair"],[69,"Peer Reviewer"],[70,"Fount Lifeguard"],[71,"Mock Exam Menace"],[72,"Professor Emeritus"],[73,"Wakefield's Stunt Double"],[74,"The Chief Examiner's Rival"],[75,"Freud Who?"],[76,"Hall of Fame Inductee"],[77,"Wakefield's Understudy"],[78,"Wakefield's Mini-Me"],[79,"Basically Mr Wakefield"],[80,"Dedicated Wakefield Stan"]];
 const lvlStart = n => 50*(n-1)*n;           // XP needed to reach level n
 function lvlFor(xp){ let n=1; while(xp>=lvlStart(n+1)) n++; return n; }
 function rankFor(n){ let r=RANKS[0][1]; RANKS.forEach(([l,name])=>{ if(n>=l) r=name; }); return r; }
@@ -1674,7 +1699,8 @@ const BADGES = [
   ["l10","🌟","Shining","Reach level 10",()=>lvlFor(G.xp)>=10],
   ["l20","🏆","Elite","Reach level 20",()=>lvlFor(G.xp)>=20],
   ["l2","🫡","Wakefield Minion","Reach level 2 and join the ranks",()=>lvlFor(G.xp)>=2],
-  ["l60","💘","Dedicated Wakefield Stan","Reach level 60. True devotion",()=>lvlFor(G.xp)>=60],
+  ["l60","🎓","Grade 9 Energy","Reach level 60",()=>lvlFor(G.xp)>=60],
+  ["l80","💘","Dedicated Wakefield Stan","Reach level 80. True devotion",()=>lvlFor(G.xp)>=80],
   // ---- secret badges: the last item is the cryptic hint shown while locked ----
   ["gold1","✨","Lucky find","Get a golden card right",()=>G.st.gold>=1, "Not all cards are created equal…"],
   ["gold10","💰","Gold digger","Get 10 golden cards right",()=>G.st.gold>=10, "…and some people collect them"],
@@ -1728,7 +1754,11 @@ const THEMES = [
   {k:"royale", name:"Wakefield Royale", lvl:45, sw:["#1A1033","#F7F0FF","#FFD54A"]},
   {k:"midnight", name:"Midnight Revision", lvl:50, sw:["#0A1020","#E8ECF7","#F5B942"]},
   {k:"coral", name:"Coral Reef", lvl:55, sw:["#FFF1EC","#2E1A16","#0F8F86"]},
-  {k:"stan", name:"Stan Mode", lvl:60, sw:["#FFE9F3","#3D0F2A","#E11D74"]},
+  {k:"uniform", name:"School Uniform", lvl:60, sw:["#A3191F","#FFFFFF","#BDBDBD"]},
+  {k:"aurora", name:"Aurora", lvl:65, sw:["#0B1026","#E8F0FF","#3DF5B0"]},
+  {k:"school", name:"The School Building", lvl:70, sw:["#F4DD1E","#1F3FD6","#6E4B35"]},
+  {k:"gold", name:"Gold Standard", lvl:75, sw:["#16140F","#F6F0DE","#E2B53E"]},
+  {k:"stan", name:"Stan Mode", lvl:80, sw:["#FFE9F3","#3D0F2A","#E11D74"]},
   {k:"wakefield", name:"✦ Wakefield Mode", lvl:1, secret:true, sw:["#0D2A1E","#F6F0DC","#E6C35C"]},
   {k:"retro", name:"👾 Retro Arcade", lvl:1, secret:true, scroll:"konami", sw:["#0A0A12","#39FF14","#FF2BD6"]},
   {k:"snowdome", name:"❄️ Snowdome", lvl:1, secret:true, scroll:"tamworth", sw:["#EFEBDD","#4E9C8E","#2B54C8"]},
@@ -1772,7 +1802,7 @@ function ring(r,frac){ const c=2*Math.PI*r; return `stroke-dasharray="${c.toFixe
 let shownLvl = lvlFor(G.xp);
 function renderHud(){
   const n=lvlFor(G.xp);
-  if(n>shownLvl){ shownLvl=n; setTimeout(()=>levelUp(n), 450); if(n>=59) setTimeout(()=>foundScroll("handover"), 2600); }
+  if(n>shownLvl){ shownLvl=n; setTimeout(()=>levelUp(n), 450); if(n>=79) setTimeout(()=>foundScroll("handover"), 2600); }
   const s=lvlStart(n), e=lvlStart(n+1), frac=(G.xp-s)/(e-s), t=today(), done=G.hist[t]||0;
   const live = G.last===t || (G.last && dayNum(t)-dayNum(G.last)===1) ? G.streak : 0;
   $("#hudLvlNum").textContent=n;
@@ -3477,7 +3507,7 @@ function pmRate(r, el){
 }
 
 /* ================= PRINTABLE CERTIFICATES ================= */
-const CERT_LEVELS = [5,10,20,30,40,50,60];
+const CERT_LEVELS = [5,10,20,30,40,50,60,70,80];
 function certList(){
   const n=lvlFor(G.xp);
   const l=CERT_LEVELS.map(v=>({id:"L"+v, open:n>=v, title:`Level ${v}: ${rankFor(v)}`, need:`Reach level ${v}`}));
@@ -3563,7 +3593,7 @@ const SECRET_SCROLLS = [
    text:"Did you just get hungry? That's classical conditioning. Pavlov's dogs drooled at a bell — you drool at XP. We are not so different. — Mr W", hint:"Ring a bell? Try the gap fills."},
   {id:"april", trigger:"Open the site on 1 April", title:"Insider exam tip",
    text:"Every answer in this year's exam is C. … April Fool. Please, PLEASE do not put C for everything. — Mr W", hint:"Some days, nothing is what it seems"},
-  {id:"handover", trigger:"Reach level 59", title:"The handover",
+  {id:"handover", trigger:"Reach level 79", title:"The handover",
    text:"You are now Basically Mr Wakefield. I have nothing left to teach you. Please don't take my lanyard. One step remains: Dedicated Wakefield Stan. — Mr W", hint:"Become the teacher"},
 ];
 function foundScroll(id){
@@ -3629,7 +3659,7 @@ function dateEggs(){
   const t=today();
   if(t==="2026-12-04"||t==="2026-12-11"||(t>"2026-12-11" && Object.keys(G.hist).some(k=>k<"2026-12-04"))) G.flags.survivor=1;
   if(t.slice(5)==="04-01") setTimeout(()=>foundScroll("april"),1500);
-  if(lvlFor(G.xp)>=59 && !G.scrolls.handover) setTimeout(()=>foundScroll("handover"),1800);
+  if(lvlFor(G.xp)>=79 && !G.scrolls.handover) setTimeout(()=>foundScroll("handover"),1800);
 }
 
 /* ================= INSTALL AS AN APP (PWA) ================= */
