@@ -1373,9 +1373,17 @@ function fmtAnswer(a,id){
   }
   return "<p style='margin:0'>"+esc(a)+"</p>";
 }
+/* ---- topics not taught yet: left out of games, stages, parent mode and suggestions ---- */
+// When a topic has been taught, delete it from this list.
+const NOT_YET = new Set(["Language, thought & communication"]);
+const taught = k => !NOT_YET.has(k);
+// game content that isn't tagged by topic: spot Language material by its studies and terms
+const notYetText = s => NOT_YET.has("Language, thought & communication") && /von frisch|\byuki\b|emoticon|sapir|whorf|waggle|round dance|\bbees?\b|darwin|language determines|links to language/i.test(s);
+const gameOK = d => taught(d.t) && !(d.t==="Exam skills" && notYetText(d.q+" "+d.a));
+
 /* ---- topic stages: every topic must reach each 20% step before any topic can go further ---- */
 const STAGE_STEP = 20;   // percent per stage. Set to 0 to switch topic locking off.
-const stageTopics = () => TOPICS.filter(t=>t.key!=="Exam skills");
+const stageTopics = () => TOPICS.filter(t=>t.key!=="Exam skills" && taught(t.key));
 function topicFrac(key){ const it=DATA.filter(d=>d.t===key); return it.length ? it.filter(d=>status(d.id)==="k").length/it.length : 0; }
 function stageInfo(){
   if(!STAGE_STEP || DEMO) return {on:false, cap:1, stage:0, locked:new Set(), fr:{}};
@@ -2187,7 +2195,7 @@ const qNames = q => new Set((q.match(NAMES_RE)||[]).map(n=>n.replace(/'s$/,"")).
 function mcFor(d, rng=Math.random){
   if(d.wrong){ const right=d.opt||d.a, opts=shuffleR([right,...d.wrong.slice(0,3)],rng); return {opts, correct:opts.indexOf(right)}; }
   const L=d.a.length, seen=new Set([d.a.toLowerCase()]), kind=qKind(d.q), names=qNames(d.q), hasNum=/\d/.test(d.a);
-  const cands=DATA.filter(x=>!x.wrong && x.id!==d.id && x.id<5000 && x.t!=="Exam skills").map(x=>{
+  const cands=DATA.filter(x=>!x.wrong && x.id!==d.id && x.id<5000 && x.t!=="Exam skills" && (taught(x.t) || !taught(d.t))).map(x=>{
     const k=qKind(x.q);
     // never offer another valid answer about the same study/theory for evaluation or finding questions
     if((kind==="eval"||kind==="find") && k===kind && [...qNames(x.q)].some(n=>names.has(n))) return null;
@@ -2202,7 +2210,7 @@ function mcFor(d, rng=Math.random){
   const opts=shuffleR([d.a,...picks],rng);
   return {opts, correct:opts.indexOf(d.a)};
 }
-const EXAM_ITEMS = () => DATA.filter(d=>d.t==="Exam skills");
+const EXAM_ITEMS = () => DATA.filter(d=>d.t==="Exam skills" && !notYetText(d.q+" "+d.a));
 const whyHTML = d => d && d.why ? `<div class="why">💡 ${esc(d.why)}</div>` : "";
 const scHTML = d => d.sc ? `<div class="sc">${esc(d.sc)}</div>` : "";
 const optsHTML = d => d.wrong && /^which/i.test(d.q) ? `<ol class="optlist">${mcFor(d, rngFrom("opts-"+d.id)).opts.map(o=>`<li>${esc(o)}</li>`).join("")}</ol>` : "";
@@ -2305,7 +2313,7 @@ function renderArcade(){
   }
   if(arc.phase==="bossmenu"){
     area.innerHTML=`<div class="arc-top"><span class="big">🐉 Boss Battles</span><span class="spacer"></span><button class="btn ghost" id="arcMenu" style="padding:7px 14px">Back</button></div>
-      <div class="modes">${TOPICS.map(t=>{ const B=BOSSES[t.key], r=G.bosses[t.key]||{}; return `<button class="mode bosscard" style="--c:${t.c}" data-boss="${esc(t.key)}">${r.won?`<span class="new" style="background:${r.flawless?"#E0A100":"#1C8A5E"};animation:none">${r.flawless?"👑 Flawless":"✓ Defeated"}</span>`:""}<span class="mi">${B.icon}</span><h3>${esc(B.name)}</h3><p>Boss of ${esc(t.name)}</p><span class="best">${r.won?`Beaten ${r.wins} time${r.wins>1?"s":""}${r.hardWon?" · 🔥 Hard mode beaten":""}`:r.tries?`Best: ${BOSS_HP-r.bestHp}/${BOSS_HP} damage`:"Undefeated"}</span>${r.won?`<span class="hardbtn" role="button" tabindex="0" data-hard="${esc(t.key)}">🔥 ${r.hardWon?"Hard mode again":"Rematch on hard mode"}</span>`:""}</button>`; }).join("")}</div>
+      <div class="modes">${TOPICS.filter(t=>taught(t.key)).map(t=>{ const B=BOSSES[t.key], r=G.bosses[t.key]||{}; return `<button class="mode bosscard" style="--c:${t.c}" data-boss="${esc(t.key)}">${r.won?`<span class="new" style="background:${r.flawless?"#E0A100":"#1C8A5E"};animation:none">${r.flawless?"👑 Flawless":"✓ Defeated"}</span>`:""}<span class="mi">${B.icon}</span><h3>${esc(B.name)}</h3><p>Boss of ${esc(t.name)}</p><span class="best">${r.won?`Beaten ${r.wins} time${r.wins>1?"s":""}${r.hardWon?" · 🔥 Hard mode beaten":""}`:r.tries?`Best: ${BOSS_HP-r.bestHp}/${BOSS_HP} damage`:"Undefeated"}</span>${r.won?`<span class="hardbtn" role="button" tabindex="0" data-hard="${esc(t.key)}">🔥 ${r.hardWon?"Hard mode again":"Rematch on hard mode"}</span>`:""}</button>`; }).join("")}</div>
       <p class="arc-note">Bosses use your hardest cards first: still learning, then not yet known. Beat a boss without losing a life for a 👑.</p>`;
     $("#arcMenu").onclick=()=>{ arc.phase="menu"; renderArcade(); };
     area.querySelectorAll("[data-boss]").forEach(b=>b.onclick=e=>{ const hd=e.target.closest("[data-hard]"); startBoss(b.dataset.boss, !!hd); });
@@ -2405,7 +2413,7 @@ function startArc(mode){
   Object.assign(arc,{mode, phase:"play", i:0, score:0, right:0, lives:3, log:[], xp:0, best:false, locked:false, t0:Date.now(), items:[], base:[], bi:0});
   resetCombo();
   if(mode==="daily"){
-    const rng=rngFrom("daily-"+today()), core=DATA.filter(d=>d.id<5000);
+    const rng=rngFrom("daily-"+today()), core=DATA.filter(d=>d.id<5000 && taught(d.t));
     const items=shuffleR(core,rng).slice(0,6).concat(shuffleR(EXAM_ITEMS(),rng).slice(0,2), [genRM(rng,"maths"), genRM(rng,"rm")]);
     arc.items=shuffleR(items,rng); arc.rng=rng;
     G.daily[today()]={started:true, done:false, score:0, time:0, log:[], items:arc.items.map(slim)}; save();
@@ -2414,13 +2422,13 @@ function startArc(mode){
   } else if(mode==="maths"){
     arc.items=Array.from({length:10},(_,i)=>genRM(Math.random, i<7?"maths":"rm")); arc.items=shuffle(arc.items); arc.rng=Math.random;
   } else if(mode==="fix"){
-    arc.items=shuffle(DATA.filter(d=>G.mistakes[d.id]!==undefined)).slice(0,10); arc.rng=Math.random;
+    arc.items=shuffle(DATA.filter(d=>G.mistakes[d.id]!==undefined && gameOK(d))).slice(0,10); arc.rng=Math.random;
     if(!arc.items.length){ arc.phase="menu"; renderArcade(); return; }
   } else if(mode==="terms"){
-    const s=new Set(store.sel); let p=TERMS.filter(x=>s.has(x.t)); if(p.length<10) p=TERMS;
+    const s=new Set(store.sel); let p=TERMS.filter(x=>s.has(x.t) && taught(x.t)); if(p.length<10) p=TERMS.filter(x=>taught(x.t));
     arc.items=shuffle(p).slice(0,10);
   } else {
-    arc.base=shuffle(pool()); arc.rng=Math.random;
+    arc.base=shuffle(pool().filter(gameOK)); if(!arc.base.length) arc.base=shuffle(DATA.filter(d=>d.id<5000 && gameOK(d))); arc.rng=Math.random;
     if(mode==="blitz") arc.end=Date.now()+60000;
     arc.timer=setInterval(arcTick,100);
   }
@@ -2986,7 +2994,7 @@ function wsFinish(){
 }
 
 /* ================= PSYCHLE (daily key term) ================= */
-const PSY_WORDS = (()=>{ const seen=new Set(); return TERMS.filter(x=>/^[a-z]{5,8}$/i.test(x.term) && !seen.has(x.term.toLowerCase()) && seen.add(x.term.toLowerCase())); })();
+const PSY_WORDS = (()=>{ const seen=new Set(); return TERMS.filter(x=>taught(x.t) && /^[a-z]{5,8}$/i.test(x.term) && !seen.has(x.term.toLowerCase()) && seen.add(x.term.toLowerCase())); })();
 const psyNo = () => dayNum(today())-dayNum("2026-11-01")+1;
 const PSY_ORDER = shuffleR(PSY_WORDS, rngFrom("psychle-order-v1"));
 function psyToday(){ const n=psyNo(); return PSY_ORDER[((n%PSY_ORDER.length)+PSY_ORDER.length)%PSY_ORDER.length]; }
@@ -3616,7 +3624,7 @@ const EXAMS = [
 const PLAN_BONUS = 40;
 const niceDate = s => new Date(s+"T12:00:00").toLocaleDateString("en-GB",{weekday:"short", day:"numeric", month:"short"});
 function weakestTopic(){
-  const cand = mockPeriod() ? MOCK_TOPICS : TOPICS.map(t=>t.key);
+  const cand = (mockPeriod() ? MOCK_TOPICS : TOPICS.map(t=>t.key)).filter(taught);
   return topicStats().filter(s=>cand.includes(s.key)).sort((a,b)=>a.k-b.k || a.l-b.l)[0].key;
 }
 function selectTopics(keys){ store.sel=[...keys]; save(); renderChips(); topicsChanged(); }
@@ -4248,7 +4256,7 @@ function mockResultsHTML(){
 
 /* ================= PARENT MODE ================= */
 const pm = {phase:"setup", items:[], i:0, shown:false, res:[], topics:null, n:10, kind:"mix"};
-function pmPickTopics(){ const W=weakData().filter(w=>w.t.key!=="Exam skills"); const started=W.filter(w=>w.seen).sort((a,b)=>a.strength-b.strength); return (started.length?started:W).slice(0,3).map(w=>w.t.key); }
+function pmPickTopics(){ const W=weakData().filter(w=>w.t.key!=="Exam skills" && taught(w.t.key)); const started=W.filter(w=>w.seen).sort((a,b)=>a.strength-b.strength); return (started.length?started:W).slice(0,3).map(w=>w.t.key); }
 function pmBuild(){
   const topics=pm.topics, prio=d=>status(d.id)==="l"?0:G.mistakes[d.id]!==undefined?0:isDue(d.id)?1:status(d.id)===""?2:3;
   let qs=[];
@@ -4748,6 +4756,13 @@ addEventListener("appinstalled",()=>{ $("#installBtn").hidden=true; installEvt=n
 if(!TEACHER && !standalone() && (isIOS || "serviceWorker" in navigator)) $("#installBtn").hidden=false;
 $("#installBtn").onclick=async()=>{ if(installEvt){ installEvt.prompt(); const c=await installEvt.userChoice.catch(()=>null); installEvt=null; if(c&&c.outcome==="accepted") $("#installBtn").hidden=true; } else showInstallHelp(); };
 
+// strip not-yet-taught material from the untagged game decks
+(function(){
+  const strip=(arr,txt)=>{ for(let i=arr.length-1;i>=0;i--) if(notYetText(txt(arr[i]))) arr.splice(i,1); };
+  strip(STUDY_FACTS, s=>s.join(" ")); strip(CLUESETS, s=>s[0]+" "+s[1].join(" "));
+  strip(ORDERS, o=>o[0]+" "+o[1].join(" ")); strip(FLAWS, f=>f.join(" "));
+  SWIPE.forEach(d=>strip(d[3], it=>it[0]+" "+it[2]));
+})();
 function demoFill(){
   const t=today(), day=n=>{ const d=new Date(t+"T12:00:00"); d.setDate(d.getDate()-n); return ymd(d); };
   Object.assign(G,{xp:lvlStart(80)+1234, streak:42, best:42, last:t, toured:1, newsSeen:WHATS_NEW_V, backupAt:t, skin:G.skin||""}); shownLvl=lvlFor(G.xp);
