@@ -1374,8 +1374,9 @@ function fmtAnswer(a,id){
   return "<p style='margin:0'>"+esc(a)+"</p>";
 }
 /* ---- topics not taught yet: left out of games, stages, parent mode and suggestions ---- */
-// When a topic has been taught, delete it from this list.
-const NOT_YET = new Set(["Language, thought & communication"]);
+// Each topic comes back automatically on its date (YYYY-MM-DD). Change the date, or delete the line, to bring it back sooner.
+const NOT_YET_UNTIL = {"Language, thought & communication":"2027-03-01"};   // Language should be finished by 28 Feb
+const NOT_YET = new Set(Object.keys(NOT_YET_UNTIL).filter(k=>{ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0") < NOT_YET_UNTIL[k]; }));
 const taught = k => !NOT_YET.has(k);
 // game content that isn't tagged by topic: spot Language material by its studies and terms
 const notYetText = s => NOT_YET.has("Language, thought & communication") && /von frisch|\byuki\b|emoticon|sapir|whorf|waggle|round dance|\bbees?\b|darwin|language determines|links to language/i.test(s);
@@ -4789,6 +4790,8 @@ $("#parentLink").onclick=()=>{ goTab("quiz"); setQuizMode("parent"); $("#parentA
 if(!TEACHER && /(^|[?&#])parent\b/i.test(location.search+location.hash)){ goTab("quiz"); setQuizMode("parent"); }
 $("#petStrip").onclick=()=>{ goTab("trophies","progress"); };
 if(!LB_LIVE && !LB_EMU && !DEMO) $("#tab-board").hidden=true;
+if(!TEACHER && !DEMO_ASK){ G.topicsBack=G.topicsBack||{}; Object.keys(NOT_YET_UNTIL).filter(k=>!NOT_YET.has(k) && !G.topicsBack[k]).forEach((k,i)=>{ G.topicsBack[k]=1; save();
+  if(G.xp>0) setTimeout(()=>toast("🔓",`${TMAP[k].name} is unlocked!`,`It's now in the games and counts towards your topic stages. Time to get it to ${STAGE_STEP||20}%!`,true),2500+i*1500); }); }
 if(!TEACHER){ petCheck(); nudgeCheck(); welcomeCheck(); if((LB_LIVE||LB_EMU) && !DEMO_ASK && G.lb && G.lb.on) setTimeout(()=>lbLoad().catch(()=>{}),1500); }
 </script>
 </body>
