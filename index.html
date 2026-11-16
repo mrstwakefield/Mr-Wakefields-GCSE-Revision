@@ -519,6 +519,20 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 /* event banner */
 .nudge{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;background:var(--warn-bg);color:var(--ink);border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);border-radius:16px;padding:10px 14px;margin:0 0 14px;font-size:15px;line-height:1.35}
 .nudge[hidden]{display:none}
+.save-box > p{margin:0 0 12px}
+.save-status{display:inline-block;font-weight:700;border-radius:99px;padding:4px 12px;font-size:15px}
+.save-status.ok{background:var(--good-bg);color:var(--good)}
+.save-status.warn{background:var(--warn-bg);color:var(--warn)}
+.save-step{display:flex;gap:12px;border-top:1px solid var(--line);padding:14px 0 4px}
+.save-step > div{flex:1;min-width:0}
+.save-step h4{margin:2px 0 0;font-family:var(--display);font-size:18px}
+.save-n{flex:none;width:32px;height:32px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:var(--display);font-weight:800}
+.save-msg{margin:8px 0 0;font-size:15px}
+.save-msg:empty{display:none}
+.save-more{border-top:1px solid var(--line);margin-top:10px;padding-top:12px}
+.save-more summary{cursor:pointer;font-weight:700}
+.save-more dt{font-weight:700;margin-top:10px}
+.save-more dd{margin:2px 0 0;color:var(--muted)}
 .lb-intro ul{margin:8px 0 4px;padding-left:1.2em;line-height:1.5}
 .lb-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.lb-head .spacer{flex:1}
 .lb-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
@@ -3105,19 +3119,59 @@ async function readSave(code){
   const s=JSON.parse(json); if(!s || typeof s.p!=="object" || typeof s.g!=="object") throw new Error("bad save"); return s;
 }
 async function loadSave(code){
-  const msg=$("#saveMsg");
+  const msg=$("#loadMsg")||$("#saveMsg");
   try{
     const s=await readSave(code), lv=lvlFor(s.g.xp||0), kn=Object.values(s.p).filter(v=>v==="k").length;
     if(!confirm(`Load this save? Level ${lv}, ${(s.g.xp||0).toLocaleString()} XP, ${kn} cards known.\n\nThis replaces the progress on this device (currently level ${lvlFor(G.xp)}).`)) return;
     localStorage.setItem(KEY, JSON.stringify({p:s.p, sel:s.sel||store.sel, all:s.all||store.all, g:s.g}));
     location.reload();
-  }catch(e){ msg.innerHTML='<span style="color:var(--warn)">That doesn\'t look like a valid save code. Make sure you copied all of it.</span>'; }
+  }catch(e){ msg.innerHTML='<span style="color:var(--warn)">That doesn\'t look like a save code. It should start with <b>FOUNT-</b>. Make sure you copied all of it, right to the end.</span>'; }
+}
+function saveStatus(){
+  if(!G.backupAt) return ["warn","⚠️ You haven't made a save code yet"];
+  const d=dayNum(today())-dayNum(G.backupAt);
+  return d===0?["ok","✅ Saved today"]:d===1?["ok","✅ Last saved yesterday"]:d<7?["ok",`✅ Last saved ${d} days ago`]:["warn",`⚠️ Last saved ${d} days ago: time for a new one`];
+}
+function saveHTML(){
+  const [cls,txt]=saveStatus(), share=!!navigator.share;
+  return `<div class="box save-box"><h3 style="margin-top:0">💾 Save your progress</h3>
+    <p class="save-status ${cls}">${txt}</p>
+    <p>Your progress is kept <b>on this device only</b>. A <b>save code</b> is a copy of all of it (level, XP, badges, cards, your lab rat) in one long piece of text. Keep it somewhere safe and you can never lose your progress.</p>
+    <div class="save-step"><span class="save-n">1</span><div><h4>Make a save code</h4>
+      <div class="card-actions" style="margin-top:6px"><button class="btn" id="saveCopy">📋 Copy my save code</button>${share?`<button class="btn ghost" id="saveShare">📤 Send it to myself</button>`:""}</div>
+      <div id="saveOut" hidden><textarea id="saveCode" readonly aria-label="Your save code" style="min-height:70px;font-size:13px;margin-top:10px"></textarea></div>
+      <p class="muted save-msg" id="saveMsg" aria-live="polite"></p></div></div>
+    <div class="save-step"><span class="save-n">2</span><div><h4>Keep it somewhere safe</h4>
+      <p class="muted" style="margin:4px 0 0">Paste it into an email to yourself, your phone's notes app or a document in OneDrive. Make a new one every week or so: the old one won't include anything you've done since.</p></div></div>
+    <div class="save-step"><span class="save-n">3</span><div><h4>Carry on from a save code</h4>
+      <p class="muted" style="margin:4px 0 8px">On a new device, or if your progress has disappeared: open this site, come to <b>💾 Save</b>, paste your code here and press <b>Load</b>.</p>
+      <textarea id="saveIn" placeholder="Paste your save code here (it starts with FOUNT-)" aria-label="Paste a save code to load" style="min-height:70px;font-size:13px"></textarea>
+      <div class="card-actions"><button class="btn" id="saveLoad">Load my progress</button></div>
+      <p class="muted" style="font-size:14px;margin:6px 0 0">This replaces whatever progress is on this device, so load your newest code.</p>
+      <p class="save-msg" id="loadMsg" aria-live="polite"></p></div></div>
+    <details class="save-more"><summary>Questions and more options</summary>
+      <dl>
+        <dt>Why isn't it saved automatically?</dt><dd>Your progress is saved automatically, but only in this browser on this device. Nothing is sent online, so moving to another device needs a save code.</dd>
+        <dt>I use the school computers.</dt><dd>School computers often clear browser data when you log off. Make a save code at the end of each session, or revise on your own phone.</dd>
+        <dt>I installed it on my iPhone home screen.</dt><dd>The home-screen app keeps its own progress, separate from Safari. Copy a save code in Safari and load it in the app (or the other way round).</dd>
+        <dt>My progress has gone!</dt><dd>Load your most recent save code in step 3. If you never made one, it can't be got back, sorry. Start making one every week!</dd>
+      </dl>
+      <p style="margin:12px 0 6px"><b>Backup files</b> (another way to store a save code)</p>
+      <div class="card-actions" style="margin-top:0"><button class="btn ghost" id="saveFile">⬇️ Download a backup file</button><label class="btn ghost" style="text-align:center">⬆️ Load a backup file<input type="file" id="saveUp" accept=".txt,.json,text/plain" hidden></label></div>
+    </details></div>`;
 }
 function wireSave(){
-  const msg=$("#saveMsg");
-  $("#saveCopy").onclick=async()=>{ flag("backup"); markBackup(); const c=await makeSave(); try{ await navigator.clipboard.writeText(c); msg.textContent=`Save code copied (${c.length.toLocaleString()} characters). Paste it somewhere safe, like an email to yourself or your notes app.`; }catch(e){ $("#saveIn").value=c; $("#saveIn").select(); msg.textContent="Couldn't copy automatically. Your code is in the box: select it all and copy it."; } };
-  $("#saveFile").onclick=async()=>{ flag("backup"); markBackup(); const c=await makeSave(), a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([c],{type:"text/plain"})); a.download=`fount-save-level-${lvlFor(G.xp)}-${today()}.txt`; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); msg.textContent="Backup file downloaded."; };
-  $("#saveLoad").onclick=()=>{ const v=$("#saveIn").value; if(v.trim()) loadSave(v); };
+  const msg=$("#saveMsg"), done=()=>{ flag("backup"); markBackup(); const st=$(".save-status"); if(st){ const [c,t]=saveStatus(); st.className="save-status "+c; st.textContent=t; } };
+  $("#saveCopy").onclick=async()=>{ const c=await makeSave(); $("#saveCode").value=c;
+    try{ await navigator.clipboard.writeText(c); done(); $("#saveOut").hidden=true;
+      msg.innerHTML=`<b style="color:var(--good)">✅ Copied!</b> Now do step 2: paste it somewhere safe.`; }
+    catch(e){ $("#saveOut").hidden=false; $("#saveCode").select(); done();
+      msg.textContent="Your browser wouldn't copy it automatically. Your code is in the box above: select all of it and copy it."; } };
+  const sh=$("#saveShare"); if(sh) sh.onclick=async()=>{ const c=await makeSave();
+    try{ await navigator.share({title:"My Fount GCSE save code", text:c}); done(); msg.innerHTML=`<b style="color:var(--good)">✅ Sent.</b> Keep that message safe.`; }
+    catch(e){ if(e && e.name!=="AbortError"){ $("#saveCode").value=c; $("#saveOut").hidden=false; msg.textContent="Couldn't open the share menu. Copy the code from the box above instead."; } } };
+  $("#saveFile").onclick=async()=>{ done(); const c=await makeSave(), a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([c],{type:"text/plain"})); a.download=`fount-save-level-${lvlFor(G.xp)}-${today()}.txt`; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); msg.textContent="Backup file downloaded. Keep it somewhere safe."; };
+  $("#saveLoad").onclick=()=>{ const v=$("#saveIn").value; if(v.trim()) loadSave(v); else { $("#loadMsg").innerHTML='<span style="color:var(--warn)">Paste your save code into the box first.</span>'; $("#saveIn").focus(); } };
   $("#saveUp").onchange=e=>{ const f=e.target.files[0]; if(f) f.text().then(loadSave); };
 }
 
@@ -3173,12 +3227,7 @@ function renderTrophies(){
       return `<div class="badge ${has?"got":"locked"}"><div class="bi">${ic}</div><b>${esc(name)}</b><span>${esc(desc)}</span></div>`; }).join("")}</div></div>`,
     scrolls:`${scrollBoxHTML()}`,
     looks:themesHTML(),
-    save:`<div class="box"><h3>Move or back up your progress <small>Your progress only lives in this browser</small></h3>
-      <p class="muted" style="margin:0 0 12px">To carry on using another device (school computer, phone, laptop), copy your save code and paste it there. Keep a copy somewhere safe in case your browser data gets cleared.</p>
-      <div class="card-actions" style="margin-top:0"><button class="btn" id="saveCopy">Copy save code</button><button class="btn ghost" id="saveFile">Download backup file</button></div>
-      <textarea id="saveIn" placeholder="Paste a save code here to load it on this device" style="min-height:80px;margin-top:14px;font-size:14px"></textarea>
-      <div class="card-actions"><button class="btn ghost" id="saveLoad">Load save code</button><label class="btn ghost" style="text-align:center">Load backup file<input type="file" id="saveUp" accept=".txt,.json,text/plain" hidden></label></div>
-      <p class="muted" id="saveMsg" style="margin:10px 0 0;font-size:15px" aria-live="polite"></p></div>
+    save:`${saveHTML()}
     ${reportBoxHTML()}`,
   };
   $("#trophyArea").innerHTML=pages[tp];
@@ -3320,7 +3369,7 @@ function tMain(){
     <div id="tOut"></div>
     <p class="muted t-note">Codes are self-reported by students and could in theory be edited, so treat them as a guide. Codes aren't sent anywhere: they only live on this page${remembered?" and in this browser (Remember is on)":" until you close the tab"}.</p></div>`;
   $("#tProj").onclick=()=>projSetup();
-  tLbRender(); lbLoad().catch(()=>{});
+  if(LB_LIVE){ tLbRender(); lbLoad().catch(()=>{}); } else { const tb=$("#tLb"); if(tb) tb.remove(); }
   $("#tPrint").onclick=()=>window.print();
   $("#tLockBtn").onclick=()=>{ try{ sessionStorage.removeItem("fount-teacher"); }catch(e){} T.reports.clear(); tLock(); };
   $("#tAdd").onclick=()=>{ addCodes($("#tIn").value); $("#tIn").value=""; };
@@ -3489,10 +3538,10 @@ document.addEventListener("keydown",e=>{
 
 /* ---- student side: progress report box (rendered inside Trophies) ---- */
 function reportBoxHTML(){
-  return `<div class="box"><h3>📨 Send your progress to your teacher <small>A short code with your level, topics and streak</small></h3>
+  return `<div class="box"><h3>📨 Send your progress to your teacher <small>A short summary of your level, topics and streak (not a save code)</small></h3>
     <label class="muted" for="repName" style="display:block;font-size:15px;margin-bottom:6px">Your name or initials (only saved in this browser)</label>
     <input id="repName" class="search" maxlength="24" value="${esc(G.name||"")}" placeholder="e.g. Sam P" style="width:100%">
-    <div class="card-actions"><button class="btn" id="repCopy">Copy progress report code</button></div>
+    <div class="card-actions"><button class="btn" id="repCopy">Copy report for my teacher</button></div>
     <p class="muted" style="margin:10px 0 0;font-size:15px">Paste it into Google Classroom, Teams or an email to your teacher. It doesn't include your save, just a summary.</p>
     <p id="repMsg" style="margin:8px 0 0;font-size:15px;word-break:break-all" aria-live="polite"></p></div>`;
 }
