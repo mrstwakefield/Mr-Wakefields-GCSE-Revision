@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7B5BE0"/><stop offset=".55" stop-color="#D6478F"/><stop offset="1" stop-color="#F39A3C"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <g id="mark">
+    <g fill="none" stroke="#fff" stroke-linecap="round">
+      <path d="M256 128 C 256 70, 344 64, 360 180" stroke-width="15"/>
+      <path d="M256 128 C 256 70, 168 64, 152 180" stroke-width="15"/>
+      <path d="M256 128 C 262 96, 300 98, 306 158" stroke-width="10" opacity=".75"/>
+      <path d="M256 128 C 250 96, 212 98, 206 158" stroke-width="10" opacity=".75"/>
+    </g>
+    <circle cx="360" cy="196" r="9" fill="#fff"/><circle cx="152" cy="196" r="9" fill="#fff"/>
+    <circle cx="256" cy="120" r="15" fill="#fff"/>
+    <path d="M178 196 H334 C334 236 300 252 256 252 C212 252 178 236 178 196 Z" fill="#fff"/>
+    <rect x="240" y="248" width="32" height="44" rx="6" fill="#fff"/>
+    <path d="M120 290 H392 C392 344 338 368 256 368 C174 368 120 344 120 290 Z" fill="#fff"/>
+    <path d="M152 306 H360" stroke="#D6478F" stroke-width="8" stroke-linecap="round" opacity=".35"/>
+    <text x="256" y="452" text-anchor="middle" font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900" font-size="76" letter-spacing="6" fill="#fff">GCSE</text>
+  </g>
+</svg>
