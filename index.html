@@ -519,6 +519,11 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 /* event banner */
 .nudge{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;background:var(--warn-bg);color:var(--ink);border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);border-radius:16px;padding:10px 14px;margin:0 0 14px;font-size:15px;line-height:1.35}
 .nudge[hidden]{display:none}
+.demobar{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;background:linear-gradient(90deg,#7B5BE0,#D6478F,#F39A3C);color:#fff;border-radius:16px;padding:10px 14px;margin:0 0 14px;font-size:15px;line-height:1.35}
+.demobar[hidden]{display:none}
+.demobar b{font-family:var(--display);font-size:17px}
+.demobar span{flex:1;min-width:200px}
+.demobar a{color:#fff;font-weight:700}
 .nudge .nd-ico{font-size:24px;flex:none}
 .nudge .nd-txt{flex:1;min-width:200px}
 .nudge .btn{padding:6px 12px;font-size:14px}
@@ -914,6 +919,7 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
 </head>
 <body>
 <div class="wrap">
+  <div class="demobar" id="demobar" hidden></div>
   <header class="top">
     <h1><span class="h1t">Mr Wakefield's Fount of Knowledge and Wisdom</span><span>GCSE psychology revision, <b id="totalQ"></b> questions</span></h1>
     <div class="meter" aria-live="polite">
@@ -1285,10 +1291,14 @@ const BY_ID = Object.fromEntries(DATA.map(d=>[d.id,d]));
 
 /* ---------- storage ---------- */
 const TEACHER = /(^|[?&#])teacher\b/i.test(location.search+location.hash);
-const KEY = "rr-psych-gcse-v1";
+// Demo mode (index.html?demo): everything unlocked, nothing saved. Needs the teacher passcode first.
+const DEMO_ASK = !TEACHER && /(^|[?&#])demo\b/i.test(location.search+location.hash);
+const DEMO = DEMO_ASK && (()=>{ try{ return sessionStorage.getItem("fount-teacher")==="1"; }catch(e){ return false; } })();
+if(DEMO_ASK && !DEMO) location.replace(location.pathname+"?teacher#demo");
+const KEY = DEMO ? "fount-demo-never-saved" : "rr-psych-gcse-v1";
 let store = {p:{}, sel:TOPICS.map(t=>t.key), all:TOPICS.map(t=>t.key)};
 try{ const s = JSON.parse(localStorage.getItem(KEY)||"null"); if(s && s.p){ store.p = s.p; if(Array.isArray(s.sel)){ const seen=new Set(Array.isArray(s.all)?s.all:s.sel.concat([])); store.sel = [...new Set(s.sel.map(k=>k.startsWith("Issues and Debates")?"Issues and Debates part I":k))].filter(k=>TMAP[k]).concat(TOPICS.map(t=>t.key).filter(k=>!seen.has(k))); } } }catch(e){}
-function save(){ if(TEACHER) return; try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+function save(){ if(TEACHER || DEMO_ASK) return; try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
 const status = id => store.p[id] || "";
 function topicPct(id){ const t=BY_ID[id].t, it=DATA.filter(x=>x.t===t); return it.filter(x=>status(x.id)==="k").length/it.length; }
 function mark(id, s){ const prev=store.p[id], pp=(s==="k"&&prev!=="k")?topicPct(id):0;
@@ -1749,7 +1759,8 @@ let combo = 0;
 
 const RANKS = [[1,"Lab Newbie"],[2,"Wakefield Minion"],[3,"Naive Participant"],[4,"Professional Guesser"],[5,"Working Memory Warm-Up"],[6,"Chunking Champion"],[7,"Procrastination Survivor"],[8,"Placebo Effect"],[9,"Flashcard Fanatic"],[10,"Certified Deep Thinker"],[11,"Wakefield's Favourite (Allegedly)"],[12,"Junior Psychologist"],[13,"Wakefield's Star Student"],[14,"Neuron Navigator"],[15,"Mr Wallace"],[16,"Research Assistant"],[17,"Fount Sipper"],[18,"Brain Cell Collector"],[19,"Bystander (Not Helping)"],[20,"Agentic State Survivor"],[21,"Wakefield's Homework Hero"],[22,"Mind Palace Builder"],[23,"Serial Position Specialist"],[24,"Fount Paddler"],[25,"Schema Builder"],[26,"Synapse Surfer"],[27,"Wakefield's Wildcard"],[28,"Shockingly Brilliant"],[29,"Classical Conditioning Champ"],[30,"Walking Visual Illusion"],[31,"Big-Picture Thinker"],[32,"Lab Technician"],[33,"Graduate Researcher"],[34,"Myelin Master"],[35,"Fount Swimmer"],[36,"Piaget's Prodigy"],[37,"Wakefield's Favourite (Confirmed)"],[38,"Doctor of Psychology"],[39,"Ethical Guidelines Enforcer"],[40,"Wakefield's Pink Pen"],[41,"Wakefield's Deputy"],[42,"Theory Titan"],[43,"Head of Department"],[44,"Hippocampus Hero"],[45,"Psychology Powerhouse"],[46,"Guardian of the Fount"],[47,"Mark Scheme Mind-Reader"],[48,"Wakefield's Successor (In Training)"],[49,"Grand Master of the Mind"],[50,"Keeper of the Sacred Mark Scheme"],[51,"Revision Royalty"],[52,"Walking Revision Guide"],[53,"Fount Overlord"],[54,"Examiner's Nightmare"],[55,"Wakefield Fan Club President"],[56,"Living Legend"],[57,"Psychology Final Boss"],[58,"Long-Term Memory Legend"],[59,"Wakefield's Seating Plan VIP"],[60,"Grade 9 Energy"],[61,"Neuroplasticity Ninja"],[62,"Sapir-Whorf Wordsmith"],[63,"Wakefield's Register Regular"],[64,"Confounding Variable Crusher"],[65,"Bee Dance Choreographer"],[66,"Keeper of Wakefield's Spare Pen"],[67,"Classically Conditioned to Revise"],[68,"Ethics Committee Chair"],[69,"Peer Reviewer"],[70,"Fount Lifeguard"],[71,"Mock Exam Menace"],[72,"Professor Emeritus"],[73,"Wakefield's Stunt Double"],[74,"The Chief Examiner's Rival"],[75,"Study Superstar"],[76,"Hall of Fame Inductee"],[77,"Wakefield's Understudy"],[78,"Wakefield's Mini-Me"],[79,"Basically Mr Wakefield"],[80,"Dedicated Wakefield Stan"]];
 const lvlStart = n => 50*(n-1)*n;           // XP needed to reach level n
-function lvlFor(xp){ let n=1; while(xp>=lvlStart(n+1)) n++; return n; }
+const MAX_LVL = 80;
+function lvlFor(xp){ let n=1; while(n<MAX_LVL && xp>=lvlStart(n+1)) n++; return n; }
 function rankFor(n){ let r=RANKS[0][1]; RANKS.forEach(([l,name])=>{ if(n>=l) r=name; }); return r; }
 const comboMult = () => combo>=20?3 : combo>=10?2 : combo>=5?1.5 : 1;
 const knownTotal = () => Object.values(store.p).filter(v=>v==="k").length;
@@ -2035,7 +2046,7 @@ const SEALS = {
   fool:    {text:"Play the Daily 10 on 1 April",            prog:()=>[Object.entries(G.daily||{}).some(([d,v])=>d.slice(5)==="04-01"&&v&&v.done)?1:0,1]},
 };
 const sealDone = k => { const s=SEALS[k]; if(!s) return true; const [a,b]=s.prog(); return a>=b; };
-const themeOpen = th => th.scroll ? !!G.scrolls[th.scroll] && sealDone(th.k) : th.secret ? !!G.flags.keeper : lvlFor(G.xp)>=th.lvl;
+const themeOpen = th => DEMO ? true : th.scroll ? !!G.scrolls[th.scroll] && sealDone(th.k) : th.secret ? !!G.flags.keeper : lvlFor(G.xp)>=th.lvl;
 function checkSeals(){
   if(typeof TEACHER!=="undefined" && TEACHER) return; G.seals=G.seals||{};
   THEMES.filter(t=>t.scroll && G.scrolls[t.scroll] && !G.seals[t.k] && sealDone(t.k)).forEach((t,i)=>{
@@ -2052,12 +2063,12 @@ let shownLvl = lvlFor(G.xp);
 function renderHud(){
   const n=lvlFor(G.xp);
   if(n>shownLvl){ shownLvl=n; setTimeout(()=>levelUp(n), 450); if(n>=79) setTimeout(()=>foundScroll("handover"), 2600); }
-  const s=lvlStart(n), e=lvlStart(n+1), frac=(G.xp-s)/(e-s), t=today(), done=G.hist[t]||0;
+  const s=lvlStart(n), e=lvlStart(n+1), frac=n>=MAX_LVL?1:(G.xp-s)/(e-s), t=today(), done=G.hist[t]||0;
   const live = G.last===t || (G.last && dayNum(t)-dayNum(G.last)===1) ? G.streak : 0;
   $("#hudLvlNum").textContent=n;
   $("#hudLvlRing").setAttribute("stroke-dashoffset", (2*Math.PI*20*(1-frac)).toFixed(1));
   $("#rankName").textContent=rankFor(n);
-  $("#xpText").textContent=`${G.xp-s} / ${e-s} XP`;
+  $("#xpText").textContent=n>=MAX_LVL?`Max level · ${G.xp.toLocaleString()} XP`:`${G.xp-s} / ${e-s} XP`;
   $("#xpFill").style.width=(frac*100)+"%";
   $("#hudStreakN").textContent=live;
   $("#hudStreak").classList.toggle("cold", G.last!==t);
@@ -3093,7 +3104,7 @@ function wireSave(){
 
 /* ---- trophies ---- */
 function renderTrophies(){
-  const n=lvlFor(G.xp), s=lvlStart(n), e=lvlStart(n+1), frac=(G.xp-s)/(e-s), t=today();
+  const n=lvlFor(G.xp), s=lvlStart(n), e=lvlStart(n+1), frac=n>=MAX_LVL?1:(G.xp-s)/(e-s), t=today();
   const acc = G.st.cards ? Math.round(G.st.right/G.st.cards*100) : 0;
   const got=BADGES.filter(b=>G.badges[b[0]]).length;
   // heatmap: last 12 weeks, columns Mon..Sun
@@ -3107,7 +3118,7 @@ function renderTrophies(){
   if(!["progress","weak","badges","scrolls","looks","save"].includes(tp)) tp=G.tpage="progress";
   const pages={
     progress:`<div class="profile"><div class="bigring"><svg viewBox="0 0 110 110"><circle class="ring-bg" cx="55" cy="55" r="48" style="stroke-width:9"/><circle class="ring-fg" cx="55" cy="55" r="48" style="stroke-width:9" ${ring(48,frac)}/></svg><b>${n}</b></div>
-      <div><h2>${esc(rankFor(n))}</h2><p>Level ${n} · ${G.xp.toLocaleString()} XP total · ${e-G.xp} XP to level ${n+1}</p>
+      <div><h2>${esc(rankFor(n))}</h2><p>Level ${n} · ${G.xp.toLocaleString()} XP total · ${n>=MAX_LVL?"max level reached 👑":`${e-G.xp} XP to level ${n+1}`}</p>
       <p>${(()=>{const nx=RANKS.find(r=>r[0]>n); return nx?`Next rank: <b>${esc(nx[1])}</b> at level ${nx[0]}`:"You've reached the top rank. Legend."})()}</p></div></div>
     ${petBoxHTML()}
     <h3 class="tp-h">Your stats</h3><div class="tiles"><div class="tile"><b>🔥 ${G.last===t||(G.last&&dayNum(t)-dayNum(G.last)===1)?G.streak:0}</b><span>Day streak (best ${G.best})</span></div>
@@ -3271,7 +3282,7 @@ function tLock(){
   $("#tPass").focus();
   $("#tForm").onsubmit=async e=>{ e.preventDefault();
     try{
-      if(await sha256hex($("#tPass").value)===TEACHER_HASH){ try{ sessionStorage.setItem("fount-teacher","1"); }catch(_){} tMain(); }
+      if(await sha256hex($("#tPass").value)===TEACHER_HASH){ try{ sessionStorage.setItem("fount-teacher","1"); }catch(_){} if(/#demo\b/.test(location.hash)) location.href=location.pathname+"?demo"; else tMain(); }
       else { $("#tErr").textContent="That passcode isn't right."; $("#tPass").select(); }
     }catch(err){ $("#tErr").textContent="This browser can't check the passcode here. Open the site over https (the normal web address)."; }
   };
@@ -3280,7 +3291,7 @@ function tMain(){
   let remembered=null; try{ remembered=localStorage.getItem(TKEY); }catch(e){}
   $("#teacherApp").innerHTML=`<div class="t-wrap">
     <div class="t-top"><h1 class="t-h">🧑‍🏫 Teacher tools</h1><span class="spacer"></span>
-      <button class="btn" id="tProj">📽️ Projector mode</button><button class="btn ghost" id="tPrint">🖨️ Print</button><button class="btn ghost" id="tLockBtn">🔒 Lock</button></div>
+      <button class="btn" id="tProj">📽️ Projector mode</button><a class="btn ghost" href="./?demo" target="_blank" rel="noopener" id="tDemo">🎓 Demo (all unlocked)</a><button class="btn ghost" id="tPrint">🖨️ Print</button><button class="btn ghost" id="tLockBtn">🔒 Lock</button></div>
     <div class="box t-noprint"><h3>Paste progress codes <small>Students copy theirs from the Save tab</small></h3>
       <textarea id="tIn" placeholder="Paste one or many codes here. They can be mixed in with other text, e.g. copied from a Google Classroom thread."></textarea>
       <div class="card-actions"><button class="btn" id="tAdd">Add codes</button><button class="btn ghost" id="tClear">Clear all</button>
@@ -4425,8 +4436,25 @@ addEventListener("appinstalled",()=>{ $("#installBtn").hidden=true; installEvt=n
 if(!TEACHER && !standalone() && (isIOS || "serviceWorker" in navigator)) $("#installBtn").hidden=false;
 $("#installBtn").onclick=async()=>{ if(installEvt){ installEvt.prompt(); const c=await installEvt.userChoice.catch(()=>null); installEvt=null; if(c&&c.outcome==="accepted") $("#installBtn").hidden=true; } else showInstallHelp(); };
 
+function demoFill(){
+  const t=today(), day=n=>{ const d=new Date(t+"T12:00:00"); d.setDate(d.getDate()-n); return ymd(d); };
+  Object.assign(G,{xp:lvlStart(80)+1234, streak:42, best:42, last:t, toured:1, newsSeen:WHATS_NEW_V, backupAt:t, skin:G.skin||""}); shownLvl=lvlFor(G.xp);
+  G.hist={}; for(let i=1;i<60;i++) G.hist[day(i)]=i%9===4?0:25+((i*37)%40); G.hist[t]=Math.max(45,G.goal+5);
+  Object.assign(G.st,{reviews:6800, cards:6800, right:5900, quizzes:120, perfect:40, blitz:48, blitzR:40, surv:35, combo:60, gold:90, exam:10, examR:200, terms:30, maths:300, mathsBest:12, focus:12, flawBest:16, orderBest:18, hardWins:9, bossWins:20, flawless:9});
+  TOPICS.forEach(tp=>{ G.bosses[tp.key]={tries:3, wins:2, bestHp:0, won:true, flawless:true, hardWon:true}; });
+  G.scrolls=G.scrolls||{}; G.skinsTried=G.skinsTried||{}; G.badges=G.badges||{};
+  SECRET_SCROLLS.forEach(s=>{ G.scrolls[s.id]=t; });
+  G.flags=Object.assign(G.flags||{},{keeper:1, survivor:1, stan:1, ring:1, backup:1});
+  G.seals={}; THEMES.forEach(th=>{ if(th.scroll) G.seals[th.k]=t; });
+  BADGES.forEach(b=>{ G.badges[b[0]]=t; });
+  THEMES.forEach(th=>{ G.skinsTried[th.k||"classic"]=1; });
+  G.pet={name:"Professor Squeaks", born:day(200), stage:PET_STAGES.length-1, mood:"ecstatic"};
+  DATA.forEach((d,i)=>{ if(i%5) store.p[d.id]="k"; else if(i%10===0) store.p[d.id]="l"; });
+  const bar=$("#demobar"); bar.hidden=false;
+  bar.innerHTML=`<b>🎓 Demo mode</b><span>Everything's unlocked so you can see what's waiting for you. Nothing here is saved.</span><a href="${esc(location.pathname)}">Exit demo</a>`;
+}
 if(TEACHER){ startTeacher(); }
-else { if(G.cardMode==="gap"||G.cardMode==="flip"){ cardMode=G.cardMode; document.querySelectorAll("[data-cm]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.cm===cardMode)); }
+else { if(DEMO) demoFill(); if(G.cardMode==="gap"||G.cardMode==="flip"){ cardMode=G.cardMode; document.querySelectorAll("[data-cm]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.cm===cardMode)); }
   dateEggs(); checkStreak(); checkBadges(); save(); renderMeter(); renderChips(); newDeck(); renderQuiz(); renderHud(); renderArcade(); renderPlan(); renderEvents(); }
 
 $("#focusBtn").onclick=focusClick; if(G.focus && G.focus.end){ if(Date.now()>=G.focus.end) focusEnd(true); else { focusTimer=setInterval(focusTick,1000); focusBtnRender(); } }
