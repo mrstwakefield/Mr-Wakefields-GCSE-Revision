@@ -543,19 +543,6 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .save-more summary{cursor:pointer;font-weight:700}
 .save-more dt{font-weight:700;margin-top:10px}
 .save-more dd{margin:2px 0 0;color:var(--muted)}
-.lb-intro ul{margin:8px 0 4px;padding-left:1.2em;line-height:1.5}
-.lb-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.lb-head .spacer{flex:1}
-.lb-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
-.lb-list li{display:flex;align-items:center;gap:10px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:16px}
-.lb-list li.me{background:var(--good-bg);border-color:var(--good);font-weight:700}
-.lb-list + .lb-list{margin-top:6px;border-top:2px dashed var(--line);padding-top:8px}
-.lb-rank{flex:none;width:30px;text-align:center;font-family:var(--display);font-weight:800;font-size:18px}
-.lb-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lb-name small{font-weight:400;color:var(--muted)}
-.lb-lvl{flex:none;font-size:13px;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:99px;padding:2px 8px}
-.lb-xp{flex:none;font-family:var(--display)}
-.lb-list.big li{font-size:26px;padding:10px 18px}.lb-list.big .lb-rank{width:48px;font-size:28px}.lb-list.big .lb-lvl{font-size:16px}
-.lb-err{color:var(--warn);font-weight:700;margin:10px 0 0}
 .demobar{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;background:linear-gradient(90deg,#7B5BE0,#D6478F,#F39A3C);color:#fff;border-radius:16px;padding:10px 14px;margin:0 0 14px;font-size:15px;line-height:1.35}
 .demobar[hidden]{display:none}
 .demobar b{font-family:var(--display);font-size:17px}
@@ -993,7 +980,6 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
     <button role="tab" aria-selected="false" data-tab="trophies" data-tp="scrolls" id="tab-scrolls" aria-controls="p-trophies">📜 Secret scrolls</button>
     <button role="tab" aria-selected="false" data-tab="trophies" data-tp="looks" id="tab-looks" aria-controls="p-trophies">🎨 Themes</button>
     <button role="tab" aria-selected="false" data-tab="trophies" data-tp="save" id="tab-save" aria-controls="p-trophies">💾 Save</button>
-    <button role="tab" aria-selected="false" data-tab="board" id="tab-board" aria-controls="p-board">🏆 Leaderboard</button>
   </div>
 
   <section class="topics" aria-labelledby="topicsTitle">
@@ -1051,9 +1037,6 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
     <div class="list" id="list"></div>
     <p class="muted" id="moreWrap" style="text-align:center"></p>
   </section>
-
-  <!-- LEADERBOARD -->
-  <section class="panel" id="p-board" role="tabpanel" aria-labelledby="tab-board" hidden><div id="boardArea"></div></section>
 
   <footer class="foot">
     <span>Your progress is saved in this browser only. <button class="linkbtn" id="backupLink" style="padding:0">Back it up</button> · <button class="linkbtn" id="tourLink" style="padding:0">📖 How it works</button> · <a class="linkbtn" href="guide.html" style="padding:0">🖨️ Guide for parents</a> · <button class="linkbtn" id="parentLink" style="padding:0">👪 Parent mode</button></span>
@@ -1340,7 +1323,7 @@ if(DEMO_ASK && !DEMO) location.replace(location.pathname+"?teacher#demo");
 const KEY = DEMO ? "fount-demo-never-saved" : "rr-psych-gcse-v1";
 let store = {p:{}, sel:TOPICS.map(t=>t.key), all:TOPICS.map(t=>t.key)};
 try{ const s = JSON.parse(localStorage.getItem(KEY)||"null"); if(s && s.p){ store.p = s.p; if(Array.isArray(s.sel)){ const seen=new Set(Array.isArray(s.all)?s.all:s.sel.concat([])); store.sel = [...new Set(s.sel.map(k=>k.startsWith("Issues and Debates")?"Issues and Debates part I":k))].filter(k=>TMAP[k]).concat(TOPICS.map(t=>t.key).filter(k=>!seen.has(k))); } } }catch(e){}
-function save(){ if(TEACHER || DEMO_ASK) return; try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} if(typeof lbQueue==="function" && lb.user) lbQueue(); }
+function save(){ if(TEACHER || DEMO_ASK) return; try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
 const status = id => store.p[id] || "";
 function topicPct(id){ const t=BY_ID[id].t, it=DATA.filter(x=>x.t===t); return it.filter(x=>status(x.id)==="k").length/it.length; }
 let lockToast=0;
@@ -1384,7 +1367,10 @@ const gameOK = d => taught(d.t) && !(d.t==="Exam skills" && notYetText(d.q+" "+d
 
 /* ---- topic stages: every topic must reach each 20% step before any topic can go further ---- */
 const STAGE_STEP = 20;   // percent per stage. Set to 0 to switch topic locking off.
-const stageTopics = () => TOPICS.filter(t=>t.key!=="Exam skills" && taught(t.key));
+// a topic that comes back only counts towards stages from this date, so students get time to catch up
+const STAGE_FROM = {"Language, thought & communication":"2027-03-15"};
+const stageCounts = (k, d) => k!=="Exam skills" && taught(k) && !(STAGE_FROM[k] && (d||today()) < STAGE_FROM[k]);
+const stageTopics = () => TOPICS.filter(t=>stageCounts(t.key));
 function topicFrac(key){ const it=DATA.filter(d=>d.t===key); return it.length ? it.filter(d=>status(d.id)==="k").length/it.length : 0; }
 function stageInfo(){
   if(!STAGE_STEP || DEMO) return {on:false, cap:1, stage:0, locked:new Set(), fr:{}};
@@ -1442,11 +1428,10 @@ function goTab(name, tp){
   const tpNow=G.tpage||"progress";
   document.querySelectorAll(".tabs [role=tab]").forEach(x=>{ const on=x.dataset.tab===tab && (!x.dataset.tp || x.dataset.tp===tpNow); x.setAttribute("aria-selected", on); if(on && x.scrollIntoView && x.parentElement.scrollWidth>x.parentElement.clientWidth) x.parentElement.scrollTo({left:x.offsetLeft-x.parentElement.clientWidth/2+x.offsetWidth/2, behavior:"smooth"}); });
   document.querySelectorAll(".panel").forEach(p=>p.hidden = p.id!=="p-"+tab);
-  $(".topics").hidden = tab==="trophies" || tab==="board";
+  $(".topics").hidden = tab==="trophies";
   if(tab==="browse") renderBrowse();
   if(tab==="arcade") renderArcade();
   if(tab==="trophies") renderTrophies();
-  if(tab==="board") lbRender();
 }
 document.querySelectorAll(".tabs [role=tab]").forEach(b=>b.addEventListener("click",()=>goTab(b.dataset.tab, b.dataset.tp)));
 
@@ -1824,7 +1809,7 @@ const GDEF = {xp:0, streak:0, best:0, last:"", freeze:0, goal:30, hist:{}, badge
   st:{reviews:0, cards:0, right:0, quizzes:0, perfect:0, blitz:0, blitzR:0, surv:0, combo:0, gold:0, exam:0, examR:0, terms:0, maths:0, mathsBest:0}};
 try{ const s=JSON.parse(localStorage.getItem(KEY)||"null"); if(s && s.g) store.g=s.g; }catch(e){}
 store.g = Object.assign({}, GDEF, store.g||{}); store.g.st = Object.assign({}, GDEF.st, store.g.st||{});
-const G = store.g;
+const G = store.g; delete G.lb; delete G.wk;
 G.srs=G.srs||{}; G.bosses=G.bosses||{}; G.mistakes=G.mistakes||{}; G.flags=G.flags||{}; G.scrolls=G.scrolls||{}; G.lcount=G.lcount||{}; G.skinsTried=G.skinsTried||{}; G.bossDays=G.bossDays||{};
 function flag(k){ if(G.flags[k]) return; G.flags[k]=1; checkBadges(); save(); }
 function checkPal(){ const s=String(G.xp); if(s.length>=3 && s===[...s].reverse().join("")) flag("palindrome"); }
@@ -1928,15 +1913,20 @@ function levelUp(n){
 function addXP(n, el, label){
   if(n<=0) return;
   G.xp+=n;
-  { const w=weekId(); if(!G.wk || G.wk.id!==w) G.wk={id:w, xp:0}; G.wk.xp+=n; }
   if(el!==false) floater(label||("+"+n+" XP"), el, n>=40?"big":"");
   renderHud();
 }
+// School holidays (first day, last day). Days missed in these don't break streaks.
+// Best guesses: check them against the school calendar and edit here.
+const HOLIDAYS = [["2026-12-19","2027-01-03"],["2027-02-13","2027-02-21"],["2027-03-27","2027-04-11"],["2027-05-29","2027-06-06"]];
+const isHoliday = d => HOLIDAYS.some(([a,b])=>d>=a && d<=b);
 function checkStreak(){
   if(!G.last) return;
   const gap=dayNum(today())-dayNum(G.last);
   if(gap<=1) return;
-  const missed=gap-1;
+  let missed=0, hol=0; for(let i=1;i<gap;i++){ const d=new Date(G.last+"T12:00:00"); d.setDate(d.getDate()+i); isHoliday(ymd(d)) ? hol++ : missed++; }
+  if(missed===0 && G.streak>0){ const y=new Date(); y.setDate(y.getDate()-1); G.last=ymd(y);
+    setTimeout(()=>toast("🏖️","Holiday streak protection",`Your ${G.streak}-day streak was safe over the holiday. Hit today's goal to keep it going.`),800); save(); return; }
   if(G.streak>0 && G.freeze>=missed){
     G.freeze-=missed; const y=new Date(); y.setDate(y.getDate()-1); G.last=ymd(y);
     setTimeout(()=>toast("🧊","Streak freeze used",`Your ${G.streak}-day streak is safe. Hit today's goal to keep it.`),800);
@@ -3417,7 +3407,6 @@ function tMain(){
   $("#teacherApp").innerHTML=`<div class="t-wrap">
     <div class="t-top"><h1 class="t-h">🧑‍🏫 Teacher tools</h1><span class="spacer"></span>
       <button class="btn" id="tProj">📽️ Projector mode</button><a class="btn ghost" href="./?demo" target="_blank" rel="noopener" id="tDemo">🎓 Demo (all unlocked)</a><button class="btn ghost" id="tPrint">🖨️ Print</button><button class="btn ghost" id="tLockBtn">🔒 Lock</button></div>
-    <div class="box t-noprint" id="tLb"></div>
     <div class="box t-noprint"><h3>Paste progress codes <small>Students copy theirs from the Save tab</small></h3>
       <textarea id="tIn" placeholder="Paste one or many codes here. They can be mixed in with other text, e.g. copied from a Google Classroom thread."></textarea>
       <div class="card-actions"><button class="btn" id="tAdd">Add codes</button><button class="btn ghost" id="tClear">Clear all</button>
@@ -3426,7 +3415,6 @@ function tMain(){
     <div id="tOut"></div>
     <p class="muted t-note">Codes are self-reported by students and could in theory be edited, so treat them as a guide. Codes aren't sent anywhere: they only live on this page${remembered?" and in this browser (Remember is on)":" until you close the tab"}.</p></div>`;
   $("#tProj").onclick=()=>projSetup();
-  if(LB_LIVE){ tLbRender(); lbLoad().catch(()=>{}); } else { const tb=$("#tLb"); if(tb) tb.remove(); }
   $("#tPrint").onclick=()=>window.print();
   $("#tLockBtn").onclick=()=>{ try{ sessionStorage.removeItem("fount-teacher"); }catch(e){} T.reports.clear(); tLock(); };
   $("#tAdd").onclick=()=>{ addCodes($("#tIn").value); $("#tIn").value=""; };
@@ -3447,6 +3435,9 @@ const heatCol = v => `color-mix(in srgb, hsl(${Math.round(v*1.2)},75%,48%) 42%, 
 function tRender(){
   const out=$("#tOut"); const rs=[...T.reports.values()];
   if(!rs.length){ out.innerHTML=`<div class="empty"><h3>No codes yet</h3><p>Ask students to open the Save tab → "Send your progress to your teacher", type their name and copy their code. Paste them all above.</p></div>`; return; }
+  rs.forEach(r=>{ const idx=TOPICS.map((t,i)=>i).filter(i=>stageCounts(TOPICS[i].key, r.date)), min=Math.min(...idx.map(i=>r.k[i]));
+    r.stage=STAGE_STEP?Math.floor(min/STAGE_STEP)+1:0; const cap=Math.min(100,r.stage*STAGE_STEP);
+    r.lockedT=STAGE_STEP && cap<100 ? idx.filter(i=>r.k[i]>=cap).map(i=>shortName(TOPICS[i].key)) : []; });
   const {key,dir}=T.sort;
   const val = (r,k) => k==="name"?r.name.toLowerCase() : k.startsWith("t")? r.k[+k.slice(1)] : r[k];
   rs.sort((a,b)=>{ const x=val(a,key), y=val(b,key); return (x<y?-1:x>y?1:0)*dir; });
@@ -3467,19 +3458,20 @@ function tRender(){
     <div class="box t-weak"><h3>🎯 Weakest topics for the class <small>${mockPeriod()?"Mock topics only (Language isn't in the mocks)":"All topics"}</small></h3>
       <ol>${weak.map(w=>`<li><b>${esc(TMAP[w.key].name)}</b>: ${w.v}% of cards known on average. <span class="muted">Try: run projector mode on ${esc(TMAP[w.key].name)}, or set its boss battle as a challenge.</span></li>`).join("")}</ol></div>
     ${inactive.length?`<div class="box"><h3>😴 No revision in the 7 days before their report <small>${inactive.length} student${inactive.length===1?"":"s"}</small></h3><p style="margin:0">${inactive.map(r=>`${esc(r.name)} <span class="muted">(${r.lastDaysAgo<0?"none in 14 days":r.lastDaysAgo+" days before report"})</span>`).join(" · ")}</p></div>`:""}
+    ${(()=>{ const ahead=rs.filter(r=>r.lockedT.length && r.lockedT.length<=2 && r.known>40); return ahead.length?`<div class="box"><h3>🔒 Racing ahead on one or two topics <small>${ahead.length} student${ahead.length===1?"":"s"}</small></h3><p style="margin:0">${ahead.map(r=>`${esc(r.name)} <span class="muted">(stage ${r.stage}; locked: ${esc(r.lockedT.join(", "))})</span>`).join(" · ")}</p><p class="muted" style="margin:6px 0 0;font-size:14px">These topics are review-only for them until their other topics catch up.</p></div>`:""; })()}
     <div class="box"><h3>Topic heatmap <small>% of cards known · click a column to sort</small></h3>
       <div class="t-scroll"><table class="t-table t-heat"><thead><tr>${th("name","Student")}${TOPICS.map((t,i)=>th("t"+i, esc(shortName(t.key)))).join("")}</tr></thead>
       <tbody>${rs.map(r=>`<tr><td>${esc(r.name)}</td>${r.k.map(v=>`<td style="background:${heatCol(v)}">${v}%</td>`).join("")}</tr>`).join("")}
       <tr class="t-avg"><td>Class average</td>${topicAvg.map(t=>`<td style="background:${heatCol(t.v)}">${t.v}%</td>`).join("")}</tr></tbody></table></div></div>
     <div class="box"><h3>Class table <small>Click a heading to sort</small></h3>
-      <div class="t-scroll"><table class="t-table"><thead><tr>${th("name","Student")}${th("level","Level")}${th("xp","XP")}${th("known","Cards known")}${th("acc","Accuracy")}${th("streak","Streak")}${th("act14","Days active (14d)")}${th("bosses","Bosses")}${th("qs","Answered")}${th("date","Report date")}</tr></thead>
-      <tbody>${rs.map(r=>`<tr class="${r.act7===0?"t-inactive":""}"><td>${esc(r.name)}</td><td>${r.level}</td><td>${r.xp.toLocaleString()}</td><td>${r.known}</td><td>${r.acc}%</td><td>${r.streak} <span class="muted">(best ${r.best})</span></td><td>${r.act14}</td><td>${r.bosses}/9</td><td>${r.qs.toLocaleString()}</td><td>${r.date}</td></tr>`).join("")}</tbody></table></div>
+      <div class="t-scroll"><table class="t-table"><thead><tr>${th("name","Student")}${th("level","Level")}${th("stage","Stage")}${th("xp","XP")}${th("known","Cards known")}${th("acc","Accuracy")}${th("streak","Streak")}${th("act14","Days active (14d)")}${th("bosses","Bosses")}${th("qs","Answered")}${th("date","Report date")}</tr></thead>
+      <tbody>${rs.map(r=>`<tr class="${r.act7===0?"t-inactive":""}"><td>${esc(r.name)}</td><td>${r.level}</td><td title="${r.lockedT.length?"Locked (review only): "+esc(r.lockedT.join(", ")):""}">${STAGE_STEP?(r.stage>100/STAGE_STEP?"All done":"Stage "+r.stage):"–"}${r.lockedT.length?` <span class="muted">🔒${r.lockedT.length}</span>`:""}</td><td>${r.xp.toLocaleString()}</td><td>${r.known}</td><td>${r.acc}%</td><td>${r.streak} <span class="muted">(best ${r.best})</span></td><td>${r.act14}</td><td>${r.bosses}/9</td><td>${r.qs.toLocaleString()}</td><td>${r.date}</td></tr>`).join("")}</tbody></table></div>
       <div class="card-actions t-noprint"><button class="btn ghost" id="tCsv">⬇️ Export CSV</button></div></div>`;
   out.querySelectorAll(".t-sort").forEach(b=>b.onclick=()=>{ const k=b.dataset.k; T.sort = {key:k, dir: T.sort.key===k ? -T.sort.dir : (k==="name"?1:-1)}; tRender(); });
   $("#tCsv").onclick=()=>{
-    const head=["Student","Level","XP","Cards known","Accuracy %","Streak","Best streak","Days active (14d)","Bosses defeated","Questions answered","Report date",...TOPICS.map(t=>TMAP[t.key].name+" % known"),...TOPICS.map(t=>TMAP[t.key].name+" % still learning")];
+    const head=["Student","Level","Stage","Locked topics","XP","Cards known","Accuracy %","Streak","Best streak","Days active (14d)","Bosses defeated","Questions answered","Report date",...TOPICS.map(t=>TMAP[t.key].name+" % known"),...TOPICS.map(t=>TMAP[t.key].name+" % still learning")];
     const q = v => /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : v;
-    const rows=rs.map(r=>[r.name,r.level,r.xp,r.known,r.acc,r.streak,r.best,r.act14,r.bosses,r.qs,r.date,...r.k,...r.l].map(q).join(","));
+    const rows=rs.map(r=>[r.name,r.level,r.stage,r.lockedT.join("; "),r.xp,r.known,r.acc,r.streak,r.best,r.act14,r.bosses,r.qs,r.date,...r.k,...r.l].map(q).join(","));
     const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([[head.map(q).join(","),...rows].join("\n")],{type:"text/csv"})); a.download=`class-progress-${today()}.csv`; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
   };
 }
@@ -3619,8 +3611,8 @@ function wireReport(){
 const EXAMS = [
   {d:"2026-12-04", name:"Paper 1 mock", mock:true},
   {d:"2026-12-11", name:"Paper 2 mock", mock:true},
-  {d:"2027-05-10", name:"Paper 1"},
-  {d:"2027-05-17", name:"Paper 2"},
+  {d:"2027-05-10", name:"Paper 1 exam", sub:"Cognition and behaviour, afternoon"},
+  {d:"2027-05-17", name:"Paper 2 exam", sub:"Social context and behaviour, afternoon"},
 ];
 const PLAN_BONUS = 40;
 const niceDate = s => new Date(s+"T12:00:00").toLocaleDateString("en-GB",{weekday:"short", day:"numeric", month:"short"});
@@ -3638,7 +3630,7 @@ function renderPlan(){
   if(!next) count=`<span>🎓 Exams are done. You smashed it, good luck with results!</span>`;
   else { const days=dayNum(next.d)-dayNum(t);
     count = days===0 ? `<span>🍀 <b>Today: ${esc(next.name)}.</b> Good luck!</span>`
-      : `<span><b class="plan-days">${next.mock?"🎯":"⏳"} ${days}</b> day${days===1?"":"s"} to your <b>${esc(next.name)}</b> <span class="muted">(${niceDate(next.d)})</span></span>`;
+      : `<span><b class="plan-days">${next.mock?"🎯":"⏳"} ${days}</b> day${days===1?"":"s"} to your <b>${esc(next.name)}</b> <span class="muted">(${niceDate(next.d)}${next.sub?" · "+esc(next.sub):""})</span></span>`;
     if(next.mock) count+=`<button class="btn ghost plan-btn" id="planMock">Revise mock topics</button>`;
   }
   const dueAll=DATA.filter(d=>isDue(d.id)).length, dd=G.daily[t], weakN=(G.tday&&G.tday.d===t&&G.tday.c[weak])||0;
@@ -4490,202 +4482,23 @@ function dateEggs(){
   if(lvlFor(G.xp)>=79 && !G.scrolls.handover) setTimeout(()=>foundScroll("handover"),1800);
 }
 
-/* ================= CLASS LEADERBOARD (Firebase + Microsoft sign-in) ================= */
-// Firebase web config. These values are public by design: the Firestore security rules
-// (firestore.rules in this repo) are what protect the data.
-const LB_CONFIG = {apiKey:"AIzaSyBXLLTn43cUI4oBSp7q07Of0Um8nCRVThw", authDomain:"gcse-fount-of-wisdom.firebaseapp.com", projectId:"gcse-fount-of-wisdom", appId:"1:861842338374:web:f5eb85a28ac62b3f9d1047"};
-// "organizations" = any work/school Microsoft account can try to sign in, so the school's ID never has to be
-// on this public site. The Firestore security rules then only accept the school's own email domain.
-const LB_TENANT = "organizations";
-// Set to true once Microsoft sign-in is switched on in Firebase (see LEADERBOARD-SETUP.md). Until then the tab is hidden.
-const LB_LIVE = false;
-const FB_URL = "https://www.gstatic.com/firebasejs/10.12.2/";
-const LB_EMU = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && /[?&]lbemu\b/.test(location.search);   // local testing only
-const LB_STEP = 3000;   // max XP rise per upload (must match firestore.rules)
-const lb = {ready:null, fb:null, auth:null, db:null, user:null, sending:false, timer:null, view:"week", rows:null, me:null, err:"", base:false, busy:false};
-const weekId = (d=today()) => { const x=new Date(d+"T12:00:00"); x.setDate(x.getDate()-((x.getDay()+6)%7)); return ymd(x); };
-const wkKey = () => "w"+weekId().replace(/-/g,"");
-const weekXP = () => G.wk && G.wk.id===weekId() ? G.wk.xp : 0;
-function lbName(u){
-  // "Amira Khan" or "Khan, Amira" -> "Amira K."
-  let n=String((u&&u.displayName)||"").replace(/\s*\(.*?\)\s*/g," ").trim(), first="", last="";
-  if(n.includes(",")){ const [a,b]=n.split(","); last=a.trim().split(/\s+/)[0]||""; first=(b||"").trim().split(/\s+/)[0]||""; }
-  else { const w=n.split(/\s+/).filter(Boolean); first=w[0]||""; last=w.length>1?w[w.length-1]:""; }
-  const clean=s=>s.replace(/[^\p{L}'-]/gu,"");
-  first=clean(first).slice(0,20); last=clean(last);
-  if(!first) return "";
-  first=first.charAt(0).toLocaleUpperCase()+first.slice(1).toLocaleLowerCase();
-  return last ? `${first} ${last.charAt(0).toLocaleUpperCase()}.` : first;
-}
-function lbErr(e){
-  const c=(e&&e.code)||"";
-  if(/popup-closed|cancelled-popup/.test(c)) return "";
-  if(/unauthorized-domain/.test(c)) return "Sign-in isn't switched on for this web address yet. Let Mr Wakefield know.";
-  if(/operation-not-allowed/.test(c)) return "Microsoft sign-in isn't switched on yet. Let Mr Wakefield know.";
-  if(/permission-denied/.test(c)) return "Only school Microsoft accounts can join the leaderboard. Sign out and use your school email.";
-  if(/network|unavailable|failed-precondition/.test(c)) return "Couldn't reach the leaderboard. Check your internet connection and try again.";
-  if(/account-exists|credential-already/.test(c)) return "That account is already linked to a different sign-in. Ask Mr Wakefield.";
-  return "Something went wrong with the leaderboard ("+(c||"unknown")+"). Try again later.";
-}
-function lbLoad(){
-  if(lb.ready) return lb.ready;
-  lb.ready=(async()=>{
-    const [A,U,F]=await Promise.all(["app","auth","firestore"].map(m=>import(FB_URL+"firebase-"+m+".js")));
-    const app=A.initializeApp(LB_CONFIG); lb.fb={U,F}; lb.auth=U.getAuth(app); lb.db=F.getFirestore(app);
-    if(LB_EMU){ U.connectAuthEmulator(lb.auth,"http://127.0.0.1:9099",{disableWarnings:true}); F.connectFirestoreEmulator(lb.db,"127.0.0.1",8080); }
-    try{ await U.getRedirectResult(lb.auth); }catch(e){ lb.err=lbErr(e); }
-    await new Promise(res=>U.onAuthStateChanged(lb.auth,u=>{
-      const changed=(u&&u.uid)!==(lb.user&&lb.user.uid); lb.user=u;
-      if(changed){ lb.base=false; lb.rows=null; lb.me=null; }
-      if(u && !TEACHER && !DEMO_ASK) lbSync(true);
-      if(tab==="board") lbRender();
-      if(TEACHER && typeof tLbRender==="function") tLbRender();
-      res();
-    }));
-  })().catch(e=>{ lb.ready=null; lb.err="Couldn't load the leaderboard. Check your internet connection and try again."; if(tab==="board") lbRender(); throw e; });
-  return lb.ready;
-}
-async function lbSignIn(){
-  lb.err=""; lb.busy=true; if(tab==="board") lbRender();
-  try{
-    await lbLoad(); const {U}=lb.fb, p=new U.OAuthProvider("microsoft.com");
-    p.setCustomParameters({tenant:LB_TENANT, prompt:"select_account"});
-    if(!TEACHER){ G.lb=Object.assign(G.lb||{},{on:1}); delete G.lb.off; save(); }
-    if(LB_EMU && window.__lbTestToken){ await U.signInWithCredential(lb.auth, p.credential({idToken:window.__lbTestToken})); }   // emulator tests only
-    else try{ await U.signInWithPopup(lb.auth,p); }
-    catch(e){ if(/popup-blocked|operation-not-supported/.test(e.code||"")){ await U.signInWithRedirect(lb.auth,p); return; } throw e; }
-  }catch(e){ lb.err=lbErr(e); }
-  lb.busy=false; if(tab==="board") lbRender(); if(TEACHER && typeof tLbRender==="function") tLbRender();
-}
-async function lbSignOut(remove){
-  if(!lb.user) return;
-  const {U,F}=lb.fb;
-  try{
-    if(remove) await F.deleteDoc(F.doc(lb.db,"board",lb.user.uid));
-    await U.signOut(lb.auth);
-  }catch(e){ lb.err=lbErr(e); }
-  if(!TEACHER){ G.lb={off:1}; save(); }
-  lb.rows=null; lb.me=null; if(tab==="board") lbRender();
-  if(remove) toast("🏆","You've been removed from the leaderboard","Your progress on this device is safe.",true);
-}
-function lbQueue(){ if(!lb.user || TEACHER || DEMO_ASK || lb.timer) return; lb.timer=setTimeout(()=>{ lb.timer=null; lbSync(); }, 30000); }
-async function lbSync(force){
-  if(!lb.user || TEACHER || DEMO_ASK || lb.sending) return;
-  const {F}=lb.fb, L=G.lb=Object.assign(G.lb||{},{on:1}), ref=F.doc(lb.db,"board",lb.user.uid), now=Date.now();
-  if(!force && L.t && now-L.t<20000){ lbQueue(); return; }
-  const name=lbName(lb.user);
-  if(!name){ lb.err="Your school account doesn't have a name we can use, so you can't join the leaderboard yet."; return; }
-  lb.sending=true;
-  try{
-    if(!lb.base){ const s=await F.getDoc(ref), d=s.exists()?s.data():null; lb.server=d?(d.xp||0):null; lb.serverWk=d?(d.wk||{}):{}; lb.base=true; }
-    if(lb.server!=null && G.xp<lb.server) return;   // this device is behind: keep the higher score
-    let xp=G.xp; if(lb.server!=null && xp-lb.server>LB_STEP) xp=lb.server+LB_STEP;   // big jumps go up in steps
-    const k=wkKey(), wx=lb.server==null ? Math.min(weekXP(),xp) : Math.min(weekXP(), (lb.serverWk[k]||0)+(xp-lb.server));   // matches firestore.rules
-    if(lb.server===xp && (lb.serverWk[k]||0)===wx && L.name===name) return;   // nothing new to upload
-    if(lb.lastW && now-lb.lastW<16000){ lbQueue(); return; }                     // rules need 15s between uploads
-    await F.setDoc(ref,{name, xp, lvl:lvlFor(xp), upd:F.serverTimestamp(), wk:{[k]:wx}});
-    lb.lastW=now; lb.server=xp; lb.serverWk={[k]:wx}; L.t=now; L.name=name; L.wx=wx; L.xp=xp; save();
-    if(xp<G.xp) lbQueue();
-    if(tab==="board" && !lb.rows?.some(r=>r.id===lb.user.uid && r.v>0)){ lb.rows=null; lbRender(); }
-  }catch(e){
-    if(e.code==="permission-denied" && lb.server!=null){ lb.lastW=now; lb.base=false; lbQueue(); }   // too soon, or score changed elsewhere: retry quietly
-    else { lb.err=lbErr(e); if(e.code==="permission-denied") lb.base=false; if(tab==="board") lbRender(); } }
-  finally{ lb.sending=false; }
-}
-async function lbFetch(){
-  const {F}=lb.fb, col=F.collection(lb.db,"board"), key=lb.view==="week"?"wk."+wkKey():"xp";
-  const snap=await F.getDocs(F.query(col,F.orderBy(key,"desc"),F.limit(20)));
-  lb.rows=snap.docs.map(d=>{ const x=d.data(); return {id:d.id, name:x.name, lvl:x.lvl, v:lb.view==="week"?((x.wk||{})[wkKey()]||0):x.xp}; });
-  lb.me=null;
-  const mine=lb.view==="week" ? (G.lb&&G.lb.wx)||0 : (G.lb&&G.lb.xp)||0;
-  if(lb.user && mine>0 && !lb.rows.some(r=>r.id===lb.user.uid)){
-    const c=await F.getCountFromServer(F.query(col,F.where(key,">",mine)));
-    lb.me={rank:c.data().count+1, v:mine};
-  }
-}
-function lbRowsHTML(rows, meId, big){
-  if(!rows.length) return `<p class="muted" style="text-align:center;padding:16px 0">${lb.view==="week"?"No one's on the board this week yet. Answer some questions to be first!":"No one's on the board yet."}</p>`;
-  return `<ol class="lb-list${big?" big":""}">${rows.map((r,i)=>`<li class="${r.id===meId?"me":""}"><span class="lb-rank">${["🥇","🥈","🥉"][i]||i+1}</span><span class="lb-name">${esc(r.name)}${r.id===meId?" <small>(you)</small>":""}</span><span class="lb-lvl">Lv ${r.lvl||1}</span><b class="lb-xp">${(r.v||0).toLocaleString()} XP</b></li>`).join("")}</ol>`;
-}
-async function lbRender(){
-  const a=$("#boardArea"); if(!a) return;
-  if(DEMO){ lb.view="week"; const s=["Amira K.","Josh T.","Ellie R.","Mason P.","Priya S.","Liam B.","Grace W.","Noah H.","Sophie L.","Kai M."].map((n,i)=>({id:"d"+i,name:n,lvl:30-i*2,v:1800-i*140}));
-    a.innerHTML=`<div class="box lb-box"><div class="lb-head"><h3 style="margin:0">🏆 Class leaderboard</h3></div><p class="muted" style="margin:6px 0 12px;font-size:15px">Demo: example names. In real life you sign in with your school Microsoft account and only your first name and surname initial are shown.</p>${lbRowsHTML(s,"d2")}</div>`; return; }
-  const signedIn=!!lb.user;
-  if(!lb.ready && G.lb && G.lb.on){ a.innerHTML=`<div class="box"><p class="muted">Loading the leaderboard…</p></div>`; lbLoad().catch(()=>{}); return; }
-  if(!signedIn){
-    a.innerHTML=`<div class="box lb-intro"><h3 style="margin-top:0">🏆 Class leaderboard</h3>
-      <p>Sign in with your <b>school Microsoft account</b> to see how your XP compares with the rest of the class.</p>
-      <ul><li>Only your <b>first name and surname initial</b> (for example "Amira K."), your level and your XP are shared.</li>
-        <li>Your answers, mistakes, badges and everything else stay on this device.</li>
-        <li>You can remove yourself from the board at any time.</li></ul>
-      <div class="card-actions"><button class="btn" id="lbIn" ${lb.busy?"disabled":""}>${lb.busy?"Signing in…":"Sign in with Microsoft"}</button></div>
-      ${lb.err?`<p class="lb-err" role="alert">${esc(lb.err)}</p>`:""}</div>`;
-    $("#lbIn").onclick=lbSignIn; return;
-  }
-  const meName=lbName(lb.user)||"you";
-  a.innerHTML=`<div class="box lb-box"><div class="lb-head"><h3 style="margin:0">🏆 Class leaderboard</h3><span class="spacer"></span>
-      <div class="seg" role="group" aria-label="Leaderboard period"><button data-lbv="week" aria-pressed="${lb.view==="week"}">This week</button><button data-lbv="all" aria-pressed="${lb.view==="all"}">All time</button></div></div>
-    <p class="muted" style="margin:6px 0 12px;font-size:15px">Your name on the board: <b>${esc(meName)}</b>${lb.view==="week"?" · The weekly board resets every Monday":""}</p>
-    <div id="lbList">${lb.rows?lbRowsHTML(lb.rows,lb.user.uid):`<p class="muted">Loading…</p>`}</div>
-    ${lb.me?`<ol class="lb-list" start="${lb.me.rank}"><li class="me"><span class="lb-rank">${lb.me.rank}</span><span class="lb-name">${esc(meName)} <small>(you)</small></span><span class="lb-lvl">Lv ${lvlFor(G.lb.xp||0)}</span><b class="lb-xp">${lb.me.v.toLocaleString()} XP</b></li></ol>`:""}
-    ${lb.err?`<p class="lb-err" role="alert">${esc(lb.err)}</p>`:""}
-    <p class="muted" style="font-size:13px;margin:12px 0 0">Scores upload every 30 seconds or so while you revise.</p>
-    <div class="card-actions" style="margin-top:12px"><button class="btn ghost" id="lbRefresh">↻ Refresh</button><button class="linkbtn" id="lbOut">Sign out</button><button class="linkbtn" id="lbRemove">Remove me from the board</button></div></div>`;
-  a.querySelectorAll("[data-lbv]").forEach(b=>b.onclick=()=>{ lb.view=b.dataset.lbv; lb.rows=null; lb.me=null; lbRender(); });
-  $("#lbRefresh").onclick=async()=>{ lb.err=""; await lbSync(true); lb.rows=null; lbRender(); };
-  $("#lbOut").onclick=()=>lbSignOut(false);
-  $("#lbRemove").onclick=()=>{ if(confirm("Remove yourself from the class leaderboard? Your progress on this device won't be affected.")) lbSignOut(true); };
-  if(!lb.rows){ try{ lb.err=""; await lbFetch(); }catch(e){ lb.err=lbErr(e); lb.rows=lb.rows||[]; } if(tab==="board") lbRender(); }
-}
-
-/* ---- teacher view: whole class, remove entries, projector ---- */
-const tLb = {rows:null, err:""};
-async function tLbFetch(){
-  const {F}=lb.fb, snap=await F.getDocs(F.query(F.collection(lb.db,"board"),F.orderBy("xp","desc")));
-  const k=wkKey();
-  tLb.rows=snap.docs.map(d=>{ const x=d.data(); return {id:d.id, name:x.name, lvl:x.lvl, xp:x.xp, wx:(x.wk||{})[k]||0, upd:x.upd&&x.upd.toDate?x.upd.toDate():null}; });
-}
-function tLbRender(){
-  const box=$("#tLb"); if(!box) return;
-  if(!lb.user){
-    box.innerHTML=`<h3>🏆 Class leaderboard <small>Sign in with your school Microsoft account to see it</small></h3>
-      <div class="card-actions"><button class="btn" id="tLbIn" ${lb.busy?"disabled":""}>Sign in with Microsoft</button></div>${lb.err?`<p class="lb-err">${esc(lb.err)}</p>`:""}`;
-    $("#tLbIn").onclick=lbSignIn; return;
-  }
-  if(!tLb.rows){ box.innerHTML=`<h3>🏆 Class leaderboard</h3><p class="muted">Loading…</p>`;
-    tLbFetch().then(tLbRender).catch(e=>{ tLb.err=lbErr(e); tLb.rows=[]; tLbRender(); }); return; }
-  const ago=d=>{ if(!d) return "–"; const m=Math.round((Date.now()-d)/60000); return m<60?`${m} min ago`:m<1440?`${Math.round(m/60)} h ago`:`${Math.round(m/1440)} days ago`; };
-  box.innerHTML=`<h3>🏆 Class leaderboard <small>${tLb.rows.length} student${tLb.rows.length===1?"":"s"} signed in · you're signed in as ${esc(lb.user.email||"")}</small></h3>
-    <div class="card-actions" style="margin-top:0"><button class="btn" id="tLbProj">📽️ Show this week's top 10</button><button class="btn ghost" id="tLbRe">↻ Refresh</button><button class="linkbtn" id="tLbOut">Sign out</button></div>
-    ${tLb.err?`<p class="lb-err">${esc(tLb.err)}</p>`:""}
-    ${tLb.rows.length?`<div class="t-scroll"><table class="t-table"><thead><tr><th>#</th><th>Name</th><th>Level</th><th>Total XP</th><th>This week</th><th>Last active</th><th></th></tr></thead><tbody>
-      ${tLb.rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.name)}</td><td>${r.lvl}</td><td>${(r.xp||0).toLocaleString()}</td><td>${r.wx.toLocaleString()}</td><td>${ago(r.upd)}</td><td><button class="linkbtn" data-tlbdel="${esc(r.id)}" data-n="${esc(r.name)}">Remove</button></td></tr>`).join("")}</tbody></table></div>`
-      :`<p class="muted">No students have signed in yet.</p>`}
-    <p class="muted t-note" style="margin-top:8px">Only first name, surname initial, level and XP are stored. XP is uploaded by students' own browsers, so treat it as a guide. Removing someone takes them off the board; they'll reappear next time they revise while signed in.</p>`;
-  $("#tLbRe").onclick=()=>{ tLb.rows=null; tLb.err=""; tLbRender(); };
-  $("#tLbOut").onclick=async()=>{ await lbSignOut(false); tLb.rows=null; tLbRender(); };
-  $("#tLbProj").onclick=()=>tLbProjector();
-  box.querySelectorAll("[data-tlbdel]").forEach(b=>b.onclick=async()=>{
-    if(!confirm(`Remove ${b.dataset.n} from the leaderboard?`)) return;
-    try{ const {F}=lb.fb; await F.deleteDoc(F.doc(lb.db,"board",b.dataset.tlbdel)); tLb.rows=tLb.rows.filter(r=>r.id!==b.dataset.tlbdel); }
-    catch(e){ tLb.err=/permission/.test(e.code||"")?"Only the teacher account named in the security rules can remove students.":lbErr(e); }
-    tLbRender(); });
-}
-function tLbProjector(){
-  const top=[...(tLb.rows||[])].filter(r=>r.wx>0).sort((a,b)=>b.wx-a.wx).slice(0,10).map(r=>({id:r.id,name:r.name,lvl:r.lvl,v:r.wx}));
-  const o=document.createElement("div"); o.className="overlay lb-proj";
-  o.innerHTML=`<div class="levelup" role="dialog" aria-modal="true" aria-label="This week's leaderboard" style="max-width:900px;text-align:left">
-    <div class="kick" style="text-align:center">Week beginning ${esc(niceDate(weekId()))}</div><h3 style="text-align:center;font-size:40px;margin:4px 0 18px">🏆 This week's top 10</h3>
-    ${(lb.view="week", lbRowsHTML(top,null,true))}<div style="text-align:center;margin-top:18px"><button class="btn" id="lbpClose">Close</button></div></div>`;
-  document.body.appendChild(o); confetti(150);
-  const close=()=>{ o.remove(); document.removeEventListener("keydown",k,true); }, k=e=>{ if(e.key==="Escape"){ e.stopPropagation(); close(); } };
-  document.addEventListener("keydown",k,true); o.onclick=e=>{ if(e.target===o||e.target.id==="lbpClose") close(); }; $("#lbpClose").focus();
-}
-addEventListener("pagehide",()=>{ if(lb.timer){ clearTimeout(lb.timer); lb.timer=null; lbSync(true); } });
 
 /* ================= BACK-UP REMINDER ================= */
 // progress lives only in this browser, so nudge once a week to save a backup
+const SESSION = {start:Date.now(), base:null, shown:false};
+function sessionSaveCheck(){
+  if(TEACHER || DEMO || SESSION.shown || G.backupAt===today()) return;
+  const done=(G.hist||{})[today()]||0; if(SESSION.base===null) SESSION.base=done;
+  const answered=done-SESSION.base, mins=(Date.now()-SESSION.start)/60000;
+  if(answered>=40 || (mins>=20 && answered>=10)){ SESSION.shown=true;
+    const n=$("#nudge"); if(!n) return; n.hidden=false;
+    n.innerHTML=`<span class="nd-ico" aria-hidden="true">💾</span><span class="nd-txt"><b>Great session: ${answered} answers!</b> Make a save code before you go, especially on a school computer, which might wipe your progress when you log off.</span>
+      <button class="btn" id="ndGo">Make a save code</button><button class="linkbtn" id="ndLater">Not now</button>`;
+    $("#ndGo").onclick=()=>{ goTab("trophies","save"); setTimeout(()=>{ const b=$("#saveCopy"); if(b){ b.scrollIntoView({behavior:reduced()?"auto":"smooth",block:"center"}); b.focus({preventScroll:true}); } },60); };
+    $("#ndLater").onclick=()=>{ n.hidden=true; n.innerHTML=""; }; }
+}
+setInterval(sessionSaveCheck, 60000);
+addEventListener("load",()=>{ SESSION.base=(G.hist||{})[today()]||0; });
 function markBackup(){ G.backupAt=today(); delete G.backupSnooze; save(); nudgeCheck(); }
 function nudgeCheck(){
   const n=$("#nudge"); if(!n) return; if(TEACHER){ n.hidden=true; return; }
@@ -4706,11 +4519,11 @@ const TOUR = [
   ["📝","Quiz","<p>Quick quizzes, 9-mark practice, <b>🧩 Exam skills</b> (2× XP) and full <b>mock papers</b> for Paper 1 and Paper 2.</p><p>Parents can test you too in <b>👪 Parent mode</b>.</p>"],
   ["🕹️","Arcade","<p>Boss battles, Psychle, Swipe Sort, Which Study?, Study Matcher, Spot the Flaw and more.</p><p>Check the <b>Game of the day</b> for bonus XP.</p>"],
   ["🐀","Level up","<p>Every answer earns XP. Climb 80 levels, keep your 🔥 streak, collect badges and unlock themes.</p><p>Your lab rat, <b>Professor Squeaks</b>, grows as you revise and gets sleepy if you stay away.</p><p>Psst… there are secret scrolls hidden around the site. 📜</p>"],
-  ["💾","Keep your progress safe","<p>Your progress is saved in <b>this browser only</b>."+(LB_LIVE?" The only thing that ever goes online is your spot on the <b>🏆 Leaderboard</b>, if you choose to sign in: just your first name, surname initial and XP.":" Nothing goes online.")+"</p><p>Back it up in the <b>💾 Save</b> tab every week or so, especially before you change phone or clear your browser.</p><p>Good luck. Keep right on! 💙</p>"],
+  ["💾","Keep your progress safe","<p>Your progress is saved in <b>this browser only</b>. Nothing goes online.</p><p>Back it up in the <b>💾 Save</b> tab every week or so, especially before you change phone or clear your browser.</p><p>Good luck. Keep right on! 💙</p>"],
 ];
 // bump WHATS_NEW_V and edit WHATS_NEW when you add features; returning students see it once
-const WHATS_NEW_V = LB_LIVE ? 3 : 2;
-const WHATS_NEW = ["🎯 Topics now unlock in stages: get every topic to 20% known, then 40%, and so on. A topic that gets ahead locks (review only) until the others catch up. This makes sure you revise everything for the exam!","💾 The Save tab is simpler: three steps to keep your progress safe", ...(LB_LIVE?["🏆 New: a class leaderboard! Sign in with your school Microsoft account to see how your XP compares (only your first name and surname initial are shown)"]:[]),"🃏 Flashcards now ask you to answer: multiple choice, gap fill or type it (typed answers earn 2× XP)","🐀 Meet Professor Squeaks, your revision lab rat","🕹️ New arcade games: Psychle, Swipe Sort, Which Study? and hard-mode boss rematches","📝 Mock papers and 🧩 Exam skills in the Quiz tab","🎨 80 levels and loads of new themes to unlock","💾 A weekly reminder to back up your progress"];
+const WHATS_NEW_V = 2;
+const WHATS_NEW = ["🎯 Topics now unlock in stages: get every topic to 20% known, then 40%, and so on. A topic that gets ahead locks (review only) until the others catch up. This makes sure you revise everything for the exam!","💾 The Save tab is simpler: three steps to keep your progress safe","🃏 Flashcards now ask you to answer: multiple choice, gap fill or type it (typed answers earn 2× XP)","🐀 Meet Professor Squeaks, your revision lab rat","🕹️ New arcade games: Psychle, Swipe Sort, Which Study? and hard-mode boss rematches","📝 Mock papers and 🧩 Exam skills in the Quiz tab","🎨 80 levels and loads of new themes to unlock","💾 A weekly reminder to back up your progress"];
 function showTour(steps, onDone){
   let i=0; const o=document.createElement("div"); o.className="overlay";
   const close=()=>{ o.remove(); document.removeEventListener("keydown",kd,true); if(onDone) onDone(); };
@@ -4789,10 +4602,9 @@ $("#focusBtn").onclick=focusClick; if(G.focus && G.focus.end){ if(Date.now()>=G.
 $("#parentLink").onclick=()=>{ goTab("quiz"); setQuizMode("parent"); $("#parentArea").scrollIntoView({behavior:reduced()?"auto":"smooth"}); };
 if(!TEACHER && /(^|[?&#])parent\b/i.test(location.search+location.hash)){ goTab("quiz"); setQuizMode("parent"); }
 $("#petStrip").onclick=()=>{ goTab("trophies","progress"); };
-if(!LB_LIVE && !LB_EMU && !DEMO) $("#tab-board").hidden=true;
 if(!TEACHER && !DEMO_ASK){ G.topicsBack=G.topicsBack||{}; Object.keys(NOT_YET_UNTIL).filter(k=>!NOT_YET.has(k) && !G.topicsBack[k]).forEach((k,i)=>{ G.topicsBack[k]=1; save();
-  if(G.xp>0) setTimeout(()=>toast("🔓",`${TMAP[k].name} is unlocked!`,`It's now in the games and counts towards your topic stages. Time to get it to ${STAGE_STEP||20}%!`,true),2500+i*1500); }); }
-if(!TEACHER){ petCheck(); nudgeCheck(); welcomeCheck(); if((LB_LIVE||LB_EMU) && !DEMO_ASK && G.lb && G.lb.on) setTimeout(()=>lbLoad().catch(()=>{}),1500); }
+  if(G.xp>0) setTimeout(()=>toast("🔓",`${TMAP[k].name} is unlocked!`,`It's back in the games. From ${niceDate(STAGE_FROM[k]||today())} it counts towards your topic stages, so get revising!`,true),2500+i*1500); }); }
+if(!TEACHER){ petCheck(); nudgeCheck(); welcomeCheck(); }
 </script>
 </body>
 </html>
