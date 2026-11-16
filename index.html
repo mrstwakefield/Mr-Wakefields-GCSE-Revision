@@ -70,6 +70,16 @@ h1 span b{font-weight:500}
 .chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:8px}
 .chip{--c:#888;position:relative;display:flex;flex-direction:column;align-items:stretch;gap:5px;border:2px solid var(--line);background:transparent;border-radius:12px;padding:8px 11px 9px;text-align:left;min-width:0;transition:border-color .15s,background .15s}
 .chip .row{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;line-height:1.2}
+.chip.locked{border-style:dashed}
+.chip .lockb{margin-left:auto;font-size:14px}
+.stagebar{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:0 0 12px;font-size:15px}
+.stagebar[hidden]{display:none}
+.stagebar .sb-top{display:flex;gap:8px 12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between}
+.stagebar .sb-top span{color:var(--muted);font-size:14px}
+.stagebar .sb-dots{display:flex;gap:6px;margin:8px 0 6px}
+.stagebar .sb-dots i{flex:1;height:8px;border-radius:99px;background:color-mix(in srgb,var(--c) 22%,transparent)}
+.stagebar .sb-dots i.on{background:var(--c)}
+.stagebar p{margin:0;color:var(--muted);font-size:14px}
 .chip .dot{width:12px;height:12px;border-radius:4px;background:var(--c);flex:none;opacity:.35}
 .chip .foot2{display:flex;align-items:center;gap:8px}
 .chip .n{font-weight:400;color:var(--muted);font-size:13px;white-space:nowrap}
@@ -991,6 +1001,7 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
       <h2 id="topicsTitle">Topics to revise</h2>
       <div><button class="linkbtn" id="mockTopics">🎯 Mock topics</button><button class="linkbtn" id="allTopics">Select all</button><button class="linkbtn" id="noTopics">Clear</button></div>
     </div>
+    <div class="stagebar" id="stagebar" hidden></div>
     <div class="chips" id="chips"></div>
   </section>
 
@@ -1332,9 +1343,23 @@ try{ const s = JSON.parse(localStorage.getItem(KEY)||"null"); if(s && s.p){ stor
 function save(){ if(TEACHER || DEMO_ASK) return; try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} if(typeof lbQueue==="function" && lb.user) lbQueue(); }
 const status = id => store.p[id] || "";
 function topicPct(id){ const t=BY_ID[id].t, it=DATA.filter(x=>x.t===t); return it.filter(x=>status(x.id)==="k").length/it.length; }
-function mark(id, s){ const prev=store.p[id], pp=(s==="k"&&prev!=="k")?topicPct(id):0;
+let lockToast=0;
+function mark(id, s){ const prev=store.p[id];
+  if(s==="k" && prev!=="k" && stageInfo().locked.has(BY_ID[id].t)){
+    if(Date.now()-lockToast>20000){ lockToast=Date.now(); toast("🔒",`${TMAP[BY_ID[id].t].name} is locked for now`,`Get every topic to ${Math.round(stageInfo().cap*100)}% known to unlock it. You still got the XP!`,true); }
+    return; }
+  const pp=(s==="k"&&prev!=="k")?topicPct(id):0;
   if(s==="k"){ if(prev!=="k") G.srs[id]={b:0,d:addDays(1)}; else if(isDue(id)){ const b=Math.min((G.srs[id].b||0)+1,SRS_INT.length-1); G.srs[id]={b,d:addDays(SRS_INT[b])}; G.st.reviews++; } } else delete G.srs[id];
-  if(s) store.p[id]=s; else delete store.p[id]; if(s==="k"&&prev!=="k") onKnown(id,pp); save(); renderMeter(); renderChips(); }
+  if(s) store.p[id]=s; else delete store.p[id]; if(s==="k"&&prev!=="k") onKnown(id,pp); stageCheck(id); save(); renderMeter(); renderChips(); }
+function stageCheck(id){ const si=stageInfo(); if(!si.on) return;
+  const t=id&&BY_ID[id]&&BY_ID[id].t;
+  if(t && si.locked.has(t) && !(G.lockSeen||{})[t+si.stage]){ G.lockSeen=G.lockSeen||{}; G.lockSeen[t+si.stage]=1;
+    if(typeof deck!=="undefined" && Array.isArray(deck)) deck=deck.filter((x,i)=>i<=pos || BY_ID[x].t!==t || status(x)==="k");
+    setTimeout(()=>toast("🔒",`${TMAP[t].name} reached ${Math.round(si.cap*100)}%!`,`Now locked (review only) until every topic gets there. Time to revise another topic.`,true),600); }
+  if(G.stage===undefined){ G.stage=si.stage; return; }
+  if(si.stage>G.stage){ G.stage=si.stage; const pc=Math.round(si.cap*100);
+    setTimeout(()=>{ toast("🔓",si.cap>=1?"Every topic unlocked for good!":`Stage ${si.stage} unlocked!`, si.cap>=1?"All topics are at least "+(pc-STAGE_STEP)+"% known. Go for 100%!":`Every topic reached ${pc-STAGE_STEP}%. Now get them all to ${pc}%.`,true); confetti(180); sfx("lvl"); },700); }
+  else if(si.stage<G.stage) G.stage=si.stage; }
 
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
@@ -1348,7 +1373,20 @@ function fmtAnswer(a,id){
   }
   return "<p style='margin:0'>"+esc(a)+"</p>";
 }
-function pool(){ const s=new Set(store.sel); return DATA.filter(d=>s.has(d.t)); }
+/* ---- topic stages: every topic must reach each 20% step before any topic can go further ---- */
+const STAGE_STEP = 20;   // percent per stage. Set to 0 to switch topic locking off.
+const stageTopics = () => TOPICS.filter(t=>t.key!=="Exam skills");
+function topicFrac(key){ const it=DATA.filter(d=>d.t===key); return it.length ? it.filter(d=>status(d.id)==="k").length/it.length : 0; }
+function stageInfo(){
+  if(!STAGE_STEP || DEMO) return {on:false, cap:1, stage:0, locked:new Set(), fr:{}};
+  const fr={}; stageTopics().forEach(t=>fr[t.key]=topicFrac(t.key));
+  const step=STAGE_STEP/100, min=Math.min(...Object.values(fr));
+  const stage=Math.floor(min/step+1e-9)+1, cap=Math.min(1,stage*step);
+  const locked=new Set(cap>=1?[]:Object.keys(fr).filter(k=>fr[k]>=cap-1e-9));
+  return {on:true, cap, stage, locked, fr, reached:Object.values(fr).filter(f=>f>=cap-1e-9).length, total:Object.keys(fr).length};
+}
+// locked topics are review-only: cards already known can still be practised
+function pool(){ const s=new Set(store.sel), L=stageInfo().locked; return DATA.filter(d=>s.has(d.t) && (!L.has(d.t) || status(d.id)==="k")); }
 
 /* ---------- meter + chips ---------- */
 $("#totalQ").textContent = DATA.length;
@@ -1359,11 +1397,21 @@ function renderMeter(){
   const mn=mistakeCount(); $("#mistN").textContent = mn ? "("+mn+")" : "";
   $("#stack").innerHTML = `<i style="width:${k/DATA.length*100}%;background:var(--good)"></i><i style="width:${l/DATA.length*100}%;background:var(--warn);opacity:.7"></i>`;
 }
+function renderStage(SI){
+  const b=$("#stagebar"); if(!b) return;
+  if(!SI.on || SI.cap>=1){ b.hidden=true; return; }
+  const pc=Math.round(SI.cap*100), lk=[...SI.locked].map(k=>TMAP[k].name);
+  b.hidden=false;
+  b.innerHTML=`<div class="sb-top"><b>🎯 Stage ${SI.stage}: get every topic to ${pc}% known</b><span>${SI.reached}/${SI.total} topics there</span></div>
+    <div class="sb-dots">${stageTopics().map(t=>`<i style="--c:${t.c}" class="${SI.fr[t.key]>=SI.cap-1e-9?"on":""}" title="${esc(t.name)}: ${Math.round(SI.fr[t.key]*100)}%"></i>`).join("")}</div>
+    ${lk.length?`<p>🔒 <b>${esc(lk.join(", "))}</b> ${lk.length===1?"is":"are"} locked (review only) until the other topics reach ${pc}%.</p>`:`<p>When a topic reaches ${pc}% it locks (review only) until the others catch up.</p>`}`;
+}
 function renderChips(){
+  const SI=stageInfo(); renderStage(SI);
   $("#chips").innerHTML = TOPICS.map(t=>{
     const items = DATA.filter(d=>d.t===t.key); const k = items.filter(d=>status(d.id)==="k").length;
-    const on = store.sel.includes(t.key);
-    return `<button class="chip" style="--c:${t.c}" aria-pressed="${on}" data-key="${esc(t.key)}"><span class="row"><span class="dot"></span>${esc(t.name)}${t.key==="Exam skills"?'<span class="sticky sm" aria-label="Double XP">2× XP</span>':""}${(()=>{const f=items.length?k/items.length:0;return f>=1?'<span class="medal" title="Gold: all known">🥇</span>':f>=.8?'<span class="medal" title="Silver: 80% known">🥈</span>':f>=.5?'<span class="medal" title="Bronze: 50% known">🥉</span>':""})()}</span><span class="foot2"><span class="bar"><i style="width:${items.length?k/items.length*100:0}%"></i></span><span class="n">${k}/${items.length}</span></span></button>`;
+    const on = store.sel.includes(t.key), lk=SI.locked.has(t.key);
+    return `<button class="chip${lk?" locked":""}" style="--c:${t.c}" aria-pressed="${on}" data-key="${esc(t.key)}" ${lk?`title="Locked at ${Math.round(SI.cap*100)}% until every topic gets there. You can still review cards you know."`:""}><span class="row"><span class="dot"></span>${esc(t.name)}${lk?'<span class="lockb" aria-label="Locked: review only">🔒</span>':""}${t.key==="Exam skills"?'<span class="sticky sm" aria-label="Double XP">2× XP</span>':""}${(()=>{const f=items.length?k/items.length:0;return f>=1?'<span class="medal" title="Gold: all known">🥇</span>':f>=.8?'<span class="medal" title="Silver: 80% known">🥈</span>':f>=.5?'<span class="medal" title="Bronze: 50% known">🥉</span>':""})()}</span><span class="foot2"><span class="bar"><i style="width:${items.length?k/items.length*100:0}%"></i></span><span class="n">${k}/${items.length}</span></span></button>`;
   }).join("");
 }
 $("#chips").addEventListener("click", e=>{
@@ -4645,15 +4693,15 @@ function nudgeCheck(){
 /* ================= WELCOME TOUR + WHAT'S NEW ================= */
 const TOUR = [
   ["🧠","Welcome to the Fount!","<p>Everything you need for GCSE Psychology, in one place. Every question comes from Mr Wakefield's booklets.</p><p>Here's a 30-second tour. You can find it again any time from <b>📖 How it works</b> at the bottom of the page.</p>"],
-  ["🗂️","Flashcards","<p>Pick your topics, then answer each card.</p><ul><li><b>Multiple choice</b>: press A–D or tap an answer.</li><li><b>🔤 Gap fill</b> and <b>✍️ Type it</b>: type your answer and it's marked for you. These earn <b>2× XP</b>.</li></ul><p>Cards you get wrong come back until you know them.</p>"],
+  ["🗂️","Flashcards","<p>Pick your topics, then answer each card.</p><ul><li><b>Multiple choice</b>: press A–D or tap an answer.</li><li><b>🔤 Gap fill</b> and <b>✍️ Type it</b>: type your answer and it's marked for you. These earn <b>2× XP</b>.</li></ul><p>Cards you get wrong come back until you know them.</p><p>🎯 Topics unlock in <b>stages</b>: get every topic to 20% known before any goes further, then 40%, and so on.</p>"],
   ["📝","Quiz","<p>Quick quizzes, 9-mark practice, <b>🧩 Exam skills</b> (2× XP) and full <b>mock papers</b> for Paper 1 and Paper 2.</p><p>Parents can test you too in <b>👪 Parent mode</b>.</p>"],
   ["🕹️","Arcade","<p>Boss battles, Psychle, Swipe Sort, Which Study?, Study Matcher, Spot the Flaw and more.</p><p>Check the <b>Game of the day</b> for bonus XP.</p>"],
   ["🐀","Level up","<p>Every answer earns XP. Climb 80 levels, keep your 🔥 streak, collect badges and unlock themes.</p><p>Your lab rat, <b>Professor Squeaks</b>, grows as you revise and gets sleepy if you stay away.</p><p>Psst… there are secret scrolls hidden around the site. 📜</p>"],
   ["💾","Keep your progress safe","<p>Your progress is saved in <b>this browser only</b>."+(LB_LIVE?" The only thing that ever goes online is your spot on the <b>🏆 Leaderboard</b>, if you choose to sign in: just your first name, surname initial and XP.":" Nothing goes online.")+"</p><p>Back it up in the <b>💾 Save</b> tab every week or so, especially before you change phone or clear your browser.</p><p>Good luck. Keep right on! 💙</p>"],
 ];
 // bump WHATS_NEW_V and edit WHATS_NEW when you add features; returning students see it once
-const WHATS_NEW_V = LB_LIVE ? 2 : 1;
-const WHATS_NEW = [...(LB_LIVE?["🏆 New: a class leaderboard! Sign in with your school Microsoft account to see how your XP compares (only your first name and surname initial are shown)"]:[]),"🃏 Flashcards now ask you to answer: multiple choice, gap fill or type it (typed answers earn 2× XP)","🐀 Meet Professor Squeaks, your revision lab rat","🕹️ New arcade games: Psychle, Swipe Sort, Which Study? and hard-mode boss rematches","📝 Mock papers and 🧩 Exam skills in the Quiz tab","🎨 80 levels and loads of new themes to unlock","💾 A weekly reminder to back up your progress"];
+const WHATS_NEW_V = LB_LIVE ? 3 : 2;
+const WHATS_NEW = ["🎯 Topics now unlock in stages: get every topic to 20% known, then 40%, and so on. A topic that gets ahead locks (review only) until the others catch up. This makes sure you revise everything for the exam!","💾 The Save tab is simpler: three steps to keep your progress safe", ...(LB_LIVE?["🏆 New: a class leaderboard! Sign in with your school Microsoft account to see how your XP compares (only your first name and surname initial are shown)"]:[]),"🃏 Flashcards now ask you to answer: multiple choice, gap fill or type it (typed answers earn 2× XP)","🐀 Meet Professor Squeaks, your revision lab rat","🕹️ New arcade games: Psychle, Swipe Sort, Which Study? and hard-mode boss rematches","📝 Mock papers and 🧩 Exam skills in the Quiz tab","🎨 80 levels and loads of new themes to unlock","💾 A weekly reminder to back up your progress"];
 function showTour(steps, onDone){
   let i=0; const o=document.createElement("div"); o.className="overlay";
   const close=()=>{ o.remove(); document.removeEventListener("keydown",kd,true); if(onDone) onDone(); };
