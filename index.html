@@ -4391,6 +4391,8 @@ const LB_CONFIG = {apiKey:"AIzaSyBXLLTn43cUI4oBSp7q07Of0Um8nCRVThw", authDomain:
 // "organizations" = any work/school Microsoft account can try to sign in, so the school's ID never has to be
 // on this public site. The Firestore security rules then only accept the school's own email domain.
 const LB_TENANT = "organizations";
+// Set to true once Microsoft sign-in is switched on in Firebase (see LEADERBOARD-SETUP.md). Until then the tab is hidden.
+const LB_LIVE = false;
 const FB_URL = "https://www.gstatic.com/firebasejs/10.12.2/";
 const LB_EMU = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && /[?&]lbemu\b/.test(location.search);   // local testing only
 const LB_STEP = 3000;   // max XP rise per upload (must match firestore.rules)
@@ -4598,11 +4600,11 @@ const TOUR = [
   ["📝","Quiz","<p>Quick quizzes, 9-mark practice, <b>🧩 Exam skills</b> (2× XP) and full <b>mock papers</b> for Paper 1 and Paper 2.</p><p>Parents can test you too in <b>👪 Parent mode</b>.</p>"],
   ["🕹️","Arcade","<p>Boss battles, Psychle, Swipe Sort, Which Study?, Study Matcher, Spot the Flaw and more.</p><p>Check the <b>Game of the day</b> for bonus XP.</p>"],
   ["🐀","Level up","<p>Every answer earns XP. Climb 80 levels, keep your 🔥 streak, collect badges and unlock themes.</p><p>Your lab rat, <b>Professor Squeaks</b>, grows as you revise and gets sleepy if you stay away.</p><p>Psst… there are secret scrolls hidden around the site. 📜</p>"],
-  ["💾","Keep your progress safe","<p>Your progress is saved in <b>this browser only</b>. The only thing that ever goes online is your spot on the <b>🏆 Leaderboard</b>, if you choose to sign in: just your first name, surname initial and XP.</p><p>Back it up in the <b>💾 Save</b> tab every week or so, especially before you change phone or clear your browser.</p><p>Good luck. Keep right on! 💙</p>"],
+  ["💾","Keep your progress safe","<p>Your progress is saved in <b>this browser only</b>."+(LB_LIVE?" The only thing that ever goes online is your spot on the <b>🏆 Leaderboard</b>, if you choose to sign in: just your first name, surname initial and XP.":" Nothing goes online.")+"</p><p>Back it up in the <b>💾 Save</b> tab every week or so, especially before you change phone or clear your browser.</p><p>Good luck. Keep right on! 💙</p>"],
 ];
 // bump WHATS_NEW_V and edit WHATS_NEW when you add features; returning students see it once
-const WHATS_NEW_V = 2;
-const WHATS_NEW = ["🏆 New: a class leaderboard! Sign in with your school Microsoft account to see how your XP compares (only your first name and surname initial are shown)","🃏 Flashcards now ask you to answer: multiple choice, gap fill or type it (typed answers earn 2× XP)","🐀 Meet Professor Squeaks, your revision lab rat","🕹️ New arcade games: Psychle, Swipe Sort, Which Study? and hard-mode boss rematches","📝 Mock papers and 🧩 Exam skills in the Quiz tab","🎨 80 levels and loads of new themes to unlock","💾 A weekly reminder to back up your progress"];
+const WHATS_NEW_V = LB_LIVE ? 2 : 1;
+const WHATS_NEW = [...(LB_LIVE?["🏆 New: a class leaderboard! Sign in with your school Microsoft account to see how your XP compares (only your first name and surname initial are shown)"]:[]),"🃏 Flashcards now ask you to answer: multiple choice, gap fill or type it (typed answers earn 2× XP)","🐀 Meet Professor Squeaks, your revision lab rat","🕹️ New arcade games: Psychle, Swipe Sort, Which Study? and hard-mode boss rematches","📝 Mock papers and 🧩 Exam skills in the Quiz tab","🎨 80 levels and loads of new themes to unlock","💾 A weekly reminder to back up your progress"];
 function showTour(steps, onDone){
   let i=0; const o=document.createElement("div"); o.className="overlay";
   const close=()=>{ o.remove(); document.removeEventListener("keydown",kd,true); if(onDone) onDone(); };
@@ -4674,7 +4676,8 @@ $("#focusBtn").onclick=focusClick; if(G.focus && G.focus.end){ if(Date.now()>=G.
 $("#parentLink").onclick=()=>{ goTab("quiz"); setQuizMode("parent"); $("#parentArea").scrollIntoView({behavior:reduced()?"auto":"smooth"}); };
 if(!TEACHER && /(^|[?&#])parent\b/i.test(location.search+location.hash)){ goTab("quiz"); setQuizMode("parent"); }
 $("#petStrip").onclick=()=>{ goTab("trophies","progress"); };
-if(!TEACHER){ petCheck(); nudgeCheck(); welcomeCheck(); if(!DEMO_ASK && G.lb && G.lb.on) setTimeout(()=>lbLoad().catch(()=>{}),1500); }
+if(!LB_LIVE && !LB_EMU && !DEMO) $("#tab-board").hidden=true;
+if(!TEACHER){ petCheck(); nudgeCheck(); welcomeCheck(); if((LB_LIVE||LB_EMU) && !DEMO_ASK && G.lb && G.lb.on) setTimeout(()=>lbLoad().catch(()=>{}),1500); }
 </script>
 </body>
 </html>
