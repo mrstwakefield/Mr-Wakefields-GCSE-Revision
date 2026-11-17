@@ -86,7 +86,7 @@ h1 span b{font-weight:500}
 .pet-opt-art{line-height:0}
 .pet-bee.happy .pet-wing,.pet-bee.ecstatic .pet-wing,.pet-bee.new .pet-wing{animation:wing .25s ease-in-out infinite alternate;transform-origin:94px 70px}
 @keyframes wing{from{transform:scaleY(1)}to{transform:scaleY(.82)}}
-.pet-neuron.ecstatic .pet-body{filter:drop-shadow(0 0 8px #B49BFF)}
+.pet-owl.ecstatic .pet-body{filter:drop-shadow(0 0 8px #F5D77A)}
 @media (prefers-reduced-motion:reduce){.pet-bee .pet-wing{animation:none}}
 .ex-answer{background:var(--soft);border-left:4px solid var(--c);border-radius:10px;padding:10px 14px;margin:10px 0}
 .ex-answer p{margin:4px 0 0;font-size:17px;line-height:1.5}
@@ -3396,8 +3396,8 @@ const PETS = {
   bee:   {title:"Von Frisch's Bee", noun:"bee", icon:"🐝", def:"Waggles", at:20, treat:["🌼","Flowers"], pr:["her","she","her"], topic:"Language, thought & communication", fact:"Worker bees are all female. Von Frisch found they dance to tell each other where food is."},
   teddy: {title:"Naughty Teddy", noun:"teddy", icon:"🧸", def:"Teddy", at:40, treat:["🍯","Honey"], pr:["him","he","his"], topic:"Development", fact:"In McGarrigle and Donaldson's study, 'naughty teddy' messed up the counters, and far more children could conserve."},
   goat:  {title:"Gibson's Mountain Goat", noun:"mountain goat", icon:"🐐", def:"Cliff", at:60, treat:["🌿","Grass"], pr:["him","he","his"], topic:"Perception", fact:"Gibson and Walk tested baby goats on the visual cliff too: none of them would step onto the 'deep' side."},
-  emo:   {title:"Yuki's Emoticon", noun:"emoticon", icon:"🙂", def:"Smiley", at:80, treat:["⭐","Stars"], pr:["it","it","its"], topic:"Language, thought & communication", fact:"Yuki found Japanese students read emotion from the eyes and Americans from the mouth. Watch its eyes!"},
-  neuron:{title:"Hebb's Neuron", noun:"neuron", icon:"⚡", def:"Sparky", at:100, treat:["⚡","Sparks"], pr:["it","it","its"], topic:"Brain & neuropsychology", fact:"Hebb said neurons that fire together wire together: practice strengthens the connections."},
+  finch: {title:"Darwin's Finch", noun:"finch", icon:"🐦", def:"Charlie", at:80, treat:["🌾","Seeds"], pr:["him","he","his"], topic:"Language, thought & communication", fact:"Darwin studied finches, and his evolutionary theory says facial expressions are innate and universal: we're born able to show emotions."},
+  owl:   {title:"The Wise Owl", noun:"owl", icon:"🦉", def:"Hoot", at:100, treat:["📚","Books"], pr:["her","she","her"], topic:"", fact:"The wisest pet in the Fount of Knowledge and Wisdom. Only students who know every single card get to meet her."},
 };
 const PET_STAGES = [[0,"Baby"],[100,"Little"],[400,"Teen"],[1000,"Grown-up"],[2500,"Wise"],[6000,"Legendary"]];
 function petInit(){ G.pet=G.pet||{name:"Professor Squeaks", born:today(), stage:0, mood:""}; const p=G.pet; p.kind=PETS[p.kind]?p.kind:"rat"; p.names=p.names||{}; if(!p.names.rat) p.names.rat = p.kind==="rat" ? p.name : "Professor Squeaks"; p.got=p.got||{rat:1}; return p; }
@@ -3465,17 +3465,24 @@ const PET_ART = {
       <ellipse cx="28" cy="50" rx="11" ry="5" fill="#E2D8C8" transform="rotate(-20 28 50)"/><ellipse cx="74" cy="50" rx="11" ry="5" fill="#E2D8C8" transform="rotate(20 74 50)"/>
       <ellipse cx="51" cy="58" rx="20" ry="22" fill="#F7F2EA"/><path d="M45 78 l6 14 l6 -14z" fill="#E2D8C8"/>`,
     face:()=>`<ellipse cx="47" cy="66" rx="2" ry="1.4" fill="#8A6D4B"/><ellipse cx="55" cy="66" rx="2" ry="1.4" fill="#8A6D4B"/>`},
-  emo:{ a:{e:[66,94,60], m:[80,82], hd:[80,26], nk:[80,110], ch:null},
-    body:()=>`<ellipse cx="64" cy="116" rx="12" ry="5" fill="#E0A100"/><ellipse cx="96" cy="116" rx="12" ry="5" fill="#E0A100"/>
-      <circle cx="80" cy="68" r="42" fill="#FFD54A" stroke="#E0A100" stroke-width="3"/>`,
-    face:(m)=>`<ellipse cx="60" cy="76" rx="6" ry="3.5" fill="#FF9AA2" opacity=".7"/><ellipse cx="100" cy="76" rx="6" ry="3.5" fill="#FF9AA2" opacity=".7"/>`,
-    eyes:(m)=>m==="ecstatic"?`<path d="M59 62 q7 -9 14 0 M87 62 q7 -9 14 0" stroke="#2A2230" stroke-width="3.2" fill="none" stroke-linecap="round"/>`:null},
-  neuron:{ a:{e:[71,89,66], m:[80,78], hd:[80,42], nk:[80,96], ch:null},
-    body:()=>`<g stroke="#7B5BE0" stroke-width="5" fill="none" stroke-linecap="round"><path d="M60 56 l-20 -18 m10 9 l-14 2"/><path d="M62 82 l-24 10 m12 -5 l-6 12"/><path d="M80 44 l-4 -24 m2 12 l10 -8"/><path d="M98 52 l18 -16"/>
-      <path d="M104 74 q20 4 30 22 q4 8 10 10"/><path d="M144 106 l8 -8 M144 106 l10 4"/></g>
-      <g fill="#C9B8FF"><rect x="108" y="72" width="12" height="7" rx="3.5" transform="rotate(14 114 75)"/><rect x="124" y="82" width="12" height="7" rx="3.5" transform="rotate(42 130 85)"/></g>
-      <circle cx="80" cy="70" r="27" fill="#9B7BEA"/>`,
-    face:()=>`<ellipse cx="66" cy="76" rx="4" ry="2.6" fill="#F6A6D8" opacity=".8"/><ellipse cx="94" cy="76" rx="4" ry="2.6" fill="#F6A6D8" opacity=".8"/>`},
+  finch:{ a:{e:[50,63,48], m:[0,0], hd:[57,30], nk:[66,74], ch:[94,92]}, noMouth:true,
+    body:()=>`<path d="M118 82 l28 -10 l-6 16z" fill="#6E4524"/>
+      <path d="M80 104 v10 m-5 0 h10 M96 104 v10 m-5 0 h10" stroke="#C98B4E" stroke-width="3" stroke-linecap="round"/>
+      <ellipse cx="88" cy="84" rx="34" ry="26" fill="#C98B4E"/><ellipse cx="80" cy="90" rx="20" ry="17" fill="#F2D3A2"/>
+      <ellipse cx="102" cy="80" rx="20" ry="12" fill="#8C5A2E" transform="rotate(-18 102 80)"/>
+      <circle cx="57" cy="52" r="22" fill="#B87A42"/>
+      <path d="M40 54 q-12 4 -16 8 q8 4 18 2z" fill="#E8B04A"/><path d="M26 62 l14 0" stroke="#B9862E" stroke-width="1.5"/>`,
+    face:()=>`<ellipse cx="46" cy="58" rx="4" ry="2.6" fill="#F2A07A" opacity=".7"/><ellipse cx="68" cy="58" rx="4" ry="2.6" fill="#F2A07A" opacity=".7"/>`},
+  owl:{ a:{e:[66,94,60], m:[0,0], hd:[80,26], nk:[80,96], ch:[100,100]}, noMouth:true,
+    body:()=>`<ellipse cx="66" cy="114" rx="9" ry="4" fill="#E8A13A"/><ellipse cx="94" cy="114" rx="9" ry="4" fill="#E8A13A"/>
+      <path d="M50 40 l2 -24 l16 18z" fill="#6E5039"/><path d="M110 40 l-2 -24 l-16 18z" fill="#6E5039"/>
+      <ellipse cx="80" cy="74" rx="36" ry="40" fill="#8B6A4F"/>
+      <ellipse cx="46" cy="82" rx="10" ry="24" fill="#6E5039"/><ellipse cx="114" cy="82" rx="10" ry="24" fill="#6E5039"/>
+      <ellipse cx="80" cy="90" rx="22" ry="22" fill="#E9D8BF"/>
+      <path d="M72 84 l4 4 l4 -4 M80 84 l4 4 l4 -4 M68 94 l4 4 l4 -4 M76 94 l4 4 l4 -4 M84 94 l4 4 l4 -4" stroke="#B89A78" stroke-width="2" fill="none"/>
+      <circle cx="66" cy="60" r="14" fill="#F5EBD6"/><circle cx="94" cy="60" r="14" fill="#F5EBD6"/>
+      <path d="M76 68 l4 8 l4 -8z" fill="#E8A13A"/>`,
+    face:()=>""},
 };
 function petSVG(stage, mood, px, kind){
   kind = kind || petKind(); const A=PET_ART[kind]||PET_ART.rat, a=A.a;
@@ -3489,7 +3496,7 @@ function petSVG(stage, mood, px, kind){
   const cap = stage>=5 ? `<g><path d="M${hx-24} ${hy} l24 -10 l24 10 l-24 10z" fill="#1E2233"/><rect x="${hx-12}" y="${hy}" width="24" height="9" fill="#1E2233"/><path d="M${hx+24} ${hy} v12" stroke="#E2B53E" stroke-width="2"/><circle cx="${hx+24}" cy="${hy+13}" r="2.5" fill="#E2B53E"/></g>` : "";
   return `<svg class="pet-svg ${mood} pet-${kind}" viewBox="0 0 160 120" width="${px}" height="${px*.75}" role="img" aria-label="Your ${esc(PETS[kind].noun)}, ${esc(petStageName(stage,kind))}, ${mood}">
     <g class="pet-body"><g transform="translate(80 118) scale(${sc}) translate(-80 -118)">
-      ${A.body(stage)}${A.face(mood)}${eyes}${glasses}${petMouth(mx,my,happy)}${bow}${badge}${cap}
+      ${A.body(stage)}${A.face(mood)}${eyes}${glasses}${A.noMouth?"":petMouth(mx,my,happy)}${bow}${badge}${cap}
     </g></g>
     ${sleepy?`<g class="pet-z" fill="#7B8BB8" font-family="var(--display)" font-weight="800"><text x="102" y="42" font-size="15">z</text><text x="114" y="31" font-size="19">Z</text>${mood==="asleep"?'<text x="128" y="22" font-size="22">Z</text>':""}</g>`:""}
     ${mood==="ecstatic"?`<g class="pet-spark" font-size="16"><text x="12" y="24">✨</text><text x="128" y="44">🎉</text></g>`:""}
@@ -4961,7 +4968,7 @@ const TOUR = [
 ];
 // bump WHATS_NEW_V and edit WHATS_NEW when you add features; returning students see it once
 const WHATS_NEW_V = 3;
-const WHATS_NEW = ["🐝 Five new pets to unlock as you learn: Von Frisch's Bee, Naughty Teddy, Gibson's Mountain Goat, Yuki's Emoticon and Hebb's Neuron. Switch pets in 📈 Progress","🧪 Six new arcade games, including Psych Lab, Be the Examiner and TDEE Builder","🎯 Topics now unlock in stages: get every topic to 20% known, then 40%, and so on. A topic that gets ahead locks (review only) until the others catch up. This makes sure you revise everything for the exam!","💾 The Save tab is simpler: three steps to keep your progress safe","🃏 Flashcards now ask you to answer: multiple choice, gap fill or type it (typed answers earn 2× XP)","🐀 Meet Professor Squeaks, your revision lab rat","🕹️ New arcade games: Psychle, Swipe Sort, Which Study? and hard-mode boss rematches","📝 Mock papers and 🧩 Exam skills in the Quiz tab","🎨 80 levels and loads of new themes to unlock","💾 A weekly reminder to back up your progress"];
+const WHATS_NEW = ["🐝 Five new pets to unlock as you learn: Von Frisch's Bee, Naughty Teddy, Gibson's Mountain Goat, Darwin's Finch and the Wise Owl. Switch pets in 📈 Progress","🧪 Six new arcade games, including Psych Lab, Be the Examiner and TDEE Builder","🎯 Topics now unlock in stages: get every topic to 20% known, then 40%, and so on. A topic that gets ahead locks (review only) until the others catch up. This makes sure you revise everything for the exam!","💾 The Save tab is simpler: three steps to keep your progress safe","🃏 Flashcards now ask you to answer: multiple choice, gap fill or type it (typed answers earn 2× XP)","🐀 Meet Professor Squeaks, your revision lab rat","🕹️ New arcade games: Psychle, Swipe Sort, Which Study? and hard-mode boss rematches","📝 Mock papers and 🧩 Exam skills in the Quiz tab","🎨 80 levels and loads of new themes to unlock","💾 A weekly reminder to back up your progress"];
 function showTour(steps, onDone){
   let i=0; const o=document.createElement("div"); o.className="overlay";
   const close=()=>{ o.remove(); document.removeEventListener("keydown",kd,true); if(onDone) onDone(); };
