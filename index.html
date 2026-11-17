@@ -77,6 +77,17 @@ h1 span b{font-weight:500}
 .chip .lockb + .gamesb{margin-left:4px}
 .yp-btns{display:flex;gap:12px;justify-content:center;margin-top:10px}.yp-btns .btn{min-width:130px;font-size:18px;padding:14px 20px}
 .year-note{margin:0 0 12px}
+.pet-box{flex-wrap:wrap}.pet-pick{flex-basis:100%;border-top:1px solid var(--line);margin-top:10px}
+.pet-pick-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.pet-opt{display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--soft);border:2px solid var(--line);border-radius:14px;padding:6px 6px 8px;color:var(--ink);font-size:13px;line-height:1.25;text-align:center}
+.pet-opt b{font-size:13px}.pet-opt span:last-child{color:var(--muted);font-size:12px}
+.pet-opt.on{border-color:var(--good);background:var(--good-bg)}
+.pet-opt:disabled{opacity:.6;filter:grayscale(.6)}
+.pet-opt-art{line-height:0}
+.pet-bee.happy .pet-wing,.pet-bee.ecstatic .pet-wing,.pet-bee.new .pet-wing{animation:wing .25s ease-in-out infinite alternate;transform-origin:94px 70px}
+@keyframes wing{from{transform:scaleY(1)}to{transform:scaleY(.82)}}
+.pet-neuron.ecstatic .pet-body{filter:drop-shadow(0 0 8px #B49BFF)}
+@media (prefers-reduced-motion:reduce){.pet-bee .pet-wing{animation:none}}
 .ex-answer{background:var(--soft);border-left:4px solid var(--c);border-radius:10px;padding:10px 14px;margin:10px 0}
 .ex-answer p{margin:4px 0 0;font-size:17px;line-height:1.5}
 .ex-ms{margin:6px 0}.ex-ms summary{cursor:pointer;font-weight:700}.ex-ms ul{margin:6px 0 0;padding-left:1.2em;font-size:15px}
@@ -2139,6 +2150,7 @@ const BADGES = [
   ["ragequit","🏃","Rage quit","End an Arcade game within 5 seconds",()=>!!G.flags.ragequit, "Nope. Not today."],
   ["fashion","🎨","Fashionista","Try 4 different themes",()=>Object.keys(G.skinsTried||{}).length>=4, "Dress for the job you want"],
   ["labpartner","🐀","Lab Partner","Try all four Psych Lab experiments",()=>Object.keys(G.st.lab||{}).length>=4],
+  ["petpals","🐝","Pet Pals","Unlock all six revision pets",()=>Object.keys((G.pet||{}).got||{}).length>=6],
   ["examiner","📝","Chief Examiner","Mark 5 answers spot on in Be the Examiner",()=>(G.st.examinerBest||0)>=15],
   ["backup","💾","Backup buddy","Copy or download a save code",()=>!!G.flags.backup, "Better safe than sorry"],
   ["stan","⭐","Title clicker","Click the site title 5 times",()=>!!G.flags.stan, "Show the title some love"],
@@ -3377,9 +3389,23 @@ function psyKey(k){
 document.addEventListener("keydown",e=>{ if(arc.phase!=="psychle" || e.target.matches("input,textarea") || e.metaKey||e.ctrlKey||e.altKey) return;
   const k=e.key.toLowerCase(); if(k==="enter"){ e.preventDefault(); psyKey("enter"); } else if(k==="backspace"){ e.preventDefault(); psyKey("back"); } else if(/^[a-z]$/.test(k)){ e.preventDefault(); psyKey(k); } });
 
-/* ================= REVISION PET (lab rat) ================= */
-const PET_STAGES = [[0,"Baby rat"],[100,"Little rat"],[400,"Teen rat"],[1000,"Grown-up rat"],[2500,"Wise rat"],[6000,"Legendary rat"]];
-function petInit(){ G.pet=G.pet||{name:"Professor Squeaks", born:today(), stage:0, mood:""}; return G.pet; }
+/* ================= REVISION PETS ================= */
+// Professor Squeaks is everyone's first pet. The others unlock as you KNOW more of the cards (% of all cards).
+const PETS = {
+  rat:   {title:"Lab Rat", noun:"lab rat", icon:"🐀", def:"Professor Squeaks", at:0,   treat:["🧀","Cheese"], pr:["him","he","his"], topic:""},
+  bee:   {title:"Von Frisch's Bee", noun:"bee", icon:"🐝", def:"Waggles", at:20, treat:["🌼","Flowers"], pr:["her","she","her"], topic:"Language, thought & communication", fact:"Worker bees are all female. Von Frisch found they dance to tell each other where food is."},
+  teddy: {title:"Naughty Teddy", noun:"teddy", icon:"🧸", def:"Teddy", at:40, treat:["🍯","Honey"], pr:["him","he","his"], topic:"Development", fact:"In McGarrigle and Donaldson's study, 'naughty teddy' messed up the counters, and far more children could conserve."},
+  goat:  {title:"Gibson's Mountain Goat", noun:"mountain goat", icon:"🐐", def:"Cliff", at:60, treat:["🌿","Grass"], pr:["him","he","his"], topic:"Perception", fact:"Gibson and Walk tested baby goats on the visual cliff too: none of them would step onto the 'deep' side."},
+  emo:   {title:"Yuki's Emoticon", noun:"emoticon", icon:"🙂", def:"Smiley", at:80, treat:["⭐","Stars"], pr:["it","it","its"], topic:"Language, thought & communication", fact:"Yuki found Japanese students read emotion from the eyes and Americans from the mouth. Watch its eyes!"},
+  neuron:{title:"Hebb's Neuron", noun:"neuron", icon:"⚡", def:"Sparky", at:100, treat:["⚡","Sparks"], pr:["it","it","its"], topic:"Brain & neuropsychology", fact:"Hebb said neurons that fire together wire together: practice strengthens the connections."},
+};
+const PET_STAGES = [[0,"Baby"],[100,"Little"],[400,"Teen"],[1000,"Grown-up"],[2500,"Wise"],[6000,"Legendary"]];
+function petInit(){ G.pet=G.pet||{name:"Professor Squeaks", born:today(), stage:0, mood:""}; const p=G.pet; p.kind=PETS[p.kind]?p.kind:"rat"; p.names=p.names||{}; if(!p.names.rat) p.names.rat = p.kind==="rat" ? p.name : "Professor Squeaks"; p.got=p.got||{rat:1}; return p; }
+const petKind = () => PETS[(G.pet&&G.pet.kind)||"rat"] ? (G.pet&&G.pet.kind)||"rat" : "rat";
+const petOf = () => PETS[petKind()];
+const knownPct = () => DATA.length ? knownTotal()/DATA.length*100 : 0;
+const petUnlocked = k => DEMO || k==="rat" || knownPct() >= PETS[k].at - 1e-9;
+const petStageName = (st,k) => `${PET_STAGES[st][1]} ${PETS[k||petKind()].noun}`;
 function petStage(){ const n=G.st.cards||0; let s=0; PET_STAGES.forEach(([v],i)=>{ if(n>=v) s=i; }); return s; }
 function petDaysAway(){ const days=Object.keys(G.hist||{}).filter(d=>G.hist[d]>0).sort(); if(!days.length) return -1; return dayNum(today())-dayNum(days[days.length-1]); }
 function petMood(){
@@ -3390,50 +3416,102 @@ function petMood(){
   if(away===2) return "sleepy";
   return "asleep";
 }
-const PET_MSG = {
-  new:"Meet your new lab rat! Answer questions to help him grow.",
-  ecstatic:"is dancing! 🎉 You smashed your daily goal.",
-  happy:"is happy you're revising today. Hit your goal to make him dance!",
-  waiting:"is waiting for you. Answer a few questions to keep him happy.",
-  sleepy:"is getting sleepy… 😴 He misses you. Revise today to perk him up.",
-  asleep:"has fallen fast asleep 💤 Answer some questions to wake him up!",
-};
-function petSVG(stage, mood, px){
-  const sc=.62+stage*.076, sleepy=mood==="sleepy"||mood==="asleep", happy=mood==="ecstatic"||mood==="happy"||mood==="new";
-  const eye = x => sleepy ? `<path d="M${x-5} 50 q5 ${mood==="asleep"?4:3} 10 0" stroke="#2A2230" stroke-width="2.6" fill="none" stroke-linecap="round"/>`
-                          : `<circle cx="${x}" cy="49" r="4.4" fill="#2A2230"/><circle cx="${x+1.5}" cy="47.4" r="1.4" fill="#fff"/>`;
-  return `<svg class="pet-svg ${mood}" viewBox="0 0 160 120" width="${px}" height="${px*.75}" role="img" aria-label="Your lab rat, ${esc(PET_STAGES[stage][1])}, ${mood}">
-    <g class="pet-body"><g transform="translate(80 118) scale(${sc}) translate(-80 -118)">
-      <path d="M118 96 q32 -4 30 -30 q-2 -14 -12 -12" stroke="#E8A3B4" stroke-width="5" fill="none" stroke-linecap="round" class="pet-tail"/>
+function petMsg(m){ const P=petOf(), [him,he]=P.pr, He=he[0].toUpperCase()+he.slice(1), dance=petKind()==="bee"?"do a waggle dance":"dance";
+  return {new:`Meet your new ${P.noun}! Answer questions to help ${him} grow.`,
+    ecstatic:`is ${petKind()==="bee"?"doing a waggle dance":"dancing"}! 🎉 You smashed your daily goal.`,
+    happy:`is happy you're revising today. Hit your goal to make ${him} ${dance}!`,
+    waiting:`is waiting for you. Answer a few questions to keep ${him} happy.`,
+    sleepy:`is getting sleepy… 😴 ${He} misses you. Revise today to perk ${him} up.`,
+    asleep:`has fallen fast asleep 💤 Answer some questions to wake ${him} up!`}[m]; }
+const PET_MSG = new Proxy({}, {get:(_,m)=>petMsg(m)});   // old name, kept so older code still works
+function petEye(x, y, sleepy, asleep, r){ r=r||4.4;
+  return sleepy ? `<path d="M${x-5} ${y+1} q5 ${asleep?4:3} 10 0" stroke="#2A2230" stroke-width="2.6" fill="none" stroke-linecap="round"/>`
+                : `<circle cx="${x}" cy="${y}" r="${r}" fill="#2A2230"/><circle cx="${x+1.5}" cy="${y-1.6}" r="${r*.32}" fill="#fff"/>`; }
+function petMouth(x, y, happy){ return happy ? `<path d="M${x-6} ${y} q6 6 12 0" stroke="#2A2230" stroke-width="2.2" fill="none" stroke-linecap="round"/>` : `<path d="M${x-5} ${y+2} h10" stroke="#2A2230" stroke-width="2" stroke-linecap="round"/>`; }
+// each species: body drawing + where its eyes, mouth, head top, neck and chest are (for accessories)
+const PET_ART = {
+  rat:{ a:{e:[50,70,49], m:[60,67], hd:[60,22], nk:[60,84], ch:null},
+    body:(st)=>`<path d="M118 96 q32 -4 30 -30 q-2 -14 -12 -12" stroke="#E8A3B4" stroke-width="5" fill="none" stroke-linecap="round" class="pet-tail"/>
       <ellipse cx="88" cy="88" rx="38" ry="28" fill="#C9CCD6"/>
-      ${stage>=3?`<path d="M62 70 q26 18 52 0 l6 40 h-64z" fill="#FFFFFF" opacity=".95"/><path d="M88 74 v34" stroke="#D6DAE2" stroke-width="2"/>`:""}
+      ${st>=3?`<path d="M62 70 q26 18 52 0 l6 40 h-64z" fill="#FFFFFF" opacity=".95"/><path d="M88 74 v34" stroke="#D6DAE2" stroke-width="2"/>`:""}
       <ellipse cx="70" cy="112" rx="10" ry="5" fill="#E8A3B4"/><ellipse cx="104" cy="112" rx="10" ry="5" fill="#E8A3B4"/>
       <circle cx="40" cy="30" r="13" fill="#C9CCD6"/><circle cx="40" cy="30" r="8" fill="#F2B8C6"/>
       <circle cx="82" cy="28" r="13" fill="#C9CCD6"/><circle cx="82" cy="28" r="8" fill="#F2B8C6"/>
-      <ellipse cx="60" cy="56" rx="30" ry="26" fill="#D7DAE2"/>
-      ${eye(50)}${eye(70)}
-      ${stage>=4?`<g stroke="#2A2230" stroke-width="2.2" fill="none"><circle cx="50" cy="49" r="8"/><circle cx="70" cy="49" r="8"/><path d="M58 49 h4"/></g>`:""}
-      <ellipse cx="44" cy="60" rx="5" ry="3" fill="#F2B8C6" opacity=".8"/><ellipse cx="76" cy="60" rx="5" ry="3" fill="#F2B8C6" opacity=".8"/>
-      <circle cx="60" cy="62" r="4" fill="#E88AA2"/>
-      ${happy?`<path d="M54 67 q6 6 12 0" stroke="#2A2230" stroke-width="2.2" fill="none" stroke-linecap="round"/>`:`<path d="M55 69 h10" stroke="#2A2230" stroke-width="2" stroke-linecap="round"/>`}
-      <g stroke="#9AA0AE" stroke-width="1.4"><path d="M46 63 l-20 -3"/><path d="M46 66 l-20 3"/><path d="M74 63 l20 -3"/><path d="M74 66 l20 3"/></g>
-      ${stage>=5?`<g><path d="M36 22 l24 -10 l24 10 l-24 10z" fill="#1E2233"/><rect x="48" y="22" width="24" height="9" fill="#1E2233"/><path d="M84 22 v12" stroke="#E2B53E" stroke-width="2"/><circle cx="84" cy="35" r="2.5" fill="#E2B53E"/></g>`:""}
-      ${stage===2?`<path d="M52 84 l8 -5 l8 5 l-8 5z" fill="#E11D74"/>`:""}
+      <ellipse cx="60" cy="56" rx="30" ry="26" fill="#D7DAE2"/>`,
+    face:()=>`<ellipse cx="44" cy="60" rx="5" ry="3" fill="#F2B8C6" opacity=".8"/><ellipse cx="76" cy="60" rx="5" ry="3" fill="#F2B8C6" opacity=".8"/><circle cx="60" cy="62" r="4" fill="#E88AA2"/>
+      <g stroke="#9AA0AE" stroke-width="1.4"><path d="M46 63 l-20 -3"/><path d="M46 66 l-20 3"/><path d="M74 63 l20 -3"/><path d="M74 66 l20 3"/></g>`},
+  bee:{ a:{e:[43,59,62], m:[51,73], hd:[51,44], nk:[66,82], ch:[90,92]},
+    body:()=>`<g class="pet-wing"><ellipse cx="84" cy="50" rx="15" ry="24" fill="#DDF1FF" stroke="#A9CFEA" stroke-width="2" opacity=".9" transform="rotate(-25 84 50)"/><ellipse cx="104" cy="54" rx="13" ry="20" fill="#DDF1FF" stroke="#A9CFEA" stroke-width="2" opacity=".9" transform="rotate(20 104 54)"/></g>
+      <path d="M128 84 l14 4 l-14 6z" fill="#2A2230"/>
+      <ellipse cx="94" cy="88" rx="36" ry="25" fill="#F6C945"/>
+      <path d="M86 64 q-6 24 0 48" stroke="#2A2230" stroke-width="8" fill="none"/><path d="M106 66 q-5 22 0 44" stroke="#2A2230" stroke-width="8" fill="none"/>
+      <path d="M44 48 q-6 -18 -16 -22" stroke="#2A2230" stroke-width="2.5" fill="none"/><circle cx="27" cy="25" r="4" fill="#2A2230"/>
+      <path d="M58 46 q4 -18 14 -24" stroke="#2A2230" stroke-width="2.5" fill="none"/><circle cx="73" cy="21" r="4" fill="#2A2230"/>
+      <circle cx="51" cy="66" r="22" fill="#FBD965"/>`,
+    face:()=>`<ellipse cx="38" cy="71" rx="4" ry="2.6" fill="#F2A65A" opacity=".7"/><ellipse cx="64" cy="71" rx="4" ry="2.6" fill="#F2A65A" opacity=".7"/>`},
+  teddy:{ a:{e:[71,89,46], m:[80,66], hd:[80,22], nk:[80,76], ch:[94,96]},
+    body:()=>`<ellipse cx="80" cy="92" rx="32" ry="26" fill="#B9824F"/><ellipse cx="80" cy="96" rx="19" ry="16" fill="#E2BC8C"/>
+      <path d="M90 84 l10 2 M93 80 l2 10" stroke="#7A4E28" stroke-width="2"/>
+      <ellipse cx="60" cy="114" rx="11" ry="6" fill="#9E6B3D"/><ellipse cx="100" cy="114" rx="11" ry="6" fill="#9E6B3D"/>
+      <circle cx="58" cy="30" r="11" fill="#B9824F"/><circle cx="58" cy="30" r="6" fill="#E2BC8C"/><circle cx="102" cy="30" r="11" fill="#B9824F"/><circle cx="102" cy="30" r="6" fill="#E2BC8C"/>
+      <circle cx="80" cy="50" r="26" fill="#C38F5C"/><ellipse cx="80" cy="60" rx="11" ry="8" fill="#E2BC8C"/><ellipse cx="80" cy="56" rx="4" ry="3" fill="#3B2414"/>`,
+    face:(m)=>m==="happy"||m==="ecstatic"?`<path d="M64 37 l12 3" stroke="#3B2414" stroke-width="2.4" stroke-linecap="round"/>`:""},
+  goat:{ a:{e:[43,58,54], m:[51,70], hd:[51,30], nk:[60,78], ch:[96,84]},
+    body:()=>`<path d="M14 120 l18 -14 h96 l20 14z" fill="#9AA0AE"/>
+      <rect x="66" y="94" width="8" height="18" rx="3" fill="#E9E1D4"/><rect x="82" y="96" width="8" height="16" rx="3" fill="#E9E1D4"/><rect x="104" y="96" width="8" height="16" rx="3" fill="#E9E1D4"/><rect x="118" y="94" width="8" height="18" rx="3" fill="#E9E1D4"/>
+      <rect x="66" y="108" width="8" height="5" fill="#4A3A2A"/><rect x="82" y="108" width="8" height="5" fill="#4A3A2A"/><rect x="104" y="108" width="8" height="5" fill="#4A3A2A"/><rect x="118" y="108" width="8" height="5" fill="#4A3A2A"/>
+      <ellipse cx="96" cy="84" rx="36" ry="20" fill="#F2ECE2"/><path d="M130 76 q8 -4 6 6" stroke="#F2ECE2" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <path d="M44 38 q-10 -22 4 -26" stroke="#8A6D4B" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M58 38 q6 -22 -6 -28" stroke="#8A6D4B" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <ellipse cx="28" cy="50" rx="11" ry="5" fill="#E2D8C8" transform="rotate(-20 28 50)"/><ellipse cx="74" cy="50" rx="11" ry="5" fill="#E2D8C8" transform="rotate(20 74 50)"/>
+      <ellipse cx="51" cy="58" rx="20" ry="22" fill="#F7F2EA"/><path d="M45 78 l6 14 l6 -14z" fill="#E2D8C8"/>`,
+    face:()=>`<ellipse cx="47" cy="66" rx="2" ry="1.4" fill="#8A6D4B"/><ellipse cx="55" cy="66" rx="2" ry="1.4" fill="#8A6D4B"/>`},
+  emo:{ a:{e:[66,94,60], m:[80,82], hd:[80,26], nk:[80,110], ch:null},
+    body:()=>`<ellipse cx="64" cy="116" rx="12" ry="5" fill="#E0A100"/><ellipse cx="96" cy="116" rx="12" ry="5" fill="#E0A100"/>
+      <circle cx="80" cy="68" r="42" fill="#FFD54A" stroke="#E0A100" stroke-width="3"/>`,
+    face:(m)=>`<ellipse cx="60" cy="76" rx="6" ry="3.5" fill="#FF9AA2" opacity=".7"/><ellipse cx="100" cy="76" rx="6" ry="3.5" fill="#FF9AA2" opacity=".7"/>`,
+    eyes:(m)=>m==="ecstatic"?`<path d="M59 62 q7 -9 14 0 M87 62 q7 -9 14 0" stroke="#2A2230" stroke-width="3.2" fill="none" stroke-linecap="round"/>`:null},
+  neuron:{ a:{e:[71,89,66], m:[80,78], hd:[80,42], nk:[80,96], ch:null},
+    body:()=>`<g stroke="#7B5BE0" stroke-width="5" fill="none" stroke-linecap="round"><path d="M60 56 l-20 -18 m10 9 l-14 2"/><path d="M62 82 l-24 10 m12 -5 l-6 12"/><path d="M80 44 l-4 -24 m2 12 l10 -8"/><path d="M98 52 l18 -16"/>
+      <path d="M104 74 q20 4 30 22 q4 8 10 10"/><path d="M144 106 l8 -8 M144 106 l10 4"/></g>
+      <g fill="#C9B8FF"><rect x="108" y="72" width="12" height="7" rx="3.5" transform="rotate(14 114 75)"/><rect x="124" y="82" width="12" height="7" rx="3.5" transform="rotate(42 130 85)"/></g>
+      <circle cx="80" cy="70" r="27" fill="#9B7BEA"/>`,
+    face:()=>`<ellipse cx="66" cy="76" rx="4" ry="2.6" fill="#F6A6D8" opacity=".8"/><ellipse cx="94" cy="76" rx="4" ry="2.6" fill="#F6A6D8" opacity=".8"/>`},
+};
+function petSVG(stage, mood, px, kind){
+  kind = kind || petKind(); const A=PET_ART[kind]||PET_ART.rat, a=A.a;
+  const sc=.62+stage*.076, sleepy=mood==="sleepy"||mood==="asleep", happy=mood==="ecstatic"||mood==="happy"||mood==="new";
+  const [ex1,ex2,ey]=a.e, [mx,my]=a.m, [hx,hy]=a.hd, [nx,ny]=a.nk;
+  const custom = A.eyes && !sleepy ? A.eyes(mood) : null;
+  const eyes = custom || (petEye(ex1,ey,sleepy,mood==="asleep")+petEye(ex2,ey,sleepy,mood==="asleep"));
+  const bow = stage===2 ? `<path d="M${nx-8} ${ny} l8 -5 l8 5 l-8 5z" fill="#E11D74"/>` : "";
+  const badge = stage>=3 && a.ch ? `<g transform="translate(${a.ch[0]} ${a.ch[1]})"><circle r="7" fill="#E2B53E"/><path d="M0 -4 l1.2 2.6 2.8 .3 -2.1 1.9 .6 2.8 -2.5 -1.4 -2.5 1.4 .6 -2.8 -2.1 -1.9 2.8 -.3z" fill="#fff"/></g>` : "";
+  const glasses = stage>=4 ? `<g stroke="#2A2230" stroke-width="2.2" fill="none"><circle cx="${ex1}" cy="${ey}" r="8"/><circle cx="${ex2}" cy="${ey}" r="8"/><path d="M${ex1+8} ${ey} H${ex2-8}"/></g>` : "";
+  const cap = stage>=5 ? `<g><path d="M${hx-24} ${hy} l24 -10 l24 10 l-24 10z" fill="#1E2233"/><rect x="${hx-12}" y="${hy}" width="24" height="9" fill="#1E2233"/><path d="M${hx+24} ${hy} v12" stroke="#E2B53E" stroke-width="2"/><circle cx="${hx+24}" cy="${hy+13}" r="2.5" fill="#E2B53E"/></g>` : "";
+  return `<svg class="pet-svg ${mood} pet-${kind}" viewBox="0 0 160 120" width="${px}" height="${px*.75}" role="img" aria-label="Your ${esc(PETS[kind].noun)}, ${esc(petStageName(stage,kind))}, ${mood}">
+    <g class="pet-body"><g transform="translate(80 118) scale(${sc}) translate(-80 -118)">
+      ${A.body(stage)}${A.face(mood)}${eyes}${glasses}${petMouth(mx,my,happy)}${bow}${badge}${cap}
     </g></g>
     ${sleepy?`<g class="pet-z" fill="#7B8BB8" font-family="var(--display)" font-weight="800"><text x="102" y="42" font-size="15">z</text><text x="114" y="31" font-size="19">Z</text>${mood==="asleep"?'<text x="128" y="22" font-size="22">Z</text>':""}</g>`:""}
     ${mood==="ecstatic"?`<g class="pet-spark" font-size="16"><text x="12" y="24">✨</text><text x="128" y="44">🎉</text></g>`:""}
   </svg>`;
 }
-function petLine(m){ return m==="new" ? `Meet <b>${esc(G.pet.name)}</b>, your new lab rat! Answer questions to help him grow.` : `<b>${esc(G.pet.name)}</b> ${esc(PET_MSG[m])}`; }
+function petLine(m){ const P=petOf(); return m==="new" ? `Meet <b>${esc(G.pet.name)}</b>, your new ${esc(P.noun)}! Answer questions to help ${P.pr[0]} grow.` : `<b>${esc(G.pet.name)}</b> ${esc(petMsg(m))}`; }
+function petPickerHTML(){
+  const pct=knownPct();
+  return `<div class="pet-pick"><h4 style="margin:14px 0 6px">Your pets <small class="muted">· unlock more by knowing more cards (you know ${Math.floor(pct)}%)</small></h4><div class="pet-pick-row">${Object.entries(PETS).map(([k,P])=>{ const open=petUnlocked(k), on=k===petKind();
+    return `<button class="pet-opt ${on?"on":""}" data-pet="${k}" ${open?"":"disabled"} aria-pressed="${on}" title="${esc(P.title)}${P.fact?": "+esc(P.fact):""}"><span class="pet-opt-art">${petSVG(open?3:0, open?"happy":"asleep", 70, k)}</span><b>${esc(P.title)}</b><span>${open?(on?"✓ With you":"Tap to switch"):"🔒 "+P.at+"% of cards known"}</span></button>`; }).join("")}</div>
+    ${petOf().fact?`<p class="muted" style="font-size:14px;margin:6px 0 0">💡 ${esc(petOf().fact)}</p>`:""}</div>`;
+}
 function petBoxHTML(){
-  const p=petInit(), st=petStage(), mood=petMood(), n=G.st.cards||0, next=PET_STAGES[st+1];
-  const td=(G.hist||{})[today()]||0, cheese=Math.min(3,Math.floor(td/10));
+  const p=petInit(), P=petOf(), st=petStage(), mood=petMood(), n=G.st.cards||0, next=PET_STAGES[st+1];
+  const td=(G.hist||{})[today()]||0, treats=Math.min(3,Math.floor(td/10));
   return `<div class="box pet-box"><div class="pet-art">${petSVG(st,mood,220)}</div>
-    <div class="pet-info"><h3 style="margin:0">🐀 <span id="petName">${esc(p.name)}</span> <button class="linkbtn" id="petRename" style="font-size:14px">Rename</button></h3>
-      <p class="muted" style="margin:2px 0 8px">${esc(PET_STAGES[st][1])}${next?` · ${next[0]-n} more answers to become a ${esc(next[1].toLowerCase())}`:" · fully grown legend 🎓"}</p>
+    <div class="pet-info"><h3 style="margin:0">${P.icon} <span id="petName">${esc(p.name)}</span> <button class="linkbtn" id="petRename" style="font-size:14px">Rename</button></h3>
+      <p class="muted" style="margin:2px 0 8px">${esc(P.title)} · ${esc(petStageName(st))}${next?` · ${next[0]-n} more answers to become a ${esc(petStageName(st+1).toLowerCase())}`:" · fully grown legend 🎓"}</p>
       ${next?`<div class="xpbar" style="margin-bottom:10px"><i style="width:${(n-PET_STAGES[st][0])/(next[0]-PET_STAGES[st][0])*100}%"></i></div>`:""}
       <p class="pet-msg">${petLine(mood)}</p>
-      <p class="muted" style="margin:6px 0 0;font-size:15px">Cheese today: ${"🧀".repeat(cheese)}${"<span style='opacity:.25'>🧀</span>".repeat(3-cheese)} <span style="font-size:13px">(one for every 10 answers)</span></p></div></div>`;
+      <p class="muted" style="margin:6px 0 0;font-size:15px">${P.treat[1]} today: ${P.treat[0].repeat(treats)}${`<span style='opacity:.25'>${P.treat[0]}</span>`.repeat(3-treats)} <span style="font-size:13px">(one for every 10 answers)</span></p></div>
+    ${petPickerHTML()}</div>`;
 }
 const NAME_BLOCK = (()=>{ try{ return JSON.parse(atob("W1siZnVjayIsICJmdWsiLCAiZmNrIiwgInNoaXQiLCAiY3VudCIsICJiaXRjaCIsICJiYXN0YXJkIiwgIndhbmsiLCAidHdhdCIsICJwdXNzeSIsICJzbHV0IiwgIndob3JlIiwgIm5pZ2ciLCAibmlnZ2EiLCAiZmFnZyIsICJmYWdnb3QiLCAicmV0YXJkIiwgInJhcGUiLCAicmFwaXN0IiwgInBvcm4iLCAicGVuaXMiLCAidmFnaW5hIiwgImRpbGRvIiwgImJvbGxvY2siLCAiYmVsbGVuZCIsICJ0b3NzZXIiLCAibm9uY2UiLCAic3Bhc3RpYyIsICJuYXppIiwgImhpdGxlciIsICJqaXp6IiwgImJ1a2tha2UiLCAiY2xpdCIsICJzaGFnIiwgImJ1Z2dlciIsICJtaW5nZSIsICJrbm9iIiwgIm1vdGhlcmYiLCAic2gxdCIsICJwYWVkbyIsICJwZWRvIiwgImluY2VsIiwgImhvcm55IiwgImJvb2IiLCAidGVzdGljbGUiLCAic2Nyb3QiLCAiZGlja2hlYWQiLCAiY29ja3N1Y2siLCAiYXJzZWhvbGUiLCAiYXNzaG9sZSIsICJ3YW5rZXIiLCAibWlsZiIsICJvbmx5ZmFucyIsICJreXMiLCAia2lsbHlvdXJzZWxmIiwgInN1aWNpZGUiLCAiY29vbiIsICJjaGluayIsICJnb29rIiwgImtpa2UiLCAid29nIiwgInRyYW5ueSIsICJkeWtlIiwgImhvbW8iXSwgWyJkaWNrIiwgImNvY2siLCAiYXJzZSIsICJhc3MiLCAidGl0IiwgInRpdHMiLCAidGl0dHkiLCAiY3VtIiwgInNleCIsICJzZXh5IiwgImFuYWwiLCAiYW51cyIsICJwb28iLCAicG9vcCIsICJwZWUiLCAicGlzcyIsICJwcmljayIsICJjcmFwIiwgInNsYWciLCAic2thbmsiLCAiaG9lIiwgImhvIiwgInNwYXoiLCAicGFraSIsICJnYXkiLCAibGVzYm8iLCAiYnV0dCIsICJidW0iLCAiYmFsbHMiLCAibnV0IiwgIm51dHMiLCAiZmFydCIsICJ0dXJkIiwgImRhbW4iLCAiaGVsbCIsICJ3aWxseSIsICJ3ZWUiLCAiYmoiLCAiZGsiLCAic3RmdSIsICJ3dGYiLCAiZnUiLCAiZm1sIiwgImxtZmFvIiwgImhvcmUiLCAidGhvdCIsICJzaW1wIiwgImR1bWIiLCAiaWRpb3QiLCAic3R1cGlkIiwgInVnbHkiLCAiZmF0IiwgImxvc2VyIiwgIm1vcm9uIiwgInN1Y2tzIiwgInNtZWxseSIsICJzdGlua3kiLCAia2lsbCIsICJkaWUiLCAiZGVhZCIsICJtdXJkZXIiLCAiZ3VuIiwgImJvbWIiLCAiZHJ1Z3MiLCAid2VlZCIsICJjcmFjayJdXQ==")); }catch(e){ return [[],[]]; } })();
 function cleanName(raw){
@@ -3448,21 +3526,27 @@ function cleanName(raw){
   if(words.some(w=>NAME_BLOCK[1].some(b=>squash(b)===w)) || NAME_BLOCK[1].some(b=>squash(b)===flat)) return null;
   return n;
 }
-function wirePet(){ const b=$("#petRename"); if(b) b.onclick=()=>{
-  let n=prompt("Name your lab rat (letters only, up to 20):", G.pet.name);
-  while(n!==null){ const ok=cleanName(n); if(ok){ G.pet.name=ok; save(); renderTrophies(); petHud(); return; }
-    n=prompt("Let's keep it friendly! Pick a different name (letters only, 2–20 characters):", "Professor Squeaks"); }
-}; }
-function petHud(){ const b=$("#petStrip"); if(!b||TEACHER) return; petInit(); const m=petMood(), st=petStage(), td=(G.hist||{})[today()]||0, cheese=Math.min(3,Math.floor(td/10));
+function wirePet(){
+  const b=$("#petRename"); if(b) b.onclick=()=>{
+    let n=prompt(`Name your ${petOf().noun} (letters only, up to 20):`, G.pet.name);
+    while(n!==null){ const ok=cleanName(n); if(ok){ G.pet.name=ok; G.pet.names[petKind()]=ok; save(); renderTrophies(); petHud(); return; }
+      n=prompt("Let's keep it friendly! Pick a different name (letters only, 2–20 characters):", petOf().def); } };
+  document.querySelectorAll("[data-pet]").forEach(x=>x.onclick=()=>{ const k=x.dataset.pet; if(!petUnlocked(k)) return; const p=petInit();
+    p.names[p.kind]=p.name; p.kind=k; p.name=p.names[k]||PETS[k].def; p.names[k]=p.name; save(); renderTrophies(); petHud();
+    toast(PETS[k].icon, `${p.name} is with you now`, PETS[k].title, true); });
+}
+function petHud(){ const b=$("#petStrip"); if(!b||TEACHER) return; petInit(); const P=petOf(), m=petMood(), st=petStage(), td=(G.hist||{})[today()]||0, treats=Math.min(3,Math.floor(td/10));
   b.hidden=false; b.className="petstrip "+m;
-  b.innerHTML=`<span class="ps-art">${petSVG(st,m,120)}</span><span class="ps-txt">${petLine(m)}</span><span class="ps-cheese" aria-label="${cheese} of 3 cheese today">${"🧀".repeat(cheese)}${"<i>🧀</i>".repeat(3-cheese)}</span>`;
-  b.setAttribute("aria-label",`${G.pet.name} the lab rat: ${PET_MSG[m]} Open progress`); }
+  b.innerHTML=`<span class="ps-art">${petSVG(st,m,120)}</span><span class="ps-txt">${petLine(m)}</span><span class="ps-cheese" aria-label="${treats} of 3 ${P.treat[1].toLowerCase()} today">${P.treat[0].repeat(treats)}${`<i>${P.treat[0]}</i>`.repeat(3-treats)}</span>`;
+  b.setAttribute("aria-label",`${G.pet.name} the ${P.noun}: ${petMsg(m)} Open progress`); }
 function petCheck(){
-  if(TEACHER) return; const p=petInit(), st=petStage(), m=petMood();
-  if(st>p.stage){ p.stage=st; save(); setTimeout(()=>{ toast("🐀",`${p.name} grew into a ${PET_STAGES[st][1].toLowerCase()}!`,st>=5?"He's wearing a graduation cap. Legendary.":st>=4?"Look, glasses! So wise.":st>=3?"He's got his own lab coat now.":"Keep revising to help him grow.",true); confetti(100); },600); }
-  if((p.mood==="sleepy"||p.mood==="asleep") && (m==="happy"||m==="ecstatic")) setTimeout(()=>toast("🐀",`${p.name} woke up!`,"He's so happy to see you revising again.",true),400);
-  if(p.mood!=="ecstatic" && m==="ecstatic" && p.mood) setTimeout(()=>toast("🐀",`${p.name} is dancing!`,"Daily goal smashed. 🧀🧀🧀",true),800);
+  if(TEACHER) return; const p=petInit(), P=petOf(), st=petStage(), m=petMood(), [him,he]=P.pr, He=he[0].toUpperCase()+he.slice(1);
+  if(st>p.stage){ p.stage=st; save(); setTimeout(()=>{ toast(P.icon,`${p.name} grew into a ${petStageName(st).toLowerCase()}!`,st>=5?`${He}'s wearing a graduation cap. Legendary.`:st>=4?"Look, glasses! So wise.":st>=3?`${He}'s earned a gold star badge.`:`Keep revising to help ${him} grow.`,true); confetti(100); },600); }
+  if((p.mood==="sleepy"||p.mood==="asleep") && (m==="happy"||m==="ecstatic")) setTimeout(()=>toast(P.icon,`${p.name} woke up!`,`${He}'s so happy to see you revising again.`,true),400);
+  if(p.mood!=="ecstatic" && m==="ecstatic" && p.mood) setTimeout(()=>toast(P.icon,`${p.name} is ${petKind()==="bee"?"doing a waggle dance":"dancing"}!`,`Daily goal smashed. ${P.treat[0].repeat(3)}`,true),800);
   if(p.mood!==m){ p.mood=m; save(); }
+  if(!DEMO) Object.keys(PETS).forEach((k,i)=>{ if(!p.got[k] && petUnlocked(k)){ p.got[k]=1; save();
+    setTimeout(()=>{ toast(PETS[k].icon,`New pet: ${PETS[k].title}!`,`You know ${PETS[k].at}% of the cards. Switch pets in 📈 Progress.`,true); confetti(160); sfx("lvl"); },1500+i*900); } });
   petHud();
 }
 
@@ -3529,7 +3613,7 @@ function saveHTML(){
   const [cls,txt]=saveStatus(), share=!!navigator.share;
   return `<div class="box save-box"><h3 style="margin-top:0">💾 Save your progress</h3>
     <p class="save-status ${cls}">${txt}</p>
-    <p>Your progress is kept <b>on this device only</b>. A <b>save code</b> is a copy of all of it (level, XP, badges, cards, your lab rat) in one long piece of text. Keep it somewhere safe and you can never lose your progress.</p>
+    <p>Your progress is kept <b>on this device only</b>. A <b>save code</b> is a copy of all of it (level, XP, badges, cards, your pets) in one long piece of text. Keep it somewhere safe and you can never lose your progress.</p>
     <div class="save-step"><span class="save-n">1</span><div><h4>Make a save code</h4>
       <div class="card-actions" style="margin-top:6px"><button class="btn" id="saveCopy">📋 Copy my save code</button>${share?`<button class="btn ghost" id="saveShare">📤 Send it to myself</button>`:""}</div>
       <div id="saveOut" hidden><textarea id="saveCode" readonly aria-label="Your save code" style="min-height:70px;font-size:13px;margin-top:10px"></textarea></div>
@@ -4859,7 +4943,7 @@ function nudgeCheck(){
   const t=today(), since=G.backupAt ? dayNum(t)-dayNum(G.backupAt) : 999, snoozed=G.backupSnooze && dayNum(t)-dayNum(G.backupSnooze)<3;
   const due=(G.st.cards||0)>=40 && since>=7 && !snoozed;
   n.hidden=!due; if(!due){ n.innerHTML=""; return; }
-  const pet=(G.pet&&G.pet.name)||"your lab rat";
+  const pet=(G.pet&&G.pet.name)||"your pet";
   n.innerHTML=`<span class="nd-ico" aria-hidden="true">💾</span><span class="nd-txt"><b>${G.backupAt?`It's been ${since} days since your last backup.`:"You haven't backed up yet."}</b> Your level ${lvlFor(G.xp)} progress, badges and ${esc(pet)} only live in this browser. It takes 30 seconds.</span>
     <button class="btn" id="ndGo">Back up now</button><button class="linkbtn" id="ndLater">Not now</button>`;
   $("#ndGo").onclick=()=>{ goTab("trophies","save"); setTimeout(()=>{ const b=$("#saveCopy"); if(b){ b.scrollIntoView({behavior:reduced()?"auto":"smooth",block:"center"}); b.focus({preventScroll:true}); } },60); };
@@ -4872,12 +4956,12 @@ const TOUR = [
   ["🗂️","Flashcards","<p>Pick your topics, then answer each card.</p><ul><li><b>Multiple choice</b>: press A–D or tap an answer.</li><li><b>🔤 Gap fill</b> and <b>✍️ Type it</b>: type your answer and it's marked for you. These earn <b>2× XP</b>.</li></ul><p>Cards you get wrong come back until you know them.</p><p>🎯 Topics unlock in <b>stages</b>: get every topic to 20% known before any goes further, then 40%, and so on.</p>"],
   ["📝","Quiz","<p>Quick quizzes, 9-mark practice, <b>🧩 Exam skills</b> (2× XP) and full <b>mock papers</b> for Paper 1 and Paper 2.</p><p>Parents can test you too in <b>👪 Parent mode</b>.</p>"],
   ["🕹️","Arcade","<p>Boss battles, Psychle, Swipe Sort, Which Study?, Study Matcher, Spot the Flaw and more.</p><p>Check the <b>Game of the day</b> for bonus XP.</p>"],
-  ["🐀","Level up","<p>Every answer earns XP. Climb 80 levels, keep your 🔥 streak, collect badges and unlock themes.</p><p>Your lab rat, <b>Professor Squeaks</b>, grows as you revise and gets sleepy if you stay away.</p><p>Psst… there are secret scrolls hidden around the site. 📜</p>"],
+  ["🐀","Level up","<p>Every answer earns XP. Climb 80 levels, keep your 🔥 streak, collect badges and unlock themes.</p><p>Your lab rat, <b>Professor Squeaks</b>, grows as you revise and gets sleepy if you stay away. Know more cards to unlock five more pets!</p><p>Psst… there are secret scrolls hidden around the site. 📜</p>"],
   ["💾","Keep your progress safe","<p>Your progress is saved in <b>this browser only</b>. Nothing goes online.</p><p>Back it up in the <b>💾 Save</b> tab every week or so, especially before you change phone or clear your browser.</p><p>Good luck. Keep right on! 💙</p>"],
 ];
 // bump WHATS_NEW_V and edit WHATS_NEW when you add features; returning students see it once
-const WHATS_NEW_V = 2;
-const WHATS_NEW = ["🎯 Topics now unlock in stages: get every topic to 20% known, then 40%, and so on. A topic that gets ahead locks (review only) until the others catch up. This makes sure you revise everything for the exam!","💾 The Save tab is simpler: three steps to keep your progress safe","🃏 Flashcards now ask you to answer: multiple choice, gap fill or type it (typed answers earn 2× XP)","🐀 Meet Professor Squeaks, your revision lab rat","🕹️ New arcade games: Psychle, Swipe Sort, Which Study? and hard-mode boss rematches","📝 Mock papers and 🧩 Exam skills in the Quiz tab","🎨 80 levels and loads of new themes to unlock","💾 A weekly reminder to back up your progress"];
+const WHATS_NEW_V = 3;
+const WHATS_NEW = ["🐝 Five new pets to unlock as you learn: Von Frisch's Bee, Naughty Teddy, Gibson's Mountain Goat, Yuki's Emoticon and Hebb's Neuron. Switch pets in 📈 Progress","🧪 Six new arcade games, including Psych Lab, Be the Examiner and TDEE Builder","🎯 Topics now unlock in stages: get every topic to 20% known, then 40%, and so on. A topic that gets ahead locks (review only) until the others catch up. This makes sure you revise everything for the exam!","💾 The Save tab is simpler: three steps to keep your progress safe","🃏 Flashcards now ask you to answer: multiple choice, gap fill or type it (typed answers earn 2× XP)","🐀 Meet Professor Squeaks, your revision lab rat","🕹️ New arcade games: Psychle, Swipe Sort, Which Study? and hard-mode boss rematches","📝 Mock papers and 🧩 Exam skills in the Quiz tab","🎨 80 levels and loads of new themes to unlock","💾 A weekly reminder to back up your progress"];
 function showTour(steps, onDone){
   let i=0; const o=document.createElement("div"); o.className="overlay";
   const close=()=>{ o.remove(); document.removeEventListener("keydown",kd,true); if(onDone) onDone(); };
