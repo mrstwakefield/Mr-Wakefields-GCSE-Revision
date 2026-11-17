@@ -72,6 +72,10 @@ h1 span b{font-weight:500}
 .chip .row{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;line-height:1.2}
 .chip.locked{border-style:dashed}
 .chip .lockb{margin-left:auto;font-size:14px}
+.chip .gamesb{margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);background:var(--soft);border-radius:99px;padding:1px 7px;white-space:nowrap}
+.chip .lockb + .gamesb{margin-left:4px}
+.yp-btns{display:flex;gap:12px;justify-content:center;margin-top:10px}.yp-btns .btn{min-width:130px;font-size:18px;padding:14px 20px}
+.year-note{margin:0 0 12px}
 .stagebar{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:0 0 12px;font-size:15px}
 .stagebar[hidden]{display:none}
 .stagebar .sb-top{display:flex;gap:8px 12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between}
@@ -1039,7 +1043,7 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
   </section>
 
   <footer class="foot">
-    <span>Your progress is saved in this browser only. <button class="linkbtn" id="backupLink" style="padding:0">Back it up</button> · <button class="linkbtn" id="tourLink" style="padding:0">📖 How it works</button> · <a class="linkbtn" href="guide.html" style="padding:0">🖨️ Guide for parents</a> · <button class="linkbtn" id="parentLink" style="padding:0">👪 Parent mode</button></span>
+    <span>Your progress is saved in this browser only. <button class="linkbtn" id="backupLink" style="padding:0">Back it up</button> · <button class="linkbtn" id="yearLink" style="padding:0">🎓 <span id="yearName">Year</span> · change</button> · <button class="linkbtn" id="tourLink" style="padding:0">📖 How it works</button> · <a class="linkbtn" href="guide.html" style="padding:0">🖨️ Guide for parents</a> · <button class="linkbtn" id="parentLink" style="padding:0">👪 Parent mode</button></span>
     <button class="btn ghost install-btn" id="installBtn" hidden>📲 Install as an app</button>
     <button class="linkbtn" id="resetBtn">Reset my progress</button>
   </footer>
@@ -1356,24 +1360,62 @@ function fmtAnswer(a,id){
   }
   return "<p style='margin:0'>"+esc(a)+"</p>";
 }
-/* ---- topics not taught yet: left out of games, stages, parent mode and suggestions ---- */
-// Each topic comes back automatically on its date (YYYY-MM-DD). Change the date, or delete the line, to bring it back sooner.
-const NOT_YET_UNTIL = {"Language, thought & communication":"2027-03-01"};   // Language should be finished by 28 Feb
-const NOT_YET = new Set(Object.keys(NOT_YET_UNTIL).filter(k=>{ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0") < NOT_YET_UNTIL[k]; }));
+/* ---- year groups: which topics are in the GAMES for each year (flashcards always have every topic) ---- */
+// Edit dates here (YYYY-MM-DD). A topic joins that year's games on its date. "never" = not this year.
+const NEVER = "9999-12-31";
+const SCHEDULE = {
+  y11: { "Language, thought & communication":"2027-03-01" },
+  y10: { "Perception":"2026-12-11", "Social influence":"2027-02-28", "RM":"2027-02-28",
+         "Brain & neuropsychology":"2027-03-16", "Psychological problems":"2027-06-01",
+         "Development":NEVER, "Language, thought & communication":NEVER },
+};
+const STAGE_GRACE_DAYS = 14;   // a topic that joins the games starts counting towards stages this many days later
+const YEAR = (()=>{ const q=(location.search+location.hash).match(/(^|[?&#])y(10|11)\b/i); if(q) return "y"+q[2];
+  try{ const s=JSON.parse(localStorage.getItem("rr-psych-gcse-v1")||"null"); if(s && s.g && /^y1[01]$/.test(s.g.year)) return s.g.year; }catch(e){} return null; })();
+const YR = YEAR || "y11";
+const YEAR_NAME = y => y==="y10" ? "Year 10" : "Year 11";
+const dstr = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const unlockDate = (y,k) => DEMO ? "" : ((SCHEDULE[y]||{})[k] || "");
+const plusDays = (s,n) => { const d=new Date(s+"T12:00:00"); d.setDate(d.getDate()+n); return dstr(d); };
+const stageFromDate = (y,k) => { const u=unlockDate(y,k); return !u ? "" : u===NEVER ? NEVER : plusDays(u, STAGE_GRACE_DAYS); };
+const taughtFor = (y,k,d) => (d||dstr(new Date())) >= unlockDate(y,k);
+const NOT_YET = new Set(TOPICS.map(t=>t.key).filter(k=>!taughtFor(YR,k)));
 const taught = k => !NOT_YET.has(k);
-// game content that isn't tagged by topic: spot Language material by its studies and terms
-const notYetText = s => NOT_YET.has("Language, thought & communication") && /von frisch|\byuki\b|emoticon|sapir|whorf|waggle|round dance|\bbees?\b|darwin|language determines|links to language/i.test(s);
+const nextUnlocks = () => Object.entries(SCHEDULE[YR]||{}).filter(([k,d])=>d!==NEVER && d>dstr(new Date())).sort((a,b)=>a[1]<b[1]?-1:1);
+// game content that isn't tagged by topic: work out its topic from study names and key ideas
+const TOPIC_NAMES = [
+  ["Language, thought & communication", /von frisch|\byuki\b|emoticon|sapir|whorf|waggle|round dance|\bbees?\b|darwin|language determines|links to language/i],
+  ["Psychological problems", /\bkaij\b|\bwiles\b|\bbeck\b|antabuse/i],
+  ["Brain & neuropsychology", /penfield|tulving|maguire|\bhebb/i],
+  ["Social influence", /milgram|\basch\b|piliavin|lat[aá]n[eé]|darley|zimbardo|levine/i],
+  ["Development", /piaget|hughes|mcgarrigle|donaldson|naughty teddy|three mountains|dweck|willingham/i],
+  ["Perception", /bruner|minturn|gilchrist|nesberg|gibson|visual cliff|hudson|mcginnies|gregory/i],
+  ["Memory", /murdock|bartlett|godden|baddeley|loftus|pickrell|clive wearing|war of the ghosts/i],
+];
+const TOPIC_IDEAS = [
+  ["Language, thought & communication", /postur|eye contact|personal space|non-verbal|animal communication/i],
+  ["Psychological problems", /depress|serotonin|ssri|\bcbt\b|addict|alcohol|aversion|negative triad|12-step|self-management|diathesis|\bmz\b|\bdz\b|twin|tolerance|withdrawal|relapse|mania|mental health|emetic/i],
+  ["Brain & neuropsychology", /cell assembl|neuron|synap|neurotransmit|hippocamp|taxi driver|broca|wernicke|\blobe|fight or flight|sympathetic|adrenal|hypothalamus|james-lange|cannon-bard|brain scan|fmri|pet scan|ct scan|localisation/i],
+  ["Social influence", /obedien|conform|agency theory|agentic|autonomous state|bystander|deindividuation|social loafing|authoritarian|diffusion of responsibility|crowd|situational|dispositional|group size|legitimate authority|moral strain/i],
+  ["Development", /egocentr|conserv|decentr|object permanence|assimilation|accommodation|sensorimotor|pre-operational|concrete operational|formal operational|early brain development|self-efficacy|mindset/i],
+  ["Perception", /constructivist|depth cue|depth perception|monocular|binocular|retinal disparity|convergence|occlusion|height in plane|relative size|linear perspective|motion parallax|texture gradient|illusion|ponzo|m[uü]ller-lyer|perceptual set|size constancy|broken b/i],
+  ["Memory", /multi-store|\bstm\b|\bltm\b|short-term memory|long-term memory|sensory memory|rehearsal|primacy|recency|serial position|schema|reconstructive|interference|false memor|episodic|semantic memor|procedural memor|chunking/i],
+  ["RM", /hypothesis|\biv\b|\bdv\b|operationalis|sampl|correlation|co-variable|confounding|extraneous|repeated measures|independent groups|matched pairs|counterbalanc|standardised|debrief|informed consent|observer|questionnaire|percentage|significant figure|median|pilot study|order effects|lab experiment|field experiment|carrying out an experiment|designing an experiment|qualitative|quantitative|primary data|secondary data/i],
+];
+const nameTopic = s => { for(const [k,re] of TOPIC_NAMES) if(re.test(s)) return k; return null; };
+const ideaTopic = s => nameTopic(s) || (()=>{ for(const [k,re] of TOPIC_IDEAS) if(re.test(s)) return k; return null; })();
+const notYetText = s => { const t=nameTopic(s); return !!t && NOT_YET.has(t); };
 const gameOK = d => taught(d.t) && !(d.t==="Exam skills" && notYetText(d.q+" "+d.a));
 
 /* ---- topic stages: every topic must reach each 20% step before any topic can go further ---- */
 const STAGE_STEP = 20;   // percent per stage. Set to 0 to switch topic locking off.
 // a topic that comes back only counts towards stages from this date, so students get time to catch up
-const STAGE_FROM = {"Language, thought & communication":"2027-03-15"};
-const stageCounts = (k, d) => k!=="Exam skills" && taught(k) && !(STAGE_FROM[k] && (d||today()) < STAGE_FROM[k]);
+const stageCountsFor = (y, k, d) => k!=="Exam skills" && (d||dstr(new Date())) >= stageFromDate(y,k);
+const stageCounts = (k, d) => stageCountsFor(YR, k, d);
 const stageTopics = () => TOPICS.filter(t=>stageCounts(t.key));
 function topicFrac(key){ const it=DATA.filter(d=>d.t===key); return it.length ? it.filter(d=>status(d.id)==="k").length/it.length : 0; }
 function stageInfo(){
-  if(!STAGE_STEP || DEMO) return {on:false, cap:1, stage:0, locked:new Set(), fr:{}};
+  if(!STAGE_STEP || DEMO || stageTopics().length<2) return {on:false, cap:1, stage:0, locked:new Set(), fr:{}};   // stages need at least two topics
   const fr={}; stageTopics().forEach(t=>fr[t.key]=topicFrac(t.key));
   const step=STAGE_STEP/100, min=Math.min(...Object.values(fr));
   const stage=Math.floor(min/step+1e-9)+1, cap=Math.min(1,stage*step);
@@ -1406,7 +1448,7 @@ function renderChips(){
   $("#chips").innerHTML = TOPICS.map(t=>{
     const items = DATA.filter(d=>d.t===t.key); const k = items.filter(d=>status(d.id)==="k").length;
     const on = store.sel.includes(t.key), lk=SI.locked.has(t.key);
-    return `<button class="chip${lk?" locked":""}" style="--c:${t.c}" aria-pressed="${on}" data-key="${esc(t.key)}" ${lk?`title="Locked at ${Math.round(SI.cap*100)}% until every topic gets there. You can still review cards you know."`:""}><span class="row"><span class="dot"></span>${esc(t.name)}${lk?'<span class="lockb" aria-label="Locked: review only">🔒</span>':""}${t.key==="Exam skills"?'<span class="sticky sm" aria-label="Double XP">2× XP</span>':""}${(()=>{const f=items.length?k/items.length:0;return f>=1?'<span class="medal" title="Gold: all known">🥇</span>':f>=.8?'<span class="medal" title="Silver: 80% known">🥈</span>':f>=.5?'<span class="medal" title="Bronze: 50% known">🥉</span>':""})()}</span><span class="foot2"><span class="bar"><i style="width:${items.length?k/items.length*100:0}%"></i></span><span class="n">${k}/${items.length}</span></span></button>`;
+    return `<button class="chip${lk?" locked":""}" style="--c:${t.c}" aria-pressed="${on}" data-key="${esc(t.key)}" ${lk?`title="Locked at ${Math.round(SI.cap*100)}% until every topic gets there. You can still review cards you know."`:""}><span class="row"><span class="dot"></span>${esc(t.name)}${lk?'<span class="lockb" aria-label="Locked: review only">🔒</span>':""}${NOT_YET.has(t.key)?`<span class="gamesb" title="Not in your games yet (flashcards only)">🎮 ${unlockDate(YR,t.key)===NEVER?"Y11":esc(niceDate(unlockDate(YR,t.key)).replace(/^\w+ /,""))}</span>`:""}${t.key==="Exam skills"?'<span class="sticky sm" aria-label="Double XP">2× XP</span>':""}${(()=>{const f=items.length?k/items.length:0;return f>=1?'<span class="medal" title="Gold: all known">🥇</span>':f>=.8?'<span class="medal" title="Silver: 80% known">🥈</span>':f>=.5?'<span class="medal" title="Bronze: 50% known">🥉</span>':""})()}</span><span class="foot2"><span class="bar"><i style="width:${items.length?k/items.length*100:0}%"></i></span><span class="n">${k}/${items.length}</span></span></button>`;
   }).join("");
 }
 $("#chips").addEventListener("click", e=>{
@@ -2249,7 +2291,7 @@ const MODES = {
 };
 const GOTD_POOL=["exam","terms","maths","blitz","surv","flaw","order","match","swipe","which","boss"];
 const GOTD_ORDER = shuffleR(GOTD_POOL, rngFrom("gotd-order-v1"));
-function gotd(){ const n=dayNum(today()); return GOTD_ORDER[((n%GOTD_ORDER.length)+GOTD_ORDER.length)%GOTD_ORDER.length]; }
+function gotd(){ const n=dayNum(today()), L=GOTD_ORDER.length; for(let j=0;j<L;j++){ const k=GOTD_ORDER[(((n+j)%L)+L)%L]; if(typeof modeLock!=="function" || !modeLock(k)) return k; } return "daily"; }
 const gotdMult = () => (typeof arc!=="undefined" && arc.mode===gotd()) ? 2 : 1;
 const arc={phase:"menu", mode:null, items:[], base:[], bi:0, i:0, score:0, right:0, lives:3, end:0, qEnd:0, timer:null, cur:null, locked:false, log:[], t0:0, xp:0, best:false, tries:0, hints:0};
 const dailyNo = () => dayNum(today())-dayNum("2026-01-01")+1;
@@ -2292,11 +2334,12 @@ function renderArcade(){
     const dd=G.daily[today()], n=pool().length;
     const gm0=MODES[gotd()];
     area.innerHTML=`<div class="gotd-bar"><span class="gotd-ico">🌟</span><div><b>Game of the day: ${gm0.icon} ${esc(gm0.name)}</b><span>Double XP on every answer and the end-of-game bonus, today only. A new game tomorrow!</span></div><button class="btn" id="gotdGo">Play</button></div>
+      ${(()=>{ const nx=nextUnlocks(); const off=TOPICS.filter(t=>NOT_YET.has(t.key)); return off.length?`<p class="arc-note year-note">🎮 <b>${YEAR_NAME(YR)} games</b> only use topics you've been taught. ${nx.length?`Coming up: ${nx.map(([k,d])=>`${esc(TMAP[k].name)} (${niceDate(d)})`).join(", ")}.`:""} Flashcards have every topic.</p>`:""; })()}
       <div class="modes">${Object.entries(MODES).map(([k,m])=>{
-      const dis = ((k==="blitz"||k==="surv") && !n) || (k==="fix" && !mistakeCount());
+      const lockMsg=modeLock(k), dis = !!lockMsg || ((k==="blitz"||k==="surv") && !n) || (k==="fix" && !mistakeCount());
       const g=k===gotd();
       const tag = g ? `<span class="new gotd-tag">🌟 Game of the day · ${m.hot?"4× XP":"2× XP"}</span>` : k==="daily"&&!(dd&&dd.done) ? '<span class="new">NEW</span>' : m.hot ? `<span class="new" style="background:#9A6324">${m.hot}</span>` : "";
-      return `<button class="mode ${k==="exam"?"featured":""} ${g?"gotd":""}" style="--c:${m.c}" data-mode="${k}" ${dis?"disabled":""}>${tag}<span class="mi">${m.icon}</span><h3>${m.name}</h3><p>${m.desc}</p><span class="best">${bestLabel(k)}</span></button>`; }).join("")}</div>
+      return `<button class="mode ${k==="exam"?"featured":""} ${g?"gotd":""}" style="--c:${m.c}" data-mode="${k}" ${dis?"disabled":""}>${tag}<span class="mi">${m.icon}</span><h3>${m.name}</h3><p>${lockMsg?"🔒 "+esc(lockMsg):m.desc}</p><span class="best">${lockMsg?"":bestLabel(k)}</span></button>`; }).join("")}</div>
       <p class="arc-note">Blitz, Survival and Key Terms use the topics you've selected above${n?` (${n} questions)`:". Pick at least one"}. Wrong answers go into your still-learning pile. Press A, B, C or D (or 1–4) to answer quickly.</p>`;
     area.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>startArc(b.dataset.mode));
     $("#gotdGo").onclick=()=>startArc(gotd());
@@ -2375,8 +2418,8 @@ function streamItem(){
   if(arc.mode==="boss"){ if(arc.boss==="RM" && Math.random()<.4) return genRM(Math.random); if(arc.bi>=arc.base.length){ arc.base=shuffle(arc.base); arc.bi=0; } return arc.base[arc.bi++]; }
   const r=Math.random();
   if(r<.18) return pickR(EXAM_ITEMS(),Math.random);   // exam skills pushed into every game
-  if(r<.26) return genRM(Math.random);
-  if(!arc.base.length) return genRM(Math.random);
+  if(r<.26 && taught("RM")) return genRM(Math.random);
+  if(!arc.base.length) return taught("RM") ? genRM(Math.random) : shuffle(EXAM_ITEMS())[0];
   if(arc.bi>=arc.base.length){ arc.base=shuffle(arc.base); arc.bi=0; }
   return arc.base[arc.bi++];
 }
@@ -2390,6 +2433,7 @@ function startBoss(key, hard=false){
 }
 function arcToTop(){ const a=$("#arcArea"), r=a.getBoundingClientRect(), hud=$("#hud").getBoundingClientRect().bottom; if(r.top<hud+8 || r.top>innerHeight*.5) scrollTo({top:scrollY+r.top-hud-12, behavior:reduced()?"auto":"smooth"}); }
 function startArc(mode){
+  if(modeLock(mode)){ toast("🔒",`${MODES[mode].name} isn't in your games yet`, modeLock(mode), true); return; }
   if(mode==="flaw"||mode==="order") return gmStart(mode);
   if(mode==="match") return mtStart();
   if(mode==="swipe") return swStart();
@@ -2405,11 +2449,11 @@ function startArc(mode){
   resetCombo();
   if(mode==="daily"){
     const rng=rngFrom("daily-"+today()), core=DATA.filter(d=>d.id<5000 && taught(d.t));
-    const items=shuffleR(core,rng).slice(0,6).concat(shuffleR(EXAM_ITEMS(),rng).slice(0,2), [genRM(rng,"maths"), genRM(rng,"rm")]);
+    const items=taught("RM") ? shuffleR(core,rng).slice(0,6).concat(shuffleR(EXAM_ITEMS(),rng).slice(0,2), [genRM(rng,"maths"), genRM(rng,"rm")]) : shuffleR(core,rng).slice(0,7).concat(shuffleR(EXAM_ITEMS(),rng).slice(0,3));
     arc.items=shuffleR(items,rng); arc.rng=rng;
     G.daily[today()]={started:true, done:false, score:0, time:0, log:[], items:arc.items.map(slim)}; save();
   } else if(mode==="exam"){
-    arc.items=shuffle(shuffle(EXAM_ITEMS()).slice(0,6).concat([genRM(Math.random,"rm"),genRM(Math.random,"rm"),genRM(Math.random,"rm"),genRM(Math.random,"maths")])); arc.rng=Math.random;
+    arc.items=taught("RM") ? shuffle(shuffle(EXAM_ITEMS()).slice(0,6).concat([genRM(Math.random,"rm"),genRM(Math.random,"rm"),genRM(Math.random,"rm"),genRM(Math.random,"maths")])) : shuffle(EXAM_ITEMS()).slice(0,10); arc.rng=Math.random;
   } else if(mode==="maths"){
     arc.items=Array.from({length:10},(_,i)=>genRM(Math.random, i<7?"maths":"rm")); arc.items=shuffle(arc.items); arc.rng=Math.random;
   } else if(mode==="fix"){
@@ -2878,7 +2922,7 @@ function swMenu(){
   arc.phase="swipe";
   $("#arcArea").innerHTML=`<div class="arc-top"><span class="big">👉 Swipe Sort</span><span class="spacer"></span><button class="btn ghost" id="arcMenu" style="padding:7px 14px">Back</button></div>
     <p class="muted">Sort each statement left or right as fast as you can: swipe, tap the buttons or use the ← → keys. 45 seconds. Wrong answers cost a point.</p>
-    <div class="modes">${SWIPE.map((d,i)=>`<button class="mode" style="--c:#9A6324" data-sw="${i}"><span class="mi">${["🧠","⚖️","🧬","✍️","🔬","👁️","🧪","🌍","🧩","📈"][i]||"👉"}</span><h3>${esc(d[0])}</h3><p>${esc(d[1])} ← → ${esc(d[2])}</p><span class="best">${(G.st.swipe||{})[i]?`Best: ${G.st.swipe[i]}`:"No score yet"}</span></button>`).join("")}</div>`;
+    <div class="modes">${SWIPE.map((d,i)=>d[3].length<SWIPE_MIN?"":`<button class="mode" style="--c:#9A6324" data-sw="${i}"><span class="mi">${["🧠","⚖️","🧬","✍️","🔬","👁️","🧪","🌍","🧩","📈"][i]||"👉"}</span><h3>${esc(d[0])}</h3><p>${esc(d[1])} ← → ${esc(d[2])}</p><span class="best">${(G.st.swipe||{})[i]?`Best: ${G.st.swipe[i]}`:"No score yet"}</span></button>`).join("")}</div>`;
   $("#arcMenu").onclick=()=>{ arc.phase="menu"; renderArcade(); };
   document.querySelectorAll("[data-sw]").forEach(b=>b.onclick=()=>swStart(+b.dataset.sw));
 }
@@ -3298,7 +3342,7 @@ $("#backupLink").onclick=()=>{ goTab("trophies","save"); setTimeout(()=>$("#save
 /* ================= SHARED: mock dates ================= */
 const MOCK_TOPICS = TOPICS.map(t=>t.key).filter(k=>k!=="Language, thought & communication");
 const MOCK_END = "2026-12-11";
-const mockPeriod = () => today() <= MOCK_END;
+const mockPeriod = () => YR!=="y10" && today() <= MOCK_END;
 const liveStreak = () => { const t=today(); return (G.last===t || (G.last && dayNum(t)-dayNum(G.last)===1)) ? G.streak : 0; };
 function weakData(){
   return TOPICS.map(t=>{ const it=DATA.filter(d=>d.t===t.key), n=it.length||1;
@@ -3346,8 +3390,9 @@ const b64u = bytes => b64e(bytes).replace(/\+/g,"-").replace(/\//g,"_").replace(
 const unb64u = s => b64d(s.replace(/-/g,"+").replace(/_/g,"/") + "===".slice((s.length+3)%4));
 const popcount = n => { let c=0; while(n){ c+=n&1; n=Math.floor(n/2); } return c; };
 function makeReport(){
-  const bytes=[1];
+  const bytes=[2];
   const nm=[...new TextEncoder().encode((G.name||"").trim().slice(0,24))].slice(0,40); bytes.push(nm.length, ...nm);
+  bytes.push(YEAR==="y10"?10:YEAR==="y11"?11:0);
   varint(bytes, dayNum(today())-dayNum("2026-01-01"));
   varint(bytes, G.xp); varint(bytes, knownTotal());
   const ts=topicStats(); ts.forEach(s=>bytes.push(s.k)); ts.forEach(s=>bytes.push(s.l));
@@ -3362,8 +3407,9 @@ function makeReport(){
 function parseReport(code){
   const b=unb64u(code.slice(4)); if(b.length<12) throw new Error("short");
   const body=b.slice(0,-2), c=(b[b.length-2]<<8)|b[b.length-1]; if(ck16(body)!==c) throw new Error("checksum");
-  const p={i:0}; if(body[p.i++]!==1) throw new Error("version");
+  const p={i:0}, ver=body[p.i++]; if(ver!==1 && ver!==2) throw new Error("version");
   const nl=body[p.i++]; const name=new TextDecoder().decode(body.slice(p.i,p.i+nl)).trim(); p.i+=nl;
+  const yb=ver===2?body[p.i++]:0, year=yb===10?"y10":yb===11?"y11":"";
   const day=readVar(body,p), xp=readVar(body,p), known=readVar(body,p);
   const k=[], l=[]; for(let i=0;i<TOPICS.length;i++){ const v=body[p.i++]; if(v===undefined||v>100) throw new Error("bad"); k.push(v); }
   for(let i=0;i<TOPICS.length;i++){ const v=body[p.i++]; if(v===undefined||v>100) throw new Error("bad"); l.push(v); }
@@ -3371,7 +3417,7 @@ function parseReport(code){
   if(p.i!==body.length) throw new Error("length");
   const d=new Date(2026,0,1); d.setDate(d.getDate()+day);
   let last=-1; for(let i=0;i<14;i++) if(Math.floor(act/Math.pow(2,i))%2){ last=i; break; }
-  return {name:name||"(no name)", date:ymd(d), xp, level:lvlFor(xp), known, k, l, acc, streak, best, bosses:popcount(bm), qs, act14:popcount(act), act7:popcount(act%128), lastDaysAgo:last};
+  return {name:name||"(no name)", year, date:ymd(d), xp, level:lvlFor(xp), known, k, l, acc, streak, best, bosses:popcount(bm), qs, act14:popcount(act), act7:popcount(act%128), lastDaysAgo:last};
 }
 
 /* ================= TEACHER PAGE (hidden: index.html?teacher) ================= */
@@ -3433,9 +3479,12 @@ function addCodes(text, quiet){
 const shortName = k => ({"Language, thought & communication":"Language","Brain & neuropsychology":"Brain","Psychological problems":"Problems","Social influence":"Social","Research methods":"RM","RM":"RM","Exam skills":"Exam skills"}[k] || TMAP[k].name);
 const heatCol = v => `color-mix(in srgb, hsl(${Math.round(v*1.2)},75%,48%) 42%, var(--card))`;
 function tRender(){
-  const out=$("#tOut"); const rs=[...T.reports.values()];
+  const out=$("#tOut"), all=[...T.reports.values()], yf=T.year||"all", rs=all.filter(r=>yf==="all" || r.year===yf || (yf==="y11" && !r.year));
+  const yearBar=`<div class="seg t-noprint" role="group" aria-label="Year group" style="margin:0 0 14px">${[["all","Everyone"],["y10","Year 10"],["y11","Year 11"]].map(([k,l])=>`<button data-tyr="${k}" aria-pressed="${yf===k}">${l} (${k==="all"?all.length:all.filter(r=>r.year===k||(k==="y11"&&!r.year)).length})</button>`).join("")}</div>`;
+  const wireYear=()=>out.querySelectorAll("[data-tyr]").forEach(b=>b.onclick=()=>{ T.year=b.dataset.tyr; tRender(); });
+  if(all.length && !rs.length){ out.innerHTML=yearBar+`<div class="empty"><h3>No reports from ${yf==="y10"?"Year 10":"Year 11"} yet</h3></div>`; wireYear(); return; }
   if(!rs.length){ out.innerHTML=`<div class="empty"><h3>No codes yet</h3><p>Ask students to open the Save tab → "Send your progress to your teacher", type their name and copy their code. Paste them all above.</p></div>`; return; }
-  rs.forEach(r=>{ const idx=TOPICS.map((t,i)=>i).filter(i=>stageCounts(TOPICS[i].key, r.date)), min=Math.min(...idx.map(i=>r.k[i]));
+  rs.forEach(r=>{ const idx=TOPICS.map((t,i)=>i).filter(i=>stageCountsFor(r.year||"y11", TOPICS[i].key, r.date)), min=Math.min(...idx.map(i=>r.k[i]));
     r.stage=STAGE_STEP?Math.floor(min/STAGE_STEP)+1:0; const cap=Math.min(100,r.stage*STAGE_STEP);
     r.lockedT=STAGE_STEP && cap<100 ? idx.filter(i=>r.k[i]>=cap).map(i=>shortName(TOPICS[i].key)) : []; });
   const {key,dir}=T.sort;
@@ -3443,11 +3492,11 @@ function tRender(){
   rs.sort((a,b)=>{ const x=val(a,key), y=val(b,key); return (x<y?-1:x>y?1:0)*dir; });
   const avg = f => Math.round(rs.reduce((s,r)=>s+f(r),0)/rs.length);
   const topicAvg = TOPICS.map((t,i)=>({key:t.key, i, v:avg(r=>r.k[i])}));
-  const pool2 = mockPeriod() ? topicAvg.filter(t=>MOCK_TOPICS.includes(t.key)) : topicAvg;
+  const pool2 = yf==="y10" ? topicAvg.filter(t=>t.key!=="Exam skills" && taughtFor("y10",t.key)) : (today()<=MOCK_END) ? topicAvg.filter(t=>MOCK_TOPICS.includes(t.key)) : topicAvg;
   const weak = pool2.slice().sort((a,b)=>a.v-b.v).slice(0,3);
   const inactive = rs.filter(r=>r.act7===0);
   const th = (k,label) => `<th><button class="t-sort" data-k="${k}">${label}${key===k?(dir>0?" ▲":" ▼"):""}</button></th>`;
-  out.innerHTML=`
+  out.innerHTML=yearBar+`
     <div class="tiles">
       <div class="tile"><b>${rs.length}</b><span>Students</span></div>
       <div class="tile"><b>${avg(r=>r.level)}</b><span>Average level</span></div>
@@ -3455,7 +3504,7 @@ function tRender(){
       <div class="tile"><b>${avg(r=>r.acc)}%</b><span>Average accuracy</span></div>
       <div class="tile"><b>${rs.length-inactive.length}/${rs.length}</b><span>Active in the last 7 days</span></div>
     </div>
-    <div class="box t-weak"><h3>🎯 Weakest topics for the class <small>${mockPeriod()?"Mock topics only (Language isn't in the mocks)":"All topics"}</small></h3>
+    <div class="box t-weak"><h3>🎯 Weakest topics for the class <small>${yf==="y10"?"Topics Year 10 have been taught so far":(today()<=MOCK_END)?"Mock topics only (Language isn't in the mocks)":"All topics"}</small></h3>
       <ol>${weak.map(w=>`<li><b>${esc(TMAP[w.key].name)}</b>: ${w.v}% of cards known on average. <span class="muted">Try: run projector mode on ${esc(TMAP[w.key].name)}, or set its boss battle as a challenge.</span></li>`).join("")}</ol></div>
     ${inactive.length?`<div class="box"><h3>😴 No revision in the 7 days before their report <small>${inactive.length} student${inactive.length===1?"":"s"}</small></h3><p style="margin:0">${inactive.map(r=>`${esc(r.name)} <span class="muted">(${r.lastDaysAgo<0?"none in 14 days":r.lastDaysAgo+" days before report"})</span>`).join(" · ")}</p></div>`:""}
     ${(()=>{ const ahead=rs.filter(r=>r.lockedT.length && r.lockedT.length<=2 && r.known>40); return ahead.length?`<div class="box"><h3>🔒 Racing ahead on one or two topics <small>${ahead.length} student${ahead.length===1?"":"s"}</small></h3><p style="margin:0">${ahead.map(r=>`${esc(r.name)} <span class="muted">(stage ${r.stage}; locked: ${esc(r.lockedT.join(", "))})</span>`).join(" · ")}</p><p class="muted" style="margin:6px 0 0;font-size:14px">These topics are review-only for them until their other topics catch up.</p></div>`:""; })()}
@@ -3464,14 +3513,15 @@ function tRender(){
       <tbody>${rs.map(r=>`<tr><td>${esc(r.name)}</td>${r.k.map(v=>`<td style="background:${heatCol(v)}">${v}%</td>`).join("")}</tr>`).join("")}
       <tr class="t-avg"><td>Class average</td>${topicAvg.map(t=>`<td style="background:${heatCol(t.v)}">${t.v}%</td>`).join("")}</tr></tbody></table></div></div>
     <div class="box"><h3>Class table <small>Click a heading to sort</small></h3>
-      <div class="t-scroll"><table class="t-table"><thead><tr>${th("name","Student")}${th("level","Level")}${th("stage","Stage")}${th("xp","XP")}${th("known","Cards known")}${th("acc","Accuracy")}${th("streak","Streak")}${th("act14","Days active (14d)")}${th("bosses","Bosses")}${th("qs","Answered")}${th("date","Report date")}</tr></thead>
-      <tbody>${rs.map(r=>`<tr class="${r.act7===0?"t-inactive":""}"><td>${esc(r.name)}</td><td>${r.level}</td><td title="${r.lockedT.length?"Locked (review only): "+esc(r.lockedT.join(", ")):""}">${STAGE_STEP?(r.stage>100/STAGE_STEP?"All done":"Stage "+r.stage):"–"}${r.lockedT.length?` <span class="muted">🔒${r.lockedT.length}</span>`:""}</td><td>${r.xp.toLocaleString()}</td><td>${r.known}</td><td>${r.acc}%</td><td>${r.streak} <span class="muted">(best ${r.best})</span></td><td>${r.act14}</td><td>${r.bosses}/9</td><td>${r.qs.toLocaleString()}</td><td>${r.date}</td></tr>`).join("")}</tbody></table></div>
+      <div class="t-scroll"><table class="t-table"><thead><tr>${th("name","Student")}${th("year","Year")}${th("level","Level")}${th("stage","Stage")}${th("xp","XP")}${th("known","Cards known")}${th("acc","Accuracy")}${th("streak","Streak")}${th("act14","Days active (14d)")}${th("bosses","Bosses")}${th("qs","Answered")}${th("date","Report date")}</tr></thead>
+      <tbody>${rs.map(r=>`<tr class="${r.act7===0?"t-inactive":""}"><td>${esc(r.name)}</td><td>${r.year==="y10"?"10":r.year==="y11"?"11":"–"}</td><td>${r.level}</td><td title="${r.lockedT.length?"Locked (review only): "+esc(r.lockedT.join(", ")):""}">${STAGE_STEP?(r.stage>100/STAGE_STEP?"All done":"Stage "+r.stage):"–"}${r.lockedT.length?` <span class="muted">🔒${r.lockedT.length}</span>`:""}</td><td>${r.xp.toLocaleString()}</td><td>${r.known}</td><td>${r.acc}%</td><td>${r.streak} <span class="muted">(best ${r.best})</span></td><td>${r.act14}</td><td>${r.bosses}/9</td><td>${r.qs.toLocaleString()}</td><td>${r.date}</td></tr>`).join("")}</tbody></table></div>
       <div class="card-actions t-noprint"><button class="btn ghost" id="tCsv">⬇️ Export CSV</button></div></div>`;
+  wireYear();
   out.querySelectorAll(".t-sort").forEach(b=>b.onclick=()=>{ const k=b.dataset.k; T.sort = {key:k, dir: T.sort.key===k ? -T.sort.dir : (k==="name"?1:-1)}; tRender(); });
   $("#tCsv").onclick=()=>{
-    const head=["Student","Level","Stage","Locked topics","XP","Cards known","Accuracy %","Streak","Best streak","Days active (14d)","Bosses defeated","Questions answered","Report date",...TOPICS.map(t=>TMAP[t.key].name+" % known"),...TOPICS.map(t=>TMAP[t.key].name+" % still learning")];
+    const head=["Student","Year","Level","Stage","Locked topics","XP","Cards known","Accuracy %","Streak","Best streak","Days active (14d)","Bosses defeated","Questions answered","Report date",...TOPICS.map(t=>TMAP[t.key].name+" % known"),...TOPICS.map(t=>TMAP[t.key].name+" % still learning")];
     const q = v => /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : v;
-    const rows=rs.map(r=>[r.name,r.level,r.stage,r.lockedT.join("; "),r.xp,r.known,r.acc,r.streak,r.best,r.act14,r.bosses,r.qs,r.date,...r.k,...r.l].map(q).join(","));
+    const rows=rs.map(r=>[r.name,r.year==="y10"?10:r.year==="y11"?11:"",r.level,r.stage,r.lockedT.join("; "),r.xp,r.known,r.acc,r.streak,r.best,r.act14,r.bosses,r.qs,r.date,...r.k,...r.l].map(q).join(","));
     const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([[head.map(q).join(","),...rows].join("\n")],{type:"text/csv"})); a.download=`class-progress-${today()}.csv`; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
   };
 }
@@ -3484,7 +3534,7 @@ function projSetup(){
   const tp=$("#teacherApp");
   tp.innerHTML=`<div class="proj"><div class="proj-bar"><b>📽️ Projector mode</b><span class="spacer"></span><button class="btn ghost" id="pFull">⛶ Full screen</button><button class="btn ghost" id="pExit">Exit</button></div>
     <div class="proj-setup">
-      <div class="box"><h3>Topics <small><button class="linkbtn" id="pMock">Mock topics</button><button class="linkbtn" id="pAll">All</button></small></h3>
+      <div class="box"><h3>Topics <small><button class="linkbtn" id="pMock">Mock topics</button><button class="linkbtn" id="pY10">Year 10 topics</button><button class="linkbtn" id="pAll">All</button></small></h3>
         <div class="chips">${TOPICS.map(t=>`<button class="chip" style="--c:${t.c}" aria-pressed="${P.sel.includes(t.key)}" data-k="${esc(t.key)}"><span class="row"><span class="dot"></span>${esc(t.name)}</span></button>`).join("")}</div></div>
       <div class="box"><h3>Teams <small>${P.teams.length} teams · edit names</small></h3>
         <div class="seg" role="group" aria-label="Number of teams">${[2,3,4,5,6].map(n=>`<button aria-pressed="${P.teams.length===n}" data-teams="${n}">${n}</button>`).join("")}</div>
@@ -3501,6 +3551,7 @@ function projSetup(){
   tp.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{ const k=b.dataset.k; P.sel=P.sel.includes(k)?P.sel.filter(x=>x!==k):[...P.sel,k]; projSetup(); });
   $("#pMock").onclick=()=>{ P.sel=[...MOCK_TOPICS]; projSetup(); };
   $("#pAll").onclick=()=>{ P.sel=TOPICS.map(t=>t.key); projSetup(); };
+  $("#pY10").onclick=()=>{ P.sel=TOPICS.map(t=>t.key).filter(k=>k!=="Exam skills" && taughtFor("y10",k)); projSetup(); };
   tp.querySelectorAll("[data-teams]").forEach(b=>b.onclick=()=>{ const n=+b.dataset.teams; while(P.teams.length<n) P.teams.push("Team "+(P.teams.length+1)); P.teams=P.teams.slice(0,n); projSetup(); });
   tp.querySelectorAll("[data-team]").forEach(inp=>inp.oninput=()=>{ P.teams[+inp.dataset.team]=inp.value||("Team "+(+inp.dataset.team+1)); });
   tp.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{ P.n=+b.dataset.n; projSetup(); });
@@ -3609,10 +3660,10 @@ function wireReport(){
 /* ================= TODAY'S PLAN + EXAM COUNTDOWN ================= */
 // Exam dates (edit here). Mocks leave out Language, thought & communication.
 const EXAMS = [
-  {d:"2026-12-04", name:"Paper 1 mock", mock:true},
-  {d:"2026-12-11", name:"Paper 2 mock", mock:true},
-  {d:"2027-05-10", name:"Paper 1 exam", sub:"Cognition and behaviour, afternoon"},
-  {d:"2027-05-17", name:"Paper 2 exam", sub:"Social context and behaviour, afternoon"},
+  {d:"2026-12-04", name:"Paper 1 mock", mock:true, year:"y11"},
+  {d:"2026-12-11", name:"Paper 2 mock", mock:true, year:"y11"},
+  {d:"2027-05-10", year:"y11", name:"Paper 1 exam", sub:"Cognition and behaviour, afternoon"},
+  {d:"2027-05-17", year:"y11", name:"Paper 2 exam", sub:"Social context and behaviour, afternoon"},
 ];
 const PLAN_BONUS = 40;
 const niceDate = s => new Date(s+"T12:00:00").toLocaleDateString("en-GB",{weekday:"short", day:"numeric", month:"short"});
@@ -3625,9 +3676,10 @@ function renderPlan(){
   const el=$("#plan"); if(!el || TEACHER) return;
   const t=today();
   if(!G.plan || G.plan.d!==t) G.plan={d:t, weak:weakestTopic(), done:false};
-  const next=EXAMS.find(x=>x.d>=t), weak=G.plan.weak;
+  const next=EXAMS.filter(x=>!x.year||x.year===YR).find(x=>x.d>=t), weak=G.plan.weak, nu=nextUnlocks()[0];
   let count;
-  if(!next) count=`<span>🎓 Exams are done. You smashed it, good luck with results!</span>`;
+  if(!next && YR==="y10") count = nu ? `<span><b class="plan-days">🎮 ${dayNum(nu[1])-dayNum(t)}</b> day${dayNum(nu[1])-dayNum(t)===1?"":"s"} until <b>${esc(TMAP[nu[0]].name)}</b> joins your games <span class="muted">(${niceDate(nu[1])})</span></span>` : `<span>🎮 Every Year 10 topic is in your games. Keep it up!</span>`;
+  else if(!next) count=`<span>🎓 Exams are done. You smashed it, good luck with results!</span>`;
   else { const days=dayNum(next.d)-dayNum(t);
     count = days===0 ? `<span>🍀 <b>Today: ${esc(next.name)}.</b> Good luck!</span>`
       : `<span><b class="plan-days">${next.mock?"🎯":"⏳"} ${days}</b> day${days===1?"":"s"} to your <b>${esc(next.name)}</b> <span class="muted">(${niceDate(next.d)}${next.sub?" · "+esc(next.sub):""})</span></span>`;
@@ -4540,14 +4592,29 @@ function showTour(steps, onDone){
   o.onclick=e=>{ if(e.target===o) close(); };
   document.body.appendChild(o); draw();
 }
+function showYearPicker(){
+  const o=document.createElement("div"); o.className="overlay";
+  o.innerHTML=`<div class="levelup tour" role="dialog" aria-modal="true" aria-labelledby="ypH"><div class="tour-ico" aria-hidden="true">🎓</div><h3 id="ypH">Which year are you in?</h3>
+    <p style="text-align:center">This sets which topics are in your games. Flashcards always have every topic.</p>
+    <div class="yp-btns"><button class="btn" data-yr="y10">Year 10</button><button class="btn" data-yr="y11">Year 11</button></div>
+    <p style="text-align:center;margin:14px 0 0"><a class="linkbtn" href="${esc(location.pathname)}?teacher">🧑‍🏫 I'm a teacher</a>${YEAR?` · <button class="linkbtn" id="ypX">Cancel</button>`:""}</p></div>`;
+  document.body.appendChild(o);
+  o.querySelectorAll("[data-yr]").forEach(b=>b.onclick=()=>{ G.year=b.dataset.yr; save(); location.replace(location.pathname); });
+  const x=o.querySelector("#ypX"); if(x) x.onclick=()=>o.remove();
+  o.querySelector("[data-yr]").focus();
+}
 function welcomeCheck(){
   if(TEACHER || /(^|[?&#])parent\b/i.test(location.search+location.hash)) return;
+  if(!YEAR && !DEMO){ setTimeout(showYearPicker,300); return; }
   const fresh=!G.xp && !(G.st.cards||0);
   if(!G.toured && fresh){ G.toured=1; G.newsSeen=WHATS_NEW_V; save(); setTimeout(()=>showTour(TOUR),400); return; }
   if((G.newsSeen||0)<WHATS_NEW_V){ G.toured=1; G.newsSeen=WHATS_NEW_V; save();
     setTimeout(()=>showTour([["✨","What's new",`<ul>${WHATS_NEW.map(x=>`<li>${x}</li>`).join("")}</ul><p class="muted" style="font-size:14px">Want the full tour? Tap <b>📖 How it works</b> at the bottom of the page.</p>`]]),500); }
 }
 $("#tourLink").onclick=()=>showTour(TOUR);
+$("#yearLink").onclick=()=>showYearPicker();
+{ const yn=$("#yearName"); if(yn) yn.textContent=YEAR?YEAR_NAME(YEAR):"Pick your year"; }
+if(YEAR && !TEACHER && !DEMO_ASK && G.year!==YEAR){ G.year=YEAR; save(); }
 
 /* ================= INSTALL AS AN APP (PWA) ================= */
 if("serviceWorker" in navigator && location.protocol.startsWith("http")) addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
@@ -4572,11 +4639,26 @@ $("#installBtn").onclick=async()=>{ if(installEvt){ installEvt.prompt(); const c
 
 // strip not-yet-taught material from the untagged game decks
 (function(){
-  const strip=(arr,txt)=>{ for(let i=arr.length-1;i>=0;i--) if(notYetText(txt(arr[i]))) arr.splice(i,1); };
-  strip(STUDY_FACTS, s=>s.join(" ")); strip(CLUESETS, s=>s[0]+" "+s[1].join(" "));
-  strip(ORDERS, o=>o[0]+" "+o[1].join(" ")); strip(FLAWS, f=>f.join(" "));
-  SWIPE.forEach(d=>strip(d[3], it=>it[0]+" "+it[2]));
+  const open = (...ks) => ks.every(k=>!k || taught(k));
+  const strip=(arr,keep)=>{ for(let i=arr.length-1;i>=0;i--) if(!keep(arr[i])) arr.splice(i,1); };
+  strip(STUDY_FACTS, s=>open(nameTopic(s[0]))); strip(CLUESETS, s=>open(nameTopic(s[0])));
+  strip(ORDERS, o=>open(ideaTopic(o[0]))); strip(FLAWS, f=>open("RM", nameTopic(f.join(" "))));
+  const DECK_TOPIC = {"Monocular or binocular?":"Perception","IV or DV?":"RM","Situational or dispositional?":"Social influence","Positive or negative correlation?":"RM"};
+  SWIPE.forEach(d=>strip(d[3], it=>open(DECK_TOPIC[d[0]], ideaTopic(it[0]+" "+it[2]))));
 })();
+// which arcade games have enough content for this year group right now
+const SWIPE_MIN = 6;
+function modeLock(k){
+  const nx=nextUnlocks()[0], when = nx ? ` More topics join on ${niceDate(nx[1])}.` : "";
+  const rmWhen = unlockDate(YR,"RM") && !taught("RM") ? `Joins your games with Research methods on ${niceDate(unlockDate(YR,"RM"))}.` : "";
+  if((k==="maths"||k==="flaw") && !taught("RM")) return rmWhen || "Not available yet.";
+  if(k==="match" && STUDY_FACTS.length<5) return "Needs a few more studies first."+when;
+  if(k==="which" && CLUESETS.length<4) return "Needs a few more studies first."+when;
+  if(k==="order" && ORDERS.length<3) return "Needs a few more topics first."+when;
+  if(k==="swipe" && !SWIPE.some(d=>d[3].length>=SWIPE_MIN)) return "Needs a few more topics first."+when;
+  if(k==="terms" && TERMS.filter(x=>taught(x.t)).length<10) return "Needs a few more topics first."+when;
+  return "";
+}
 function demoFill(){
   const t=today(), day=n=>{ const d=new Date(t+"T12:00:00"); d.setDate(d.getDate()-n); return ymd(d); };
   Object.assign(G,{xp:lvlStart(80)+1234, streak:42, best:42, last:t, toured:1, newsSeen:WHATS_NEW_V, backupAt:t, skin:G.skin||""}); shownLvl=lvlFor(G.xp);
@@ -4602,8 +4684,8 @@ $("#focusBtn").onclick=focusClick; if(G.focus && G.focus.end){ if(Date.now()>=G.
 $("#parentLink").onclick=()=>{ goTab("quiz"); setQuizMode("parent"); $("#parentArea").scrollIntoView({behavior:reduced()?"auto":"smooth"}); };
 if(!TEACHER && /(^|[?&#])parent\b/i.test(location.search+location.hash)){ goTab("quiz"); setQuizMode("parent"); }
 $("#petStrip").onclick=()=>{ goTab("trophies","progress"); };
-if(!TEACHER && !DEMO_ASK){ G.topicsBack=G.topicsBack||{}; Object.keys(NOT_YET_UNTIL).filter(k=>!NOT_YET.has(k) && !G.topicsBack[k]).forEach((k,i)=>{ G.topicsBack[k]=1; save();
-  if(G.xp>0) setTimeout(()=>toast("🔓",`${TMAP[k].name} is unlocked!`,`It's back in the games. From ${niceDate(STAGE_FROM[k]||today())} it counts towards your topic stages, so get revising!`,true),2500+i*1500); }); }
+if(!TEACHER && !DEMO_ASK){ G.topicsBack=G.topicsBack||{}; Object.entries(SCHEDULE[YR]||{}).filter(([k,d])=>d!==NEVER && taught(k) && dayNum(today())-dayNum(d)<=30 && !G.topicsBack[YR+":"+k]).forEach(([k],i)=>{ G.topicsBack[YR+":"+k]=1; save();
+  if(G.xp>0) setTimeout(()=>toast("🔓",`${TMAP[k].name} is in your games now!`,`From ${niceDate(stageFromDate(YR,k))} it counts towards your topic stages, so get revising!`,true),2500+i*1500); }); }
 if(!TEACHER){ petCheck(); nudgeCheck(); welcomeCheck(); }
 </script>
 </body>
