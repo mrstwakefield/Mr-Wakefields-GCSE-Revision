@@ -287,7 +287,7 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 @keyframes toastOut{to{opacity:0;transform:translateY(10px)}}
 .overlay{position:fixed;inset:0;z-index:97;display:grid;place-items:center;background:rgba(10,14,30,.55);padding:16px;animation:fade .2s}
 @keyframes fade{from{opacity:0}}
-.levelup{background:var(--card);border-radius:24px;padding:32px 28px;text-align:center;max-width:360px;width:100%;animation:pop .5s cubic-bezier(.2,1.5,.4,1)}
+.levelup{background:var(--card);border-radius:24px;padding:32px 28px;text-align:center;max-width:360px;width:100%;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-y:auto;animation:pop .5s cubic-bezier(.2,1.5,.4,1)}
 @keyframes pop{from{transform:scale(.6);opacity:0}}
 .levelup .kick{font-weight:700;letter-spacing:.14em;font-size:13px;color:var(--muted);text-transform:uppercase}
 .levelup .num{font-family:var(--display);font-weight:800;font-size:96px;line-height:1;margin:6px 0;background:linear-gradient(135deg,#7B5BE0,#D6478F,#F39A3C);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -4968,7 +4968,7 @@ const TOUR = [
 ];
 // bump WHATS_NEW_V and edit WHATS_NEW when you add features; returning students see it once
 const WHATS_NEW_V = 3;
-const WHATS_NEW = ["🐝 Five new pets to unlock as you learn: Von Frisch's Bee, Naughty Teddy, Gibson's Mountain Goat, Darwin's Finch and the Wise Owl. Switch pets in 📈 Progress","🧪 Six new arcade games, including Psych Lab, Be the Examiner and TDEE Builder","🎯 Topics now unlock in stages: get every topic to 20% known, then 40%, and so on. A topic that gets ahead locks (review only) until the others catch up. This makes sure you revise everything for the exam!","💾 The Save tab is simpler: three steps to keep your progress safe","🃏 Flashcards now ask you to answer: multiple choice, gap fill or type it (typed answers earn 2× XP)","🐀 Meet Professor Squeaks, your revision lab rat","🕹️ New arcade games: Psychle, Swipe Sort, Which Study? and hard-mode boss rematches","📝 Mock papers and 🧩 Exam skills in the Quiz tab","🎨 80 levels and loads of new themes to unlock","💾 A weekly reminder to back up your progress"];
+const WHATS_NEW = ["🐝 5 new pets to unlock (📈 Progress)","🧪 6 new arcade games, like Psych Lab","🎯 Topics unlock in 20% stages","🎓 Year 10 or 11? Change it at the bottom of the page","💾 A simpler Save tab"];
 function showTour(steps, onDone){
   let i=0; const o=document.createElement("div"); o.className="overlay";
   const close=()=>{ o.remove(); document.removeEventListener("keydown",kd,true); if(onDone) onDone(); };
