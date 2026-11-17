@@ -3431,13 +3431,20 @@ const PETS = {
   owl:   {title:"The Wise Owl", noun:"owl", icon:"🦉", def:"Socrates", at:100, treat:["📚","Books"], pr:["him","he","his"], topic:"", fact:"Named after Socrates, the ancient Greek philosopher who asked big questions about how we think and know things, long before psychology was a subject. Only students who know every single card get to meet him."},
 };
 const PET_STAGES = [[0,"Baby"],[100,"Little"],[400,"Teen"],[1000,"Grown-up"],[2500,"Wise"],[6000,"Legendary"]];
-function petInit(){ G.pet=G.pet||{name:"Professor Squeaks", born:today(), stage:0, mood:""}; const p=G.pet; p.kind=PETS[p.kind]?p.kind:"rat"; p.names=p.names||{}; if(!p.names.rat) p.names.rat = p.kind==="rat" ? p.name : "Professor Squeaks"; p.got=p.got||{rat:1}; return p; }
+function petInit(){ G.pet=G.pet||{name:"Professor Squeaks", born:today(), stage:0, mood:""}; const p=G.pet; p.kind=PETS[p.kind]?p.kind:"rat"; p.names=p.names||{}; if(!p.names.rat) p.names.rat = p.kind==="rat" ? p.name : "Professor Squeaks"; p.got=p.got||{rat:1};
+  // each pet grows from the answers given after it was unlocked (the rat counts from the very start)
+  p.start=p.start||{}; p.start.rat=0; Object.keys(p.got).forEach(k=>{ if(k!=="rat" && p.start[k]===undefined) p.start[k]=G.st.cards||0; });
+  p.stages=p.stages||{rat:p.stage||0}; return p; }
 const petKind = () => PETS[(G.pet&&G.pet.kind)||"rat"] ? (G.pet&&G.pet.kind)||"rat" : "rat";
 const petOf = () => PETS[petKind()];
 const knownPct = () => DATA.length ? knownTotal()/DATA.length*100 : 0;
 const petUnlocked = k => DEMO || k==="rat" || knownPct() >= PETS[k].at - 1e-9;
 const petStageName = (st,k) => `${PET_STAGES[st][1]} ${PETS[k||petKind()].noun}`;
-function petStage(){ const n=G.st.cards||0; let s=0; PET_STAGES.forEach(([v],i)=>{ if(n>=v) s=i; }); return s; }
+// later pets grow faster so they can still reach Legendary
+const PET_SCALE = {rat:1, bee:.8, teddy:.65, goat:.5, finch:.4, owl:.3};
+const petStagesFor = k => PET_STAGES.map(([v,n])=>[Math.round(v*(PET_SCALE[k]||1)), n]);
+const petAnswers = k => Math.max(0, (G.st.cards||0) - ((((G.pet||{}).start)||{})[k]||0));
+function petStage(k){ k=k||petKind(); const n=petAnswers(k); let s=0; petStagesFor(k).forEach(([v],i)=>{ if(n>=v) s=i; }); return s; }
 function petDaysAway(){ const days=Object.keys(G.hist||{}).filter(d=>G.hist[d]>0).sort(); if(!days.length) return -1; return dayNum(today())-dayNum(days[days.length-1]); }
 function petMood(){
   const away=petDaysAway(), td=(G.hist||{})[today()]||0;
@@ -3537,16 +3544,16 @@ function petLine(m){ const P=petOf(); return m==="new" ? `Meet <b>${esc(G.pet.na
 function petPickerHTML(){
   const pct=knownPct();
   return `<div class="pet-pick"><h4 style="margin:14px 0 6px">Your pets <small class="muted">· unlock more by knowing more cards (you know ${Math.floor(pct)}%)</small></h4><div class="pet-pick-row">${Object.entries(PETS).map(([k,P])=>{ const open=petUnlocked(k), on=k===petKind();
-    return `<button class="pet-opt ${on?"on":""}" data-pet="${k}" ${open?"":"disabled"} aria-pressed="${on}" title="${esc(P.title)}${P.fact?": "+esc(P.fact):""}"><span class="pet-opt-art">${petSVG(open?3:0, open?"happy":"asleep", 70, k)}</span><b>${esc(P.title)}</b><span>${open?(on?"✓ With you":"Tap to switch"):"🔒 "+P.at+"% of cards known"}</span></button>`; }).join("")}</div>
+    return `<button class="pet-opt ${on?"on":""}" data-pet="${k}" ${open?"":"disabled"} aria-pressed="${on}" title="${esc(P.title)}${P.fact?": "+esc(P.fact):""}"><span class="pet-opt-art">${petSVG(open?petStage(k):0, open?"happy":"asleep", 70, k)}</span><b>${esc(P.title)}</b><span>${open?(on?"✓ With you":"Tap to switch"):"🔒 "+P.at+"% of cards known"}</span></button>`; }).join("")}</div>
     ${petOf().fact?`<p class="muted" style="font-size:14px;margin:6px 0 0">💡 ${esc(petOf().fact)}</p>`:""}<p class="muted" style="font-size:13px;margin:4px 0 0">🎨 Each new pet also unlocks a matching theme.</p></div>`;
 }
 function petBoxHTML(){
-  const p=petInit(), P=petOf(), st=petStage(), mood=petMood(), n=G.st.cards||0, next=PET_STAGES[st+1];
+  const p=petInit(), P=petOf(), st=petStage(), mood=petMood(), n=petAnswers(petKind()), S=petStagesFor(petKind()), next=S[st+1];
   const td=(G.hist||{})[today()]||0, treats=Math.min(3,Math.floor(td/10));
   return `<div class="box pet-box"><div class="pet-art">${petSVG(st,mood,220)}</div>
     <div class="pet-info"><h3 style="margin:0">${P.icon} <span id="petName">${esc(p.name)}</span> <button class="linkbtn" id="petRename" style="font-size:14px">Rename</button></h3>
       <p class="muted" style="margin:2px 0 8px">${esc(P.title)} · ${esc(petStageName(st))}${next?` · ${next[0]-n} more answers to become a ${esc(petStageName(st+1).toLowerCase())}`:" · fully grown legend 🎓"}</p>
-      ${next?`<div class="xpbar" style="margin-bottom:10px"><i style="width:${(n-PET_STAGES[st][0])/(next[0]-PET_STAGES[st][0])*100}%"></i></div>`:""}
+      ${next?`<div class="xpbar" style="margin-bottom:10px"><i style="width:${(n-S[st][0])/(next[0]-S[st][0])*100}%"></i></div>`:""}
       <p class="pet-msg">${petLine(mood)}</p>
       <p class="muted" style="margin:6px 0 0;font-size:15px">${P.treat[1]} today: ${P.treat[0].repeat(treats)}${`<span style='opacity:.25'>${P.treat[0]}</span>`.repeat(3-treats)} <span style="font-size:13px">(one for every 10 answers)</span></p></div>
     ${petPickerHTML()}</div>`;
@@ -3579,12 +3586,13 @@ function petHud(){ const b=$("#petStrip"); if(!b||TEACHER) return; petInit(); co
   b.setAttribute("aria-label",`${G.pet.name} the ${P.noun}: ${petMsg(m)} Open progress`); }
 function petCheck(){
   if(TEACHER) return; const p=petInit(), P=petOf(), st=petStage(), m=petMood(), [him,he]=P.pr, He=he[0].toUpperCase()+he.slice(1);
-  if(st>p.stage){ p.stage=st; save(); setTimeout(()=>{ toast(P.icon,`${p.name} grew into a ${petStageName(st).toLowerCase()}!`,st>=5?`${He}'s wearing a graduation cap. Legendary.`:st>=4?"Look, glasses! So wise.":st>=3?`${He}'s earned a gold star badge.`:`Keep revising to help ${him} grow.`,true); confetti(100); },600); }
+  Object.keys(p.got).forEach(k=>{ if(k!==petKind() && petUnlocked(k)) p.stages[k]=Math.max(p.stages[k]||0, petStage(k)); });
+  if(st>(p.stages[petKind()]||0)){ p.stages[petKind()]=st; if(petKind()==="rat") p.stage=st; save(); setTimeout(()=>{ toast(P.icon,`${p.name} grew into a ${petStageName(st).toLowerCase()}!`,st>=5?`${He}'s wearing a graduation cap. Legendary.`:st>=4?"Look, glasses! So wise.":st>=3?`${He}'s earned a gold star badge.`:`Keep revising to help ${him} grow.`,true); confetti(100); },600); }
   if((p.mood==="sleepy"||p.mood==="asleep") && (m==="happy"||m==="ecstatic")) setTimeout(()=>toast(P.icon,`${p.name} woke up!`,`${He}'s so happy to see you revising again.`,true),400);
   if(p.mood!=="ecstatic" && m==="ecstatic" && p.mood) setTimeout(()=>toast(P.icon,`${p.name} is ${petKind()==="bee"?"doing a waggle dance":"dancing"}!`,`Daily goal smashed. ${P.treat[0].repeat(3)}`,true),800);
   if(p.mood!==m){ p.mood=m; save(); }
-  if(!DEMO) Object.keys(PETS).forEach((k,i)=>{ if(!p.got[k] && petUnlocked(k)){ p.got[k]=1; save();
-    setTimeout(()=>{ toast(PETS[k].icon,`New pet: ${PETS[k].title}!`,`You know ${PETS[k].at}% of the cards. Switch pets in 📈 Progress, and try ${PETS[k].noun==="owl"?"his":"its"} new theme: ${(THEMES.find(t=>t.pet===k)||{}).name||""}.`,true); confetti(160); sfx("lvl"); },1500+i*900); } });
+  if(!DEMO) Object.keys(PETS).forEach((k,i)=>{ if(!p.got[k] && petUnlocked(k)){ p.got[k]=1; p.start[k]=G.st.cards||0; p.stages[k]=0; save();
+    setTimeout(()=>{ toast(PETS[k].icon,`New pet: ${PETS[k].title}!`,`You know ${PETS[k].at}% of the cards. ${PETS[k].pr[1][0].toUpperCase()+PETS[k].pr[1].slice(1)} starts as a baby: switch pets in 📈 Progress, and try ${PETS[k].noun==="owl"?"his":"its"} new theme: ${(THEMES.find(t=>t.pet===k)||{}).name||""}.`,true); confetti(160); sfx("lvl"); },1500+i*900); } });
   petHud();
 }
 
