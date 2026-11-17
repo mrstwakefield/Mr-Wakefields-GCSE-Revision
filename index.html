@@ -72,6 +72,7 @@ h1 span b{font-weight:500}
 .chip .row{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;line-height:1.2}
 .chip.locked{border-style:dashed}
 .chip .lockb{margin-left:auto;font-size:14px}
+.th-year{display:inline-block;align-self:flex-start;font-size:11px;font-weight:700;border-radius:99px;padding:1px 8px;background:var(--ink);color:var(--paper);margin:2px 0}
 .chip .gamesb{margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);background:var(--soft);border-radius:99px;padding:1px 7px;white-space:nowrap}
 .chip .lockb + .gamesb{margin-left:4px}
 .yp-btns{display:flex;gap:12px;justify-content:center;margin-top:10px}.yp-btns .btn{min-width:130px;font-size:18px;padding:14px 20px}
@@ -834,6 +835,30 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
 :root[data-skin="school"] .top h1 span:not(.h1t),:root[data-skin="school"] .top .meter *{color:#3A3A20!important}
 :root[data-skin="school"] body{background-image:linear-gradient(270deg,#1F3FD6 0,#1F3FD6 18px,#A7ADB4 18px,#A7ADB4 22px,transparent 22px);background-attachment:fixed}
 @media (max-width:700px){:root[data-skin="school"] body{background-image:linear-gradient(270deg,#1F3FD6 0,#1F3FD6 7px,transparent 7px)}}
+/* Year 10 themes */
+:root[data-skin="y10sensory"]{--paper:#EAF7FF;--card:#FFFFFF;--ink:#0B2A3D;--muted:#3F6175;--line:#C6E4F5;--soft:#D9EFFB;--good:#0F7350;--good-bg:#D6F2E6;--warn:#A2421A;--warn-bg:#FCE6DA;color-scheme:light}
+:root[data-skin="y10sensory"] .h1t{background:linear-gradient(90deg,#0B2A3D,#1FA2E0 70%,#0B2A3D);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-skin="y10sensory"] h1::before{content:"👀 "}
+:root[data-skin="y10sensorimotor"]{--paper:#FFF6E0;--card:#FFFFFF;--ink:#2B1F0E;--muted:#6B5A3C;--line:#F0DEB2;--soft:#FBEBC8;--good:#1D6E3A;--good-bg:#DDF0DA;--warn:#B23A22;--warn-bg:#FCE1D8;color-scheme:light}
+:root[data-skin="y10sensorimotor"] body{background-image:radial-gradient(circle at 8% 12%,rgba(232,68,46,.10) 0 46px,transparent 47px),radial-gradient(circle at 92% 30%,rgba(31,111,224,.10) 0 38px,transparent 39px),radial-gradient(circle at 15% 85%,rgba(245,185,20,.14) 0 52px,transparent 53px)}
+:root[data-skin="y10sensorimotor"] h1::before{content:"🧸 "}
+:root[data-skin="y10class"]{--paper:#0D2B2E;--card:#133A3E;--ink:#E8F4F2;--muted:#A5C7C2;--line:#225257;--soft:#184549;--good:#5FD3C2;--good-bg:#12433F;--warn:#FFA27A;--warn-bg:#46291E;color-scheme:dark}
+:root[data-skin="y10class"] h1::before{content:"🎓 "}
+:root[data-skin="y10class"] .h1t::after{content:" · 2028";color:#5FD3C2}
+:root[data-skin="y10class"] .btn.good{color:#0D2B2E}
+/* Year 11 themes */
+:root[data-skin="y11ltm"]{--paper:#15142E;--card:#1E1C40;--ink:#ECEBFF;--muted:#ABA8D6;--line:#33305E;--soft:#26244D;--good:#6EDCB0;--good-bg:#173A33;--warn:#FFA27A;--warn-bg:#40261E;color-scheme:dark}
+:root[data-skin="y11ltm"] .h1t{background:linear-gradient(90deg,#ECEBFF,#8C7CFF 60%,#ECEBFF);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-skin="y11ltm"] h1::before{content:"🧠 "}
+:root[data-skin="y11ltm"] .btn.good{color:#15142E}
+:root[data-skin="y11formal"]{--paper:#F3F0F7;--card:#FFFFFF;--ink:#241A33;--muted:#5E5270;--line:#DDD5E8;--soft:#E9E3F1;--good:#17704C;--good-bg:#D9F0E5;--warn:#A2421A;--warn-bg:#FBE5DA;color-scheme:light}
+:root[data-skin="y11formal"] .h1t{font-style:italic}
+:root[data-skin="y11formal"] h1::before{content:"♟️ "}
+:root[data-skin="y11class"]{--paper:#0F1A33;--card:#16244A;--ink:#F3EEDC;--muted:#BDB6A0;--line:#28396A;--soft:#1C2C58;--good:#E2B53E;--good-bg:#3A3014;--warn:#FF9B7A;--warn-bg:#3E2418;color-scheme:dark}
+:root[data-skin="y11class"] .h1t{background:linear-gradient(180deg,#FFF1C2,#E2B53E 55%,#B08A2A);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-skin="y11class"] h1::before{content:"🎓 "}
+:root[data-skin="y11class"] .h1t::after{content:" · 2027"}
+:root[data-skin="y11class"] .btn.good{color:#0F1A33}
 :root[data-skin="gold"]{--paper:#16140F;--card:#211E16;--ink:#F6F0DE;--muted:#C2B796;--line:#3A3424;--soft:#2A261C;--good:#E2B53E;--good-bg:#3A3014;--warn:#FF9B7A;--warn-bg:#3E2418;color-scheme:dark}
 :root[data-skin="gold"] .h1t{background:linear-gradient(180deg,#FFF1C2,#E2B53E 55%,#A9801F);-webkit-background-clip:text;background-clip:text;color:transparent}
 :root[data-skin="gold"] h1::before{content:"🥇 "}
@@ -1942,7 +1967,7 @@ function levelUp(n){
   sfx("lvl"); confetti(200);
   const o=document.createElement("div"); o.className="overlay";
   o.innerHTML=`<div class="levelup" role="dialog" aria-modal="true" aria-label="Level up"><div class="kick">Level up!</div><div class="num">${n}</div>
-    <h3>${r!==old?"New rank: "+esc(r):esc(r)}</h3>${(()=>{const th=THEMES.find(t=>t.lvl===n);return th?`<p style="margin:0 0 8px;color:var(--ink)">🎨 New theme unlocked: <b>${esc(th.name)}</b>. Switch it on in the Themes tab.</p>`:""})()}${CERT_LEVELS.includes(n)?`<p style="margin:0 0 8px;color:var(--ink)">🏅 <b>Certificate unlocked!</b> Print it from the Progress tab.</p>`:""}<p>${lvlStart(n+1)-G.xp} XP to level ${n+1}. Keep it going.</p><button class="btn" id="luOk">Let's go</button></div>`;
+    <h3>${r!==old?"New rank: "+esc(r):esc(r)}</h3>${(()=>{const th=THEMES.find(t=>t.lvl===n && themeMine(t));return th?`<p style="margin:0 0 8px;color:var(--ink)">🎨 New theme unlocked: <b>${esc(th.name)}</b>. Switch it on in the Themes tab.</p>`:""})()}${CERT_LEVELS.includes(n)?`<p style="margin:0 0 8px;color:var(--ink)">🏅 <b>Certificate unlocked!</b> Print it from the Progress tab.</p>`:""}<p>${lvlStart(n+1)-G.xp} XP to level ${n+1}. Keep it going.</p><button class="btn" id="luOk">Let's go</button></div>`;
   document.body.appendChild(o);
   const close=()=>{ o.remove(); document.removeEventListener("keydown",esc2,true); };
   const esc2=e=>{ if(e.key==="Tab") return; e.stopPropagation(); if(e.key==="Escape"||e.key==="Enter"||e.key===" "){ e.preventDefault(); close(); } };
@@ -2141,6 +2166,13 @@ const THEMES = [
   {k:"school", name:"The School Building", lvl:70, sw:["#F4DD1E","#1F3FD6","#6E4B35"]},
   {k:"gold", name:"Gold Standard", lvl:75, sw:["#16140F","#F6F0DE","#E2B53E"]},
   {k:"stan", name:"Stan Mode", lvl:80, sw:["#FFE9F3","#3D0F2A","#E11D74"]},
+  // year-group themes: only that year can unlock them
+  {k:"y10sensory", name:"Sensory Register", lvl:7, year:"y10", sw:["#EAF7FF","#0B2A3D","#1FA2E0"]},
+  {k:"y10sensorimotor", name:"Sensorimotor Stage", lvl:23, year:"y10", sw:["#FFF6E0","#2B1F0E","#E8442E"]},
+  {k:"y10class", name:"Class of 2028", lvl:33, year:"y10", sw:["#0D2B2E","#E8F4F2","#5FD3C2"]},
+  {k:"y11ltm", name:"Long-Term Memory", lvl:7, year:"y11", sw:["#15142E","#ECEBFF","#8C7CFF"]},
+  {k:"y11formal", name:"Formal Operational", lvl:23, year:"y11", sw:["#F3F0F7","#241A33","#6B3FA0"]},
+  {k:"y11class", name:"Class of 2027", lvl:33, year:"y11", sw:["#0F1A33","#F3EEDC","#E2B53E"]},
   {k:"wakefield", name:"✦ Wakefield Mode", lvl:1, secret:true, sw:["#0D2A1E","#F6F0DC","#E6C35C"]},
   {k:"retro", name:"👾 Electrical Impulse", note:"Brain & neuro: messages zap along the axon to the synapse", lvl:1, secret:true, scroll:"konami", sw:["#0A0A12","#39FF14","#FF2BD6"]},
   {k:"snowdome", name:"❄️ Snowdome", lvl:1, secret:true, scroll:"tamworth", sw:["#EFEBDD","#4E9C8E","#2B54C8"]},
@@ -2168,7 +2200,8 @@ const SEALS = {
   fool:    {text:"Play the Daily 10 on 1 April",            prog:()=>[Object.entries(G.daily||{}).some(([d,v])=>d.slice(5)==="04-01"&&v&&v.done)?1:0,1]},
 };
 const sealDone = k => { const s=SEALS[k]; if(!s) return true; const [a,b]=s.prog(); return a>=b; };
-const themeOpen = th => DEMO ? true : th.scroll ? !!G.scrolls[th.scroll] && sealDone(th.k) : th.secret ? !!G.flags.keeper : lvlFor(G.xp)>=th.lvl;
+const themeMine = th => !th.year || DEMO || th.year===YR;
+const themeOpen = th => DEMO ? true : !themeMine(th) ? false : th.scroll ? !!G.scrolls[th.scroll] && sealDone(th.k) : th.secret ? !!G.flags.keeper : lvlFor(G.xp)>=th.lvl;
 function checkSeals(){
   if(typeof TEACHER!=="undefined" && TEACHER) return; G.seals=G.seals||{};
   THEMES.filter(t=>t.scroll && G.scrolls[t.scroll] && !G.seals[t.k] && sealDone(t.k)).forEach((t,i)=>{
@@ -4495,9 +4528,9 @@ function scrollBoxHTML(){
     </div>`;
 }
 function themeCard(th){ const open=themeOpen(th), on=(G.skin||"")===th.k;
-  return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b><span>${open?(on?"✓ In use":"Tap to use"):th.scroll?"🔒 "+esc(SEALS[th.k].text):"🔒 Level "+th.lvl}</span></button>`; }
+  return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b>${th.year?`<span class="th-year">${th.year==="y10"?"Year 10 only":"Year 11 only"}</span>`:""}<span>${open?(on?"✓ In use":"Tap to use"):th.scroll?"🔒 "+esc(SEALS[th.k].text):"🔒 Level "+th.lvl}</span></button>`; }
 function themesHTML(){
-  const mine=THEMES.filter(th=>themeOpen(th)), sealed=THEMES.filter(th=>th.scroll && G.scrolls[th.scroll] && !themeOpen(th)), next=THEMES.filter(th=>!th.secret && !themeOpen(th));
+  const mine=THEMES.filter(th=>themeOpen(th)), sealed=THEMES.filter(th=>th.scroll && G.scrolls[th.scroll] && !themeOpen(th)), next=THEMES.filter(th=>!th.secret && themeMine(th) && !themeOpen(th));
   const hiddenSecrets=THEMES.filter(th=>th.secret && !themeOpen(th) && !(th.scroll && G.scrolls[th.scroll])).length;
   return `<div class="box"><h3>🎨 Your themes <small>${mine.length} unlocked · tap one to use it</small></h3><div class="themes">${mine.map(themeCard).join("")}</div></div>
     ${sealed.length?`<div class="box"><h3>🔒 Sealed secret themes <small>You found these in secret scrolls. Break the seal to unlock them</small></h3><div class="themes">${sealed.map(themeCard).join("")}</div></div>`:""}
@@ -4615,6 +4648,7 @@ $("#tourLink").onclick=()=>showTour(TOUR);
 $("#yearLink").onclick=()=>showYearPicker();
 { const yn=$("#yearName"); if(yn) yn.textContent=YEAR?YEAR_NAME(YEAR):"Pick your year"; }
 if(YEAR && !TEACHER && !DEMO_ASK && G.year!==YEAR){ G.year=YEAR; save(); }
+{ const cur=THEMES.find(t=>t.k===(G.skin||"")); if(cur && !themeMine(cur) && !TEACHER){ G.skin=""; save(); if(typeof applySkin==="function") applySkin(); } }
 
 /* ================= INSTALL AS AN APP (PWA) ================= */
 if("serviceWorker" in navigator && location.protocol.startsWith("http")) addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
