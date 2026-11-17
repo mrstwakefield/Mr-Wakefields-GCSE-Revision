@@ -3455,7 +3455,7 @@ function parseReport(code){
 
 /* ================= TEACHER PAGE (hidden: index.html?teacher) ================= */
 // Only a SHA-256 hash of the passcode lives here. To change it, replace this hash.
-const TEACHER_HASH = "ccae82e419401c6a9e526f456e8e71352ef42ac1d1538c660b3b5c8a9c746006";
+const TEACHER_HASH = "d31a75ceb536e0a5b9d907c4482ea4799c6c0cad336ec797e3e58b75d6d58476";
 const T = {reports:new Map(), sort:{key:"name", dir:1}};
 const TKEY = "fount-teacher-codes";
 async function sha256hex(s){ const b=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join(""); }
