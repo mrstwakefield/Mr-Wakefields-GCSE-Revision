@@ -719,7 +719,10 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .petbtn svg{display:block}
 .petbtn.sleepy{filter:saturate(.6)}
 .pet-box{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
-.pet-art{flex:none}
+.pet-art{flex:none;position:relative;background:none;border:0;padding:0;cursor:pointer;line-height:0;border-radius:16px}
+.pet-art:hover .pet-svg{transform:scale(1.03)}.pet-svg{transition:transform .15s}
+.pet-bubble{position:absolute;left:50%;top:4px;transform:translateX(-50%);background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:5px 10px;font:700 14px/1.2 var(--body);white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.12);animation:bubpop 1.8s ease forwards;pointer-events:none}
+@keyframes bubpop{0%{opacity:0;transform:translate(-50%,6px) scale(.8)}12%{opacity:1;transform:translate(-50%,0) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-6px)}}
 .pet-info{flex:1;min-width:220px}
 .pet-msg{margin:0;font-size:17px}
 .box .pet-info h3{display:flex;align-items:baseline;gap:8px;justify-content:flex-start}
@@ -728,6 +731,13 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .pet-svg.happy .pet-tail{animation:petwag 1s ease-in-out infinite alternate;transform-origin:118px 96px;transform-box:view-box}
 .pet-z text{animation:petz 2.4s ease-in-out infinite}
 .pet-z text:nth-child(2){animation-delay:.4s}.pet-z text:nth-child(3){animation-delay:.8s}
+.pet-svg.tapdance .pet-body{animation:pettap 1.2s ease-in-out;transform-origin:80px 110px;transform-box:view-box}
+.pet-svg.tapdance.pet-bee .pet-body{animation:petwaggle 1.2s ease-in-out}
+.pet-svg.tapsnooze .pet-body{animation:petsnooze 1.2s ease-in-out;transform-origin:80px 110px;transform-box:view-box}
+@keyframes pettap{0%{transform:none}20%{transform:translateY(-14px) rotate(-8deg)}40%{transform:translateY(0) rotate(8deg)}60%{transform:translateY(-10px) rotate(-6deg)}80%{transform:translateY(0) rotate(4deg)}100%{transform:none}}
+@keyframes petwaggle{0%,100%{transform:none}10%,30%,50%,70%,90%{transform:translateX(-7px) rotate(-7deg)}20%,40%,60%,80%{transform:translateX(7px) rotate(7deg)}}
+@keyframes petsnooze{0%,100%{transform:none}50%{transform:rotate(3deg) scaleY(.97)}}
+@media (prefers-reduced-motion:reduce){.pet-svg.tapdance .pet-body,.pet-svg.tapsnooze .pet-body{animation:none}}
 @keyframes petdance{from{transform:translateY(0) rotate(-3deg)}to{transform:translateY(-6px) rotate(3deg)}}
 @keyframes petwag{from{transform:rotate(-6deg)}to{transform:rotate(8deg)}}
 @keyframes petz{0%,100%{opacity:.2;transform:translateY(4px)}50%{opacity:1;transform:translateY(-2px)}}
@@ -3550,11 +3560,12 @@ function petPickerHTML(){
 function petBoxHTML(){
   const p=petInit(), P=petOf(), st=petStage(), mood=petMood(), n=petAnswers(petKind()), S=petStagesFor(petKind()), next=S[st+1];
   const td=(G.hist||{})[today()]||0, treats=Math.min(3,Math.floor(td/10));
-  return `<div class="box pet-box"><div class="pet-art">${petSVG(st,mood,220)}</div>
+  return `<div class="box pet-box"><button class="pet-art" id="petArt" type="button" aria-label="Tap ${esc(p.name)} to make ${P.pr[0]} dance">${petSVG(st,mood,220)}</button>
     <div class="pet-info"><h3 style="margin:0">${P.icon} <span id="petName">${esc(p.name)}</span> <button class="linkbtn" id="petRename" style="font-size:14px">Rename</button></h3>
       <p class="muted" style="margin:2px 0 8px">${esc(P.title)} · ${esc(petStageName(st))}${next?` · ${next[0]-n} more answers to become a ${esc(petStageName(st+1).toLowerCase())}`:" · fully grown legend 🎓"}</p>
       ${next?`<div class="xpbar" style="margin-bottom:10px"><i style="width:${(n-S[st][0])/(next[0]-S[st][0])*100}%"></i></div>`:""}
       <p class="pet-msg">${petLine(mood)}</p>
+      <p class="muted" style="margin:2px 0 4px;font-size:13px">👆 Tap ${esc(p.name)} to make ${P.pr[0]} dance</p>
       <p class="muted" style="margin:6px 0 0;font-size:15px">${P.treat[1]} today: ${P.treat[0].repeat(treats)}${`<span style='opacity:.25'>${P.treat[0]}</span>`.repeat(3-treats)} <span style="font-size:13px">(one for every 10 answers)</span></p></div>
     ${petPickerHTML()}</div>`;
 }
@@ -3571,7 +3582,18 @@ function cleanName(raw){
   if(words.some(w=>NAME_BLOCK[1].some(b=>squash(b)===w)) || NAME_BLOCK[1].some(b=>squash(b)===flat)) return null;
   return n;
 }
+const PET_SAYS = {rat:"Squeak squeak! 🧀", bee:"Waggle waggle! 🌼", teddy:"Hehe, I messed up your counters!", goat:"Baa! Mind the cliff!", finch:"Tweet tweet! 🌾", owl:"Hoot! Know thyself. 🦉"};
+function petTapDance(){
+  const art=$("#petArt"); if(!art) return; const svg=art.querySelector(".pet-svg"), m=petMood(), asleep=m==="sleepy"||m==="asleep";
+  if(svg){ svg.classList.remove("tapdance","tapsnooze"); void svg.getBoundingClientRect(); svg.classList.add(asleep?"tapsnooze":"tapdance"); setTimeout(()=>svg.classList.remove("tapdance","tapsnooze"),1300); }
+  const old=art.querySelector(".pet-bubble"); if(old) old.remove();
+  const bub=document.createElement("span"); bub.className="pet-bubble"; bub.setAttribute("aria-live","polite");
+  bub.textContent = asleep ? "Zzz… five more minutes…" : PET_SAYS[petKind()]||"Yay!"; art.appendChild(bub);
+  setTimeout(()=>bub.remove(),1800); if(!asleep && typeof sfx==="function") sfx("tick");
+  G.st.petTaps=(G.st.petTaps||0)+1;
+}
 function wirePet(){
+  { const a=$("#petArt"); if(a) a.onclick=petTapDance; }
   const b=$("#petRename"); if(b) b.onclick=()=>{
     let n=prompt(`Name your ${petOf().noun} (letters only, up to 20):`, G.pet.name);
     while(n!==null){ const ok=cleanName(n); if(ok){ G.pet.name=ok; G.pet.names[petKind()]=ok; save(); renderTrophies(); petHud(); return; }
