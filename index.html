@@ -77,6 +77,25 @@ h1 span b{font-weight:500}
 .chip .lockb + .gamesb{margin-left:4px}
 .yp-btns{display:flex;gap:12px;justify-content:center;margin-top:10px}.yp-btns .btn{min-width:130px;font-size:18px;padding:14px 20px}
 .year-note{margin:0 0 12px}
+.ex-answer{background:var(--soft);border-left:4px solid var(--c);border-radius:10px;padding:10px 14px;margin:10px 0}
+.ex-answer p{margin:4px 0 0;font-size:17px;line-height:1.5}
+.ex-ms{margin:6px 0}.ex-ms summary{cursor:pointer;font-weight:700}.ex-ms ul{margin:6px 0 0;padding-left:1.2em;font-size:15px}
+.ex-marks{display:flex;gap:8px;flex-wrap:wrap}.ex-marks .btn{min-width:52px;font-size:18px}
+.ex-marks .btn.good{background:var(--good);border-color:var(--good);color:#fff}.ex-marks .btn.warn-b{border-color:var(--warn);color:var(--warn)}
+.tdee-done li b{display:inline-block;width:20px;color:var(--c)}
+.tdee-why{margin:8px 0 0;padding-left:1.2em;font-size:15px;color:var(--muted)}
+.lab-word{font-family:var(--display);font-size:clamp(36px,10vw,64px);font-weight:800;text-align:center;padding:40px 0;min-height:150px;display:grid;place-items:center}
+.lab-digits{letter-spacing:4px}
+.lab-word .lab-b13{width:120px;height:110px}
+.lab-b13{width:90px;height:82px}
+.lab-ml{width:100%;max-width:420px;display:block;margin:6px auto;color:var(--ink)}
+.lab-curve{display:flex;gap:4px;align-items:flex-end;height:120px;margin:10px 0 0}
+.lab-bar{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end}
+.lab-bar i{display:block;width:100%;border-radius:4px 4px 0 0}
+.lab-bar.p i{background:#3B7DD8}.lab-bar.m i{background:var(--line)}.lab-bar.r i{background:#1C8A5E}
+.lab-bar span{font-size:11px;color:var(--muted);margin-top:2px}
+.lab-key{display:inline-block;padding:0 6px;border-radius:6px;color:#fff;font-size:12px}.lab-key.p{background:#3B7DD8}.lab-key.m{background:#8A93A8}.lab-key.r{background:#1C8A5E}
+.lab-vs{display:flex;gap:12px;margin:10px 0}.lab-vs div{flex:1;background:var(--soft);border-radius:12px;padding:12px;text-align:center}.lab-vs b{display:block;font-family:var(--display);font-size:30px}.lab-vs span{color:var(--muted);font-size:14px}
 .stagebar{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:0 0 12px;font-size:15px}
 .stagebar[hidden]{display:none}
 .stagebar .sb-top{display:flex;gap:8px 12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between}
@@ -2119,6 +2138,8 @@ const BADGES = [
   ["honest","😇","Honest Abe","Mark 50 cards as still learning",()=>(G.st.learnMarks||0)>=50, "Honesty is the best policy"],
   ["ragequit","🏃","Rage quit","End an Arcade game within 5 seconds",()=>!!G.flags.ragequit, "Nope. Not today."],
   ["fashion","🎨","Fashionista","Try 4 different themes",()=>Object.keys(G.skinsTried||{}).length>=4, "Dress for the job you want"],
+  ["labpartner","🐀","Lab Partner","Try all four Psych Lab experiments",()=>Object.keys(G.st.lab||{}).length>=4],
+  ["examiner","📝","Chief Examiner","Mark 5 answers spot on in Be the Examiner",()=>(G.st.examinerBest||0)>=15],
   ["backup","💾","Backup buddy","Copy or download a save code",()=>!!G.flags.backup, "Better safe than sorry"],
   ["stan","⭐","Title clicker","Click the site title 5 times",()=>!!G.flags.stan, "Show the title some love"],
   ["ring","👆","Ring the bell","Tap the level ring 10 times",()=>!!G.flags.ring, "Is this thing on?"],
@@ -2320,9 +2341,15 @@ const MODES = {
   swipe:{icon:"👉", name:"Swipe Sort", c:"#9A6324", hot:"2× XP", desc:"Theory or study? Strength or weakness? Nature or nurture? AO1 or AO3? S or C? Swipe as many as you can in 45 seconds."},
   which:{icon:"🕵️", name:"Which Study?", c:"#9A6324", hot:"2× XP", desc:"Clues appear one at a time. Name the study as early as you can: 5 points on the first clue, 1 on the last."},
   match:{icon:"🔗", name:"Study Matcher", c:"#9A6324", hot:"2× XP", desc:"Match each study to its aim, procedure, finding or conclusion, against the clock. Pick a round type or play them all mixed."},
+  lab:{icon:"🧪", name:"Psych Lab", c:"#0F766E", desc:"Be the participant! Mini versions of classic studies (Murdock, chunking, Müller-Lyer, B or 13?) with your own results explained."},
+  truths:{icon:"🤥", name:"Two Truths and a Lie", c:"#9A6324", desc:"Three statements about a study. Two are true, one is borrowed from a different study. Spot the lie. 6 rounds."},
+  odd:{icon:"🧩", name:"Odd One Out", c:"#9A6324", desc:"Four items, one doesn't belong: a binocular cue among monocular ones, a term from the wrong topic… 8 rounds."},
+  examiner:{icon:"📝", name:"Be the Examiner", c:"#9A6324", hot:"2× XP", desc:"Read a student's answer and the mark scheme, then give it a mark. 3 points for spot on, 1 for one mark out. 5 answers."},
+  tdee:{icon:"🧱", name:"TDEE Builder", c:"#9A6324", hot:"2× XP", desc:"Build an evaluation paragraph in the right order: Term, Define, Evidence, Explain. Watch out for sentences that don't belong."},
+  synoptic:{icon:"🔗", name:"Synoptic Links", c:"#9A6324", hot:"2× XP", desc:"Year 11: link ideas across topics, ready for the synoptic 9-mark questions. 6 rounds."},
   order:{icon:"🔢", name:"Put it in Order", c:"#9A6324", hot:"2× XP", desc:"Tap the steps in the right order: synaptic transmission, MSM, CBT, sampling, AMRC, TDEE and more. 6 rounds."},
 };
-const GOTD_POOL=["exam","terms","maths","blitz","surv","flaw","order","match","swipe","which","boss"];
+const GOTD_POOL=["exam","terms","maths","blitz","surv","flaw","order","match","swipe","which","boss","truths","odd","examiner","tdee"];
 const GOTD_ORDER = shuffleR(GOTD_POOL, rngFrom("gotd-order-v1"));
 function gotd(){ const n=dayNum(today()), L=GOTD_ORDER.length; for(let j=0;j<L;j++){ const k=GOTD_ORDER[(((n+j)%L)+L)%L]; if(typeof modeLock!=="function" || !modeLock(k)) return k; } return "daily"; }
 const gotdMult = () => (typeof arc!=="undefined" && arc.mode===gotd()) ? 2 : 1;
@@ -2358,6 +2385,8 @@ function bestLabel(k){
     : k==="match" ? ((st.mtBest||{}).mixed?`Mixed fastest: ${st.mtBest.mixed}s`:st.matchBest?`Fastest: ${st.matchBest}s`:"No time yet")
     : k==="flaw" ? (st.flawBest?`Best: ${st.flawBest}/16`:"No score yet")
     : k==="order" ? (st.orderBest?`Best: ${st.orderBest}/18`:"No score yet")
+    : k==="lab" ? (Object.keys(st.lab||{}).length?`${Object.keys(st.lab).length}/4 experiments tried`:"4 experiments to try")
+    : NX_BEST[k] ? (st[NX_BEST[k]]?`Best: ${st[NX_BEST[k]]}/${NX_ROUNDS[k]*NX_PTS[k]}`:"No score yet")
     : k==="fix" ? (mistakeCount()?`${mistakeCount()} mistake${mistakeCount()===1?"":"s"} to fix`:"Nothing to fix right now 🎉")
     : dd&&dd.done ? `Done today: ${dd.score}/10 ✓` : "Ready to play";
 }
@@ -2466,6 +2495,8 @@ function startBoss(key, hard=false){
 }
 function arcToTop(){ const a=$("#arcArea"), r=a.getBoundingClientRect(), hud=$("#hud").getBoundingClientRect().bottom; if(r.top<hud+8 || r.top>innerHeight*.5) scrollTo({top:scrollY+r.top-hud-12, behavior:reduced()?"auto":"smooth"}); }
 function startArc(mode){
+  if(mode==="lab" && !modeLock(mode)) return labMenu();
+  if(NX_BUILD[mode] && !modeLock(mode)) return nxStart(mode);
   if(modeLock(mode)){ toast("🔒",`${MODES[mode].name} isn't in your games yet`, modeLock(mode), true); return; }
   if(mode==="flaw"||mode==="order") return gmStart(mode);
   if(mode==="match") return mtStart();
@@ -3059,6 +3090,244 @@ function wsFinish(){
     <button class="btn" id="arcAgain">Play again</button> <button class="btn ghost" id="arcMenu">Arcade menu</button>
     ${missed.length?`<ul class="results" style="margin-top:22px"><li style="padding-left:14px;background:none;border:0"><b>Learn from these:</b></li>${missed.map(x=>`<li class="no"><b>${esc(x.s[0])}</b><div class="ans">${esc(x.s[1].join(" "))}</div></li>`).join("")}</ul>`:""}</div>`;
   $("#arcAgain").onclick=wsStart; $("#arcMenu").onclick=()=>{ arc.phase="menu"; renderArcade(); };
+}
+
+/* ================= NEW GAMES: Two Truths and a Lie, Odd One Out, Be the Examiner, TDEE Builder, Synoptic Links ================= */
+// content written for this site (not taken from exam board materials)
+const EXAMINER = [["Memory","Describe the multi-store model of memory.",4,["Sensory memory receives information from the senses (1)","Attention moves information into STM (1)","STM has limited capacity (about 7 items) and duration (about 18–30 seconds) (1)","Rehearsal moves information into LTM, which has unlimited capacity (1)","Retrieval brings information back from LTM to STM (credit)"],"Information comes in through our senses into sensory memory. If we pay attention to it, it goes into short-term memory, which can only hold a few things. If we rehearse it, it goes into long-term memory.",3,"Three accurate points: sensory memory to STM via attention, STM is limited, rehearsal moves it to LTM. For 4 it needed more detail, e.g. STM capacity/duration or retrieval."],["Memory","Explain one difference between episodic and semantic memory.",2,["Episodic: memories of personal events with a time and place (1)","Semantic: facts and knowledge shared by everyone, with no 'when' or 'where' (1)","Must be a clear contrast for 2"],"Episodic memory is about things that have happened to you.",1,"Only describes episodic memory. There's no contrast with semantic memory, so it can't get the second mark."],["Memory","Outline one weakness of the method used in Murdock's study.",2,["Identifies a weakness, e.g. lab experiment / artificial task (1)","Explains it in the context of the study (1)"],"It was a lab experiment, so it lacks ecological validity, because learning lists of words isn't like how we use memory in everyday life.",2,"Clear weakness (lab experiment, low ecological validity) explained with the word-list task. Full marks."],["Perception","Explain how Gregory's theory explains the Ponzo illusion.",3,["We use past experience to interpret what we see (1)","The converging lines look like railway tracks going into the distance, so the top line seems further away (1)","Size constancy makes us see the 'further' line as bigger, even though the lines are equal (1)"],"Gregory says we use past experience. The converging lines look like railway tracks going into the distance, so we think the top line is further away. Because of size constancy our brain makes it look bigger, even though both lines are the same length.",3,"All three steps: past experience, the depth cue from converging lines, and misapplied size constancy."],["Perception","Describe one monocular depth cue.",2,["Names a monocular cue (1)","Describes how it signals depth (1)"],"Occlusion.",1,"Names a correct cue but doesn't describe it (e.g. 'when one object blocks part of another, the blocked one looks further away')."],["Development","Describe what Piaget meant by conservation.",2,["Understanding that quantity stays the same when appearance changes (1)","Example or link to stages, e.g. pre-operational children can't conserve (1)"],"Conservation is when a child understands that the amount of something stays the same even if it looks different, for example water poured into a taller glass. Pre-operational children can't do this.",2,"Accurate definition plus an example and a link to Piaget's stages."],["Development","Outline Dweck's mindset theory.",4,["Fixed mindset: belief that ability can't change (1)","Growth mindset: belief that ability grows with effort (1)","Fixed: performance goals / avoid challenge; growth: learning goals / embrace challenge (1)","Role of praise: praising effort encourages a growth mindset (1)"],"Dweck said some people have a fixed mindset and some have a growth mindset. A growth mindset is better.",1,"Naming the two mindsets earns a mark, but neither is described, and 'better' is a judgement, not description."],["RM","Explain one strength of using a repeated measures design.",2,["Identifies a strength, e.g. controls participant variables (1)","Explains why, e.g. the same people do both conditions so differences are due to the IV (1)"],"Participant variables are controlled because the same people do both conditions, so any difference is more likely to be due to the IV and not individual differences.",2,"Strength identified and fully explained."],["RM","A researcher found a mean of 12.6 words recalled in silence and 9.1 words with music. What do these results suggest?",2,["Uses the data / identifies the direction of the difference (1)","Draws a conclusion, e.g. music may reduce recall (1)"],"The silence group did better.",1,"Describes the result but doesn't draw a conclusion about the effect of music, or use the figures."],["Social influence","Explain how deindividuation might lead to antisocial behaviour in a crowd.",3,["Being in a crowd makes people feel anonymous (1)","They lose their sense of personal identity / responsibility (1)","So they are less worried about being judged and may behave in ways they normally wouldn't (1)"],"In a crowd people feel anonymous, so they lose their sense of personal identity and responsibility. This means they're less worried about being judged, so they might do things they normally wouldn't, like vandalism.",3,"Anonymity, loss of identity and the effect on behaviour, with an example."],["Social influence","Describe Milgram's agency theory.",4,["Agentic state: acting as an agent of an authority figure (1)","Not feeling responsible for your actions (1)","Agentic shift: moving from autonomous to agentic state (1)","Legitimate authority / moral strain (1)"],"People obey because they're in an agentic state. This means they act as an agent for an authority figure and don't feel responsible for what they do. Moving from being autonomous to agentic is called the agentic shift. They may feel moral strain.",4,"Four accurate, distinct points."],["Brain & neuropsychology","Describe the role of the sympathetic nervous system in the fight or flight response.",3,["Activated when a threat is detected (1)","Triggers adrenaline release from the adrenal glands (1)","Body changes, e.g. faster heart rate and breathing, prepare for action (1)"],"The sympathetic nervous system makes your heart beat faster.",1,"One accurate effect. Nothing on the threat triggering it, adrenaline, or how it prepares the body for action."],["Psychological problems","Explain how CBT is used to treat depression.",4,["Identifies negative or irrational thoughts (1)","Therapist challenges / disputes them, e.g. 'Where's the evidence?' (1)","Replaces them with more rational thoughts (1)","Behavioural element, e.g. homework or thought diaries (1)"],"CBT stands for cognitive behavioural therapy. It's a talking therapy where the patient talks to a therapist about their problems once a week.",1,"Only general information about therapy. Nothing about challenging and replacing negative thoughts."],["Psychological problems","Outline the genetic explanation of addiction.",3,["Some people inherit genes that make them more vulnerable (1)","Evidence, e.g. Kaij: 54% concordance in MZ vs 28% in DZ twins (1)","Not 100% concordance, so environment also matters (1)"],"Some people inherit genes that make them more vulnerable to addiction. Kaij found higher concordance for alcohol abuse in identical twins (54%) than non-identical twins (28%). This suggests genes play a role, but not 100%, so environment matters too.",3,"Vulnerability, supporting evidence with figures, and the limit of genes."],["Language, thought & communication","Describe the Sapir-Whorf hypothesis.",3,["Language affects how we think (1)","Strong version: language determines thought (1)","Weak version: language influences thought (1)"],"Language affects how we think. The strong version says language determines thought, and the weak version says it influences it.",3,"Core idea plus both versions, accurately described."],["Exam skills","Evaluate the use of questionnaires in psychological research.",4,["Strength identified (1) and explained (1)","Weakness identified (1) and explained (1)"],"Questionnaires are good because you can get lots of data quickly. But people might lie.",2,"A strength and a weakness are identified, but neither is explained (e.g. why people might lie: social desirability bias)."]], TDEE = [["Memory","Evaluate Murdock's study",["One weakness of Murdock's study is that it lacks mundane realism.","This means the task does not reflect how we use memory in everyday life.","For example, participants learned lists of unrelated words, which we rarely do outside a lab.","This is a weakness because the findings may not tell us how memory works in real situations."],["Murdock found that words at the start and end of the list were remembered best.","This study has some good points and some bad points."]],["Memory","Evaluate the multi-store model",["One strength of the multi-store model is research support.","This means studies have found evidence that matches what the model predicts.","For example, Murdock found primacy and recency effects, suggesting separate STM and LTM stores.","This is a strength because it increases our confidence that STM and LTM really are separate."],["The multi-store model has three stores: sensory memory, STM and LTM.","Everyone agrees with this model."]],["Perception","Evaluate Gregory's constructivist theory",["One weakness of Gregory's theory is that it may underestimate the information our senses provide.","This means we may not always need past experience to make sense of what we see.","For example, Gibson and Walk found most babies avoided the 'deep' side of the visual cliff before they could have learned about depth.","This is a weakness because it suggests some perception is innate, which Gregory's theory can't explain."],["Gregory said perception is an active process of making inferences.","Gregory was a psychologist who studied illusions."]],["Development","Evaluate Piaget's stage theory",["One weakness of Piaget's theory is that it underestimates children's abilities.","This means children may be able to do things at younger ages than Piaget claimed.","For example, Hughes found that 90% of children aged 3½–5 could hide a boy doll from two policemen.","This is a weakness because it suggests the three mountains task was too confusing, so Piaget's ages may be wrong."],["Piaget said children pass through four stages in a fixed order.","Piaget's theory is quite old."]],["Social influence","Evaluate Milgram's study",["One weakness of Milgram's study is that it raises ethical issues.","This means participants were not fully protected from psychological harm.","For example, some participants sweated, trembled and had nervous laughing fits while giving 'shocks'.","This is a weakness because causing distress is unacceptable, even though participants were debriefed."],["65% of participants went all the way to 450V.","Milgram's study is very famous."]],["Social influence","Evaluate Piliavin's subway study",["One strength of Piliavin's study is high ecological validity.","This means the findings are likely to reflect how people behave in real life.","For example, it took place on a real New York subway train and passengers didn't know they were being studied.","This is a strength because their helping was natural, so the results are likely to apply to real emergencies."],["The victim with a cane was helped 95% of the time.","It was a good study."]],["RM","Evaluate laboratory experiments",["One strength of lab experiments is high control over extraneous variables.","This means the researcher can be more confident that the IV caused the change in the DV.","For example, everyone can be tested in the same room, at the same time of day, with standardised instructions.","This is a strength because it gives high internal validity and makes the study easier to replicate."],["A lab experiment is carried out in a controlled, artificial setting.","Lab experiments are used a lot in psychology."]],["Brain & neuropsychology","Evaluate Penfield's study",["One strength of Penfield's study is that it supports localisation of function.","This means it gives evidence that different brain areas have different jobs.","For example, stimulating the temporal lobe caused some patients to relive vivid memories.","This is a strength because it helps us understand the role of specific areas, such as the temporal lobe in memory."],["Penfield operated on patients with epilepsy.","The brain is very complicated."]],["Psychological problems","Evaluate CBT as a treatment for depression",["One strength of CBT is research support for its effectiveness.","This means studies show CBT really does help people with depression.","For example, Wiles found that adding CBT to antidepressants roughly doubled the improvement rate (46% vs 22%).","This is a strength because it suggests CBT is a worthwhile treatment for the NHS to offer."],["CBT uses thought diaries and homework tasks.","Lots of people have depression."]],["Psychological problems","Evaluate the biological explanation of depression",["One weakness of the biological explanation is that it is reductionist.","This means it reduces depression to one simple cause: low serotonin.","For example, it ignores the negative thinking patterns that Beck's cognitive explanation focuses on.","This is a weakness because depression probably has several causes, so serotonin-based treatments may not work for everyone."],["Serotonin is a neurotransmitter.","Depression is a common mental health problem."]],["Language, thought & communication","Evaluate von Frisch's bee research",["One strength of von Frisch's research is its reliability.","This means his findings were consistent and could be repeated.","For example, he made over 1,000 observations of paint-marked bees over about 20 years.","This is a strength because consistent findings make us more confident that bees communicate distance and direction through dance."],["Bees do a round dance when food is close to the hive.","Bees are interesting animals."]]], SYNOPTIC = [["Memory","Bartlett: memory is reconstructed using schemas","Development","Piaget: schemas grow through assimilation and accommodation","Both use schemas: mental frameworks built from experience that shape how we process new information."],["Memory","Bartlett: 'canoe' became 'boat' in War of the Ghosts","Language, thought & communication","The Sapir-Whorf hypothesis","Participants changed details to fit their own language and culture, suggesting language and culture shape how we think and remember."],["Perception","Perceptual set: expectation shapes what we see","Memory","Reconstructive memory","Both are top-down: past experience and expectations change what we perceive or remember."],["Perception","Hudson: culture affects depth perception in pictures","Language, thought & communication","Yuki: Japanese and American students read emoticons differently","Both show culture shaping how we interpret visual information."],["Development","Piaget: thought comes before language","Language, thought & communication","Piaget's theory of language and thought","The same theory: children need the concept (e.g. 'more') before they can use the word properly."],["Development","Dweck: praising effort builds a growth mindset","Psychological problems","CBT: challenging negative beliefs about yourself","Both show that the beliefs we hold about ourselves affect how we feel and behave, and that they can change."],["Development","McGarrigle and Donaldson: children answer differently when asked twice","RM","Demand characteristics","Being asked the same question twice may suggest the first answer was wrong, so children change it."],["Social influence","Milgram's participants were distressed and deceived","RM","Ethics: protection from harm, deception and debriefing","A key example of why ethical guidelines protect participants."],["Social influence","Piliavin's study on a real subway train","RM","Field experiments","A field experiment: natural setting and high ecological validity, but less control over variables."],["Brain & neuropsychology","Hebb: practice strengthens connections between neurons","Memory","Rehearsal moves information into LTM","Both suggest repetition strengthens memory: rehearsal in the MSM, cell assemblies in Hebb's theory."],["Brain & neuropsychology","Tulving: episodic and semantic memories activate different brain areas","Memory","Types of long-term memory","Brain-scan evidence that episodic and semantic memory really are different types of LTM."],["Brain & neuropsychology","Serotonin is a neurotransmitter passed across the synapse","Psychological problems","SSRIs and the biological explanation of depression","SSRIs stop serotonin being reabsorbed, so more stays in the synapse, linking synaptic transmission to treatment."],["Psychological problems","Kaij: concordance for alcohol abuse in twins","RM","Correlation does not show cause and effect","Concordance shows a relationship between genes and addiction, but twins also share environments."],["Language, thought & communication","Darwin: facial expressions are innate and universal","Perception","Gibson: perception is innate (direct theory)","Both argue for nature: abilities we are born with because they helped our ancestors survive."],["Memory","Godden and Baddeley tested divers underwater and on land","RM","Ecological validity","Testing in real settings (underwater) makes the findings more like real life than a lab task."],["Social influence","Authoritarian personality comes from a strict upbringing","Development","Nature vs nurture","An example of nurture: early experiences shape personality and obedience."]];
+const nxPick1 = a => a[Math.floor(Math.random()*a.length)];
+const NX_ROUNDS = {truths:6, odd:8, examiner:5, tdee:5, synoptic:6};
+const nx = {kind:null, items:[], i:0, score:0, max:0, xp:0, log:[], locked:false, picked:[], wrongs:0, pool:[]};
+const NX_BUILD = {
+  truths(){
+    const F=["Aim","Method","Finding","Conclusion"];
+    return shuffle(STUDY_FACTS).slice(0,NX_ROUNDS.truths).map(s=>{
+      const others=STUDY_FACTS.filter(x=>x!==s); if(!others.length) return null;
+      const lf=nxPick1([3,3,2,1]), o=nxPick1(others), keep=shuffle([1,2,3,4].filter(f=>f!==lf)).slice(0,2);
+      const st=shuffle([...keep.map(f=>({label:F[f-1], text:s[f], lie:false})), {label:F[lf-1], text:o[lf], lie:true}]);
+      return {s:s[0], st, why:`The lie was from ${o[0]}. ${s[0]}'s real ${F[lf-1].toLowerCase()}: ${s[lf]}.`, topic:nameTopic(s[0])||"Exam skills"};
+    }).filter(Boolean);
+  },
+  odd(){
+    const out=[];
+    const decks=SWIPE.filter(d=>{ const a=d[3].filter(x=>x[1]===0).length, b=d[3].filter(x=>x[1]===1).length; return (a>=3&&b>=1)||(b>=3&&a>=1); });
+    const tops=[...new Set(TERMS.filter(x=>taught(x.t) && x.t!=="Exam skills").map(x=>x.t))];
+    for(let n=0; n<NX_ROUNDS.odd*3 && out.length<NX_ROUNDS.odd; n++){
+      if(decks.length && (n%2===0 || tops.length<2)){
+        const d=nxPick1(decks), side=[0,1].filter(s=>d[3].filter(x=>x[1]===s).length>=3 && d[3].some(x=>x[1]!==s)); if(!side.length) continue;
+        const s=nxPick1(side), same=shuffle(d[3].filter(x=>x[1]===s)).slice(0,3), odd=nxPick1(d[3].filter(x=>x[1]!==s));
+        const opts=shuffle([...same.map(x=>x[0]), odd[0]]);
+        if(out.some(o=>o.opts.includes(odd[0]))) continue;
+        out.push({prompt:`${d[0].replace(/\?$/,"")}: which is the odd one out?`, opts, correct:opts.indexOf(odd[0]), why:`"${odd[0]}" is ${(s?d[1]:d[2]).toLowerCase()}: ${odd[2]} The others are all ${(s?d[2]:d[1]).toLowerCase()}.`, topic:"Exam skills"});
+      } else if(tops.length>=2){
+        const [a,b]=shuffle(tops), A=shuffle(TERMS.filter(x=>x.t===a)).slice(0,3), Bt=nxPick1(TERMS.filter(x=>x.t===b));
+        if(A.length<3 || !Bt) continue;
+        const names=[...A.map(x=>x.term), Bt.term]; if(new Set(names.map(x=>x.toLowerCase())).size<4) continue;
+        const opts=shuffle(names);
+        out.push({prompt:"Key terms: which one belongs to a different topic?", opts, correct:opts.indexOf(Bt.term), why:`${Bt.term} is from ${TMAP[b].name}. ${A.map(x=>x.term).join(", ")} are all ${TMAP[a].name} terms.`, topic:a});
+      }
+    }
+    return out;
+  },
+  examiner(){ return shuffle(EXAMINER.filter(e=>taught(e[0]))).slice(0,NX_ROUNDS.examiner); },
+  tdee(){ return shuffle(TDEE.filter(e=>taught(e[0]))).slice(0,NX_ROUNDS.tdee).map(e=>({e, pool:shuffle([...e[2].map((s,i)=>({s,i})), ...e[3].map((s,j)=>({s,i:-1-j}))])})); },
+  synoptic(){
+    const ok=SYNOPTIC.filter(l=>taught(l[0]) && taught(l[2]));
+    return shuffle(ok).slice(0,NX_ROUNDS.synoptic).map(l=>{ const dist=ok.filter(x=>x[3]!==l[3] && x[2]!==l[0] && x[2]!==l[2]); const opts=shuffle([l[3], ...shuffle(dist.length>=3?dist:ok.filter(x=>x[3]!==l[3] && x[2]!==l[0])).slice(0,3).map(x=>x[3])]); return {l, opts, correct:opts.indexOf(l[3])}; });
+  },
+};
+const NX_PTS = {truths:1, odd:1, examiner:3, tdee:3, synoptic:2};
+const NX_BEST = {truths:"truthsBest", odd:"oddBest", examiner:"examinerBest", tdee:"tdeeBest", synoptic:"synopticBest"};
+const NX_EXAM = {examiner:1, tdee:1, synoptic:1};   // exam-technique games: 2× XP
+function nxStart(kind){
+  clearInterval(arc.timer); arc.phase="nx"; arc.mode=kind;
+  Object.assign(nx,{kind, i:0, score:0, xp:0, log:[], locked:false, picked:[], wrongs:0});
+  nx.items=NX_BUILD[kind](); nx.max=nx.items.length*NX_PTS[kind];
+  if(!nx.items.length){ arc.phase="menu"; renderArcade(); return; }
+  resetCombo(); nxRender(); arcToTop();
+}
+function nxTop(){ const m=MODES[nx.kind], n=nx.items.length; return `<div class="arc-top"><span class="big">${m.icon} ${m.name}</span><span class="spacer"></span><span>Points</span><span class="big">${nx.score}</span><span class="big">${nx.i+1}/${n}</span></div><div class="progressline"><i style="width:${nx.i/n*100}%"></i></div>`; }
+const nxQuit = `<p style="text-align:right;margin-top:10px"><button class="linkbtn" id="arcQuit">End game</button></p>`;
+function nxOpts(opts){ return `<div class="opts">${opts.map((o,i)=>`<button class="opt" data-nx="${i}"><span class="k">${"ABCDEF"[i]}</span><span>${esc(o)}</span></button>`).join("")}</div>`; }
+function nxRender(){
+  if(nx.i>=nx.items.length) return nxFinish();
+  const it=nx.items[nx.i], a=$("#arcArea"), k=nx.kind;
+  if(k==="truths"){
+    a.innerHTML=nxTop()+`<div class="quiz-q" style="--c:#9A6324"><div class="tag">🤥 Two truths and a lie</div><div class="q">Which statement about <b>${esc(it.s)}</b> is the lie?</div>
+      <div class="opts">${it.st.map((s,i)=>`<button class="opt" data-nx="${i}"><span class="k">${"ABC"[i]}</span><span><b>${esc(s.label)}:</b> ${esc(s.text)}</span></button>`).join("")}</div><div id="nxFb" class="gapfb" aria-live="polite"></div></div>`+nxQuit;
+  } else if(k==="odd"){
+    a.innerHTML=nxTop()+`<div class="quiz-q" style="--c:#9A6324"><div class="tag">🧩 Odd one out</div><div class="q">${esc(it.prompt)}</div>${nxOpts(it.opts)}<div id="nxFb" class="gapfb" aria-live="polite"></div></div>`+nxQuit;
+  } else if(k==="examiner"){
+    const [t,q,max,ms,ans]=it;
+    a.innerHTML=nxTop()+`<div class="quiz-q" style="--c:${TMAP[t].c}"><div class="tag">📝 Be the examiner <span class="muted">${esc(TMAP[t].name)} · ${max} mark${max===1?"":"s"}</span></div>
+      <div class="q">${esc(q)} <span class="muted">[${max}]</span></div>
+      <div class="ex-answer"><span class="muted">A student wrote:</span><p>${esc(ans)}</p></div>
+      <details class="ex-ms"><summary>Mark scheme</summary><ul>${ms.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></details>
+      <p class="muted" style="margin:10px 0 6px">How many marks would you give it?</p>
+      <div class="ex-marks">${Array.from({length:max+1},(_,m)=>`<button class="btn ghost" data-nx="${m}">${m}</button>`).join("")}</div><div id="nxFb" class="gapfb" aria-live="polite"></div></div>`+nxQuit;
+  } else if(k==="tdee"){
+    const e=it.e;
+    a.innerHTML=nxTop()+`<div class="quiz-q" style="--c:${TMAP[e[0]].c}"><div class="tag">🧱 TDEE builder <span class="muted">${3-Math.min(3,nx.wrongs)} point${3-nx.wrongs===1?"":"s"} left</span></div>
+      <div class="q">${esc(e[1])}: build one TDEE paragraph</div>
+      <ol class="ord-done tdee-done">${nx.picked.map(i=>`<li><b>${"TDEE"[i]}</b> ${esc(e[2][i])}</li>`).join("")}${Array.from({length:4-nx.picked.length},(_,j)=>`<li class="ord-empty"><b>${"TDEE"[nx.picked.length+j]}</b></li>`).join("")}</ol>
+      <div class="ord-pool">${it.pool.filter(p=>!nx.picked.includes(p.i) && !(it.gone||[]).includes(p.i)).map(p=>`<button class="opt ord-step" data-tdee="${p.i}"><span>${esc(p.s)}</span></button>`).join("")}</div>
+      <p class="muted ord-tip">Tap Term, Define, Evidence, Explain in order. Two of the sentences don't belong in an evaluation paragraph.</p><div id="nxFb" class="gapfb" aria-live="polite"></div></div>`+nxQuit;
+    a.querySelectorAll("[data-tdee]").forEach(b=>b.onclick=()=>nxTdee(+b.dataset.tdee, b));
+  } else if(k==="synoptic"){
+    const l=it.l;
+    a.innerHTML=nxTop()+`<div class="quiz-q" style="--c:${TMAP[l[0]].c}"><div class="tag">🔗 Synoptic links <span class="muted">${esc(TMAP[l[0]].name)}</span></div>
+      <div class="q">Which idea from another topic links best to: <b>${esc(l[1])}</b>?</div>${nxOpts(it.opts)}<div id="nxFb" class="gapfb" aria-live="polite"></div></div>`+nxQuit;
+  }
+  a.querySelectorAll("[data-nx]").forEach(b=>b.onclick=()=>nxPick(+b.dataset.nx, b));
+  $("#arcQuit").onclick=()=>nxFinish();
+}
+function nxNext(ms){ setTimeout(()=>{ nx.locked=false; nx.i++; nx.picked=[]; nx.wrongs=0; nxRender(); }, ms); }
+function nxPick(i, btn){
+  if(nx.locked) return; nx.locked=true;
+  const it=nx.items[nx.i], k=nx.kind, fb=$("#nxFb"), btns=[...document.querySelectorAll("[data-nx]")];
+  let ok=false, pts=0, why="", topic="Exam skills";
+  if(k==="truths"){ const c=it.st.findIndex(s=>s.lie); ok=i===c; pts=ok?1:0; why=it.why; topic=it.topic; btns.forEach((b,j)=>{ b.disabled=true; b.classList.add(j===c?"right":j===i?"wrong":"dim"); }); nx.log.push({t:`${it.s}`, ok, ans:it.why}); }
+  else if(k==="odd"||k==="synoptic"){ ok=i===it.correct; pts=ok?NX_PTS[k]:0; why=k==="odd"?it.why:it.l[4]; topic=k==="odd"?it.topic:"Exam skills";
+    btns.forEach((b,j)=>{ b.disabled=true; b.classList.add(j===it.correct?"right":j===i?"wrong":"dim"); });
+    nx.log.push({t:k==="odd"?it.prompt:it.l[1], ok, ans:k==="odd"?it.why:`${it.l[3]}: ${it.l[4]}`}); }
+  else if(k==="examiner"){ const real=it[5], d=Math.abs(i-real); pts=d===0?3:d===1?1:0; ok=d===0;
+    btns.forEach((b,m)=>{ b.disabled=true; if(m===real) b.classList.add("good"); else if(m===i) b.classList.add("warn-b"); });
+    why=`<b>The examiner gave ${real}/${it[2]}.</b> ${esc(it[6])}`; nx.log.push({t:it[1], ok, ans:`${real}/${it[2]}: ${it[6]}`}); }
+  nx.score+=pts; nx.xp+=answer({ok, el:btn, mode:"arcade", topic: NX_EXAM[k] ? "Exam skills" : topic});
+  fb.innerHTML = (ok?`<b style="color:var(--good)">✓ ${k==="examiner"?"Spot on! +3":"Correct"}</b> `:k==="examiner"&&pts?`<b style="color:var(--good)">Close: +1</b> `:`<b style="color:var(--warn)">Not quite.</b> `) + `<span class="muted">${k==="examiner"?why:esc(why)}</span>`;
+  fb.insertAdjacentHTML("beforeend",`<div class="card-actions" style="margin-top:8px"><button class="btn" id="nxGo">${nx.i+1>=nx.items.length?"See results":"Next →"}</button></div>`);
+  $("#nxGo").onclick=()=>nxNext(0); $("#nxGo").focus({preventScroll:true});
+}
+function nxTdee(s, btn){
+  if(nx.locked) return;
+  const it=nx.items[nx.i], e=it.e, next=nx.picked.length, fb=$("#nxFb");
+  if(s===next){ nx.picked.push(s); sfx("tick");
+    if(nx.picked.length===4){ nx.locked=true; const pts=Math.max(0,3-nx.wrongs); nx.score+=pts;
+      nx.xp+=answer({ok:pts>0, el:btn, mode:"arcade", topic:"Exam skills"}); nx.log.push({t:e[1], ok:pts===3, ans:e[2].join(" ")});
+      nxRender(); $("#nxFb").innerHTML=`<b style="color:var(--good)">✓ ${pts}/3 points</b><ul class="tdee-why"><li><b>Not evaluation:</b> "${esc(e[3][0])}" just describes, so it's AO1.</li><li><b>Too vague:</b> "${esc(e[3][1])}" doesn't say what or why.</li></ul><div class="card-actions" style="margin-top:8px"><button class="btn" id="nxGo">${nx.i+1>=nx.items.length?"See results":"Next →"}</button></div>`;
+      $("#nxGo").onclick=()=>nxNext(0); return; }
+    nxRender(); return; }
+  nx.wrongs++; sfx("no"); btn.classList.remove("shake"); void btn.offsetWidth; btn.classList.add("shake","wrong");
+  if(s<0){ it.gone=(it.gone||[]).concat(s); fb.innerHTML=`<span style="color:var(--warn)">${s===-1?"That one just describes, it doesn't evaluate.":"Too vague to earn marks."}</span>`; setTimeout(()=>{ if(!nx.locked) nxRender(); },900); }
+  else { fb.innerHTML=`<span style="color:var(--warn)">Right paragraph, wrong order. What comes ${["first (Term)","second (Define)","third (Evidence)","last (Explain)"][next]}?</span>`; setTimeout(()=>btn.classList.remove("wrong"),500); }
+  const tg=document.querySelector(".quiz-q .tag .muted"); if(tg) tg.textContent=`${Math.max(0,3-nx.wrongs)} point${3-nx.wrongs===1?"":"s"} left`;
+}
+function nxFinish(){
+  if(arc.phase!=="nx") return; arc.phase="nxdone";
+  const k=nx.kind, m=MODES[k], key=NX_BEST[k], best=nx.score>(G.st[key]||0); if(best) G.st[key]=nx.score;
+  const bonus=(10+nx.score*2)*(NX_EXAM[k]?2:1)*gotdMult(); nx.xp+=bonus; addXP(bonus,false);
+  if(best&&nx.score>0){ confetti(150); sfx("lvl"); }
+  checkBadges(); save();
+  const missed=nx.log.filter(x=>!x.ok);
+  $("#arcArea").innerHTML=`<div class="empty">${best&&nx.score>0?'<div class="newbest">🏆 NEW PERSONAL BEST</div>':""}<h3>${m.icon} ${m.name} over</h3><p class="score">${nx.score}/${nx.max}</p><p class="muted">+${nx.xp} XP${NX_EXAM[k]?" (2× exam skills XP)":""}</p>
+    <button class="btn" id="arcAgain">Play again</button> <button class="btn ghost" id="arcMenu">Arcade menu</button>
+    ${missed.length?`<ul class="results" style="margin-top:22px"><li style="padding-left:14px;background:none;border:0"><b>Learn from these:</b></li>${missed.map(x=>`<li class="no"><b>${esc(x.t)}</b><div class="ans">${esc(x.ans)}</div></li>`).join("")}</ul>`:""}</div>`;
+  $("#arcAgain").onclick=()=>nxStart(k); $("#arcMenu").onclick=()=>{ arc.phase="menu"; renderArcade(); };
+}
+document.addEventListener("keydown",e=>{
+  if(tab!=="arcade" || arc.phase!=="nx" || e.target.matches("input,textarea") || e.metaKey||e.ctrlKey||e.altKey) return;
+  if(nx.kind==="examiner" && /^[0-9]$/.test(e.key)){ const b=document.querySelector(`[data-nx="${e.key}"]:not(:disabled)`); if(b){ e.preventDefault(); b.click(); } return; }
+  const oi=optKey(e.key); if(oi<0) return; const b=document.querySelector(`[data-nx="${oi}"]:not(:disabled)`); if(b && nx.kind!=="examiner"){ e.preventDefault(); b.click(); }
+});
+
+/* ================= PSYCH LAB: be the participant ================= */
+const LAB = {
+  murdock:{icon:"📋", name:"Murdock's word list", topic:"Memory", desc:"Watch 15 words, then recall as many as you can in any order. See your own serial position curve."},
+  digits:{icon:"🔢", name:"Digit span and chunking", topic:"Memory", desc:"Remember long numbers, with and without chunking. Does grouping help you beat Miller's 7 ± 2?"},
+  muller:{icon:"↔️", name:"The Müller-Lyer illusion", topic:"Perception", desc:"Stretch a line until it looks the same length as another. How far does the illusion fool you?"},
+  bruner:{icon:"🅱️", name:"B or 13?", topic:"Perception", desc:"A quick-fire perceptual set experiment, like Bruner and Minturn's. What will you see?"},
+};
+const LAB_WORDS = ["apple","bridge","candle","dolphin","engine","forest","guitar","hammer","island","jacket","kettle","ladder","marble","needle","orange","pencil","rabbit","saddle","tunnel","umbrella","violin","wallet","yacht","zebra","anchor","basket","castle","desert","feather","garden","helmet","iceberg","jungle","lemon","mirror","napkin","oyster","parrot","rocket","spider","tiger","velvet","window","button","cactus","drum","eagle","fridge","glove","honey","kite","lantern","magnet","nest","pillow","quilt","river","shovel","teapot","wheel"];
+const lab = {exp:null, step:0, data:{}, timer:null};
+function labMenu(){
+  clearInterval(arc.timer); clearTimeout(lab.timer); arc.phase="lab"; arc.mode="lab";
+  $("#arcArea").innerHTML=`<div class="arc-top"><span class="big">🧪 Psych Lab</span><span class="spacer"></span><button class="btn ghost" id="arcMenu" style="padding:7px 14px">Back</button></div>
+    <p class="muted">Be the participant! Take part in mini versions of classic studies, then see your own results and what they show.</p>
+    <div class="modes">${Object.entries(LAB).map(([k,x])=>{ const off=!taught(x.topic); return `<button class="mode" style="--c:${TMAP[x.topic].c}" data-lab="${k}" ${off?"disabled":""}>${(G.st.lab||{})[k]?'<span class="new" style="background:var(--good)">✓ Done</span>':""}<span class="mi">${x.icon}</span><h3>${esc(x.name)}</h3><p>${off?`🔒 Joins your games with ${esc(TMAP[x.topic].name)} on ${esc(niceDate(unlockDate(YR,x.topic)))}.`:esc(x.desc)}</p><span class="best">${esc(TMAP[x.topic].name)}</span></button>`; }).join("")}</div>`;
+  $("#arcMenu").onclick=()=>{ arc.phase="menu"; renderArcade(); };
+  document.querySelectorAll("[data-lab]").forEach(b=>b.onclick=()=>labStart(b.dataset.lab));
+  arcToTop();
+}
+function labShell(inner){ const x=LAB[lab.exp]; return `<div class="arc-top"><span class="big">${x.icon} ${esc(x.name)}</span><span class="spacer"></span><button class="btn ghost" id="labBack" style="padding:7px 14px">Lab menu</button></div><div class="quiz-q lab-q" style="--c:${TMAP[x.topic].c}">${inner}</div>`; }
+function labWire(){ const b=$("#labBack"); if(b) b.onclick=()=>{ clearTimeout(lab.timer); labMenu(); }; }
+function labDone(xp, html){
+  G.st.lab=G.st.lab||{}; G.st.lab[lab.exp]=(G.st.lab[lab.exp]||0)+1; addXP(xp,false); checkBadges(); save();
+  $("#arcArea").innerHTML=labShell(html+`<p class="muted" style="margin-top:10px">+${xp} XP</p><div class="card-actions"><button class="btn" id="labAgain">Try again</button><button class="btn ghost" id="labMenuB">Another experiment</button></div>`);
+  labWire(); $("#labAgain").onclick=()=>labStart(lab.exp); $("#labMenuB").onclick=labMenu; confetti(80);
+}
+function labStart(k){
+  clearTimeout(lab.timer); lab.exp=k; lab.step=0; lab.data={}; arc.phase="lab";
+  ({murdock:labMurdock, digits:labDigits, muller:labMuller, bruner:labBruner})[k]();
+}
+// --- Murdock ---
+function labMurdock(){
+  const words=shuffle(LAB_WORDS).slice(0,15); lab.data.words=words;
+  $("#arcArea").innerHTML=labShell(`<div class="q">You'll see 15 words, one at a time. Just watch and try to remember them.</div><p class="muted">Afterwards, type all the words you can remember, in any order.</p><div class="card-actions"><button class="btn" id="labGo">Start</button></div>`); labWire();
+  $("#labGo").onclick=()=>{ let i=0; const show=()=>{ if(i>=words.length) return recall();
+      $("#arcArea").innerHTML=labShell(`<div class="lab-word" aria-live="assertive">${esc(words[i])}</div><p class="muted" style="text-align:center">Word ${i+1} of 15</p>`); labWire(); i++; lab.timer=setTimeout(show,1500); }; show(); };
+  const recall=()=>{ $("#arcArea").innerHTML=labShell(`<div class="q">Type every word you can remember, in any order.</div><textarea id="labIn" class="search" style="width:100%;min-height:110px" placeholder="e.g. apple, bridge, candle…"></textarea><div class="card-actions"><button class="btn" id="labOk">I'm done</button></div>`); labWire(); $("#labIn").focus();
+    $("#labOk").onclick=()=>{ const got=new Set(($("#labIn").value.toLowerCase().match(/[a-z]+/g)||[])); const hit=words.map(w=>got.has(w)); const n=hit.filter(Boolean).length;
+      const f=hit.slice(0,4).filter(Boolean).length, mid=hit.slice(4,11).filter(Boolean).length, l=hit.slice(11).filter(Boolean).length;
+      const ushape = (f/4+l/4)/2 > mid/7;
+      labDone(15+n*2, `<div class="q">You recalled <b>${n}/15</b> words.</div>
+        <div class="lab-curve">${hit.map((h,i)=>`<div class="lab-bar ${i<4?"p":i>10?"r":"m"}" title="${esc(words[i])}"><i style="height:${h?100:6}%"></i><span>${i+1}</span></div>`).join("")}</div>
+        <p class="muted" style="font-size:14px;margin:4px 0 10px">Position in the list → <span class="lab-key p">first 4</span> <span class="lab-key m">middle</span> <span class="lab-key r">last 4</span></p>
+        <p>First 4 words: <b>${f}/4</b> · Middle 7: <b>${mid}/7</b> · Last 4: <b>${l}/4</b></p>
+        <p>${ushape?"🎯 <b>Just like Murdock!</b> You remembered more from the start and end than the middle: a U-shaped serial position curve.":"Your curve isn't the classic U shape this time. That's normal for one person and one list: Murdock averaged lots of participants and lists."}</p>
+        <p class="muted">Murdock explained it with the multi-store model: early words were rehearsed into <b>LTM</b> (primacy effect), and the last words were still in <b>STM</b> when you started recalling (recency effect).</p>`); };
+  };
+}
+// --- Digit span ---
+function labDigits(){
+  const trials=[["u",9],["c",9],["u",10],["c",10]]; let t=0; const res=[];
+  const digits=n=>Array.from({length:n},(_,i)=>i===0?1+Math.floor(Math.random()*9):Math.floor(Math.random()*10)).join("");
+  const chunk=s=>s.match(/.{1,3}/g).join(" ");
+  $("#arcArea").innerHTML=labShell(`<div class="q">You'll see a long number for 4 seconds. Then type it back.</div><p class="muted">Four goes: some plain, some split into chunks.</p><div class="card-actions"><button class="btn" id="labGo">Start</button></div>`); labWire();
+  const run=()=>{ if(t>=trials.length) return done(); const [kind,n]=trials[t], s=digits(n);
+    $("#arcArea").innerHTML=labShell(`<p class="muted" style="text-align:center">Go ${t+1} of 4 · ${kind==="c"?"chunked":"not chunked"}</p><div class="lab-word lab-digits">${kind==="c"?chunk(s):s}</div>`); labWire();
+    lab.timer=setTimeout(()=>{ $("#arcArea").innerHTML=labShell(`<div class="q">Type the number you saw.</div><input id="labIn" class="search" inputmode="numeric" autocomplete="off" style="width:100%;font-size:22px;letter-spacing:2px"><div class="card-actions"><button class="btn" id="labOk">Check</button></div>`); labWire();
+      const go=()=>{ const v=($("#labIn").value.match(/\d/g)||[]).join(""); let c=0; for(let i=0;i<s.length;i++) if(v[i]===s[i]) c++; res.push({kind,n,c}); t++; run(); };
+      $("#labIn").focus(); $("#labOk").onclick=go; $("#labIn").onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); go(); } }; }, 4000); };
+  $("#labGo").onclick=run;
+  const done=()=>{ const u=res.filter(r=>r.kind==="u"), c=res.filter(r=>r.kind==="c"), su=u.reduce((a,r)=>a+r.c,0), sc=c.reduce((a,r)=>a+r.c,0), tot=u.reduce((a,r)=>a+r.n,0);
+    labDone(15+su+sc, `<div class="q">Digits remembered in the right place</div>
+      <div class="lab-vs"><div><b>${su}/${tot}</b><span>Not chunked</span></div><div><b>${sc}/${tot}</b><span>Chunked</span></div></div>
+      <p>${sc>su?"🎯 <b>Chunking helped you!</b>":sc===su?"It came out even this time.":"Chunking didn't help you this time, but on average it does."} Miller said STM holds about <b>7 ± 2</b> items. A 9 or 10-digit number is too many single items, but grouped into chunks of three it's only 3 or 4 items.</p>
+      <p class="muted">That's why phone numbers are written in chunks, like 0121 456 7890.</p>`); };
+}
+// --- Müller-Lyer ---
+function labMuller(){
+  const refs=[170,190,150]; let t=0; const errs=[];
+  const line=(x1,x2,y,out)=>{ const d=out?-16:16; return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}"/><polyline points="${x1+d},${y-13} ${x1},${y} ${x1+d},${y+13}"/><polyline points="${x2-d},${y-13} ${x2},${y} ${x2-d},${y+13}"/>`; };
+  const draw=(ref,len)=>`<svg class="lab-ml" viewBox="0 0 340 170" role="img" aria-label="Two lines with arrow fins"><g stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round">${line(170-ref/2,170+ref/2,50,false)}${line(170-len/2,170+len/2,125,true)}</g><text x="10" y="22" font-size="13" fill="currentColor" opacity=".6">A</text><text x="10" y="100" font-size="13" fill="currentColor" opacity=".6">B</text></svg>`;
+  const run=()=>{ if(t>=refs.length) return done(); const ref=refs[t]; let len=Math.round(ref*(Math.random()<.5?.7:1.3));
+    const render=()=>{ $("#arcArea").innerHTML=labShell(`<p class="muted" style="text-align:center">Go ${t+1} of 3</p><div class="q" style="text-align:center">Make line <b>B</b> the same length as line <b>A</b>.</div>${draw(ref,len)}
+      <input type="range" id="mlR" min="80" max="300" value="${len}" style="width:100%" aria-label="Length of line B">
+      <div class="card-actions" style="justify-content:center"><button class="btn ghost" id="mlM">− shorter</button><button class="btn ghost" id="mlP">+ longer</button><button class="btn" id="mlOk">They look the same</button></div>`); labWire();
+      const upd=v=>{ len=Math.max(80,Math.min(300,v)); $(".lab-ml").outerHTML=draw(ref,len); $("#mlR").value=len; };
+      $("#mlR").oninput=e=>upd(+e.target.value); $("#mlM").onclick=()=>upd(len-3); $("#mlP").onclick=()=>upd(len+3);
+      $("#mlOk").onclick=()=>{ errs.push((len-ref)/ref*100); t++; run(); }; };
+    render(); };
+  $("#arcArea").innerHTML=labShell(`<div class="q">Two lines, two kinds of fins. Adjust the bottom line until both lines look exactly the same length.</div><p class="muted">Trust your eyes: no measuring!</p><div class="card-actions"><button class="btn" id="labGo">Start</button></div>`); labWire();
+  $("#labGo").onclick=run;
+  const done=()=>{ const avg=errs.reduce((a,b)=>a+b,0)/errs.length, r=Math.round(Math.abs(avg));
+    labDone(25, `<div class="q">On average you made line B <b>${r}% ${avg<0?"shorter":"longer"}</b> than line A.</div>
+      <p>${avg<-3?"🎯 <b>The illusion fooled you!</b> The line with outward fins looks longer, so you made it shorter to compensate.":Math.abs(avg)<=3?"👀 <b>Eagle eyes!</b> The illusion barely fooled you.":"Interesting: you went the other way. Most people make line B shorter."}</p>
+      <p class="muted"><b>Gregory's explanation:</b> the fins look like the corners of buildings. Outward fins (B) look like the inside corner of a room, far away; inward fins (A) look like the outside corner of a building, close by. Our brain applies size constancy, so the 'further away' line looks longer.</p>`); };
+}
+// --- B or 13 ---
+function labBruner(){
+  const group=Math.random()<.5?"letters":"numbers", primes=group==="letters"?["L","M","Y","A"]:["16","10","12","17"];
+  const fig=`<svg class="lab-b13" viewBox="0 0 120 110" role="img" aria-label="An ambiguous figure"><g stroke="currentColor" stroke-width="9" fill="none" stroke-linecap="round"><line x1="40" y1="14" x2="40" y2="96"/><path d="M50 15 Q88 13 88 34 Q88 52 60 54 Q92 56 92 76 Q92 97 50 95"/></g></svg>`;
+  $("#arcArea").innerHTML=labShell(`<div class="q">You'll see five things flash up very quickly, one after another.</div><p class="muted">Watch closely, then say what the last one was.</p><div class="card-actions"><button class="btn" id="labGo">Start</button></div>`); labWire();
+  $("#labGo").onclick=()=>{ let i=0; const show=()=>{ if(i<primes.length){ $("#arcArea").innerHTML=labShell(`<div class="lab-word">${primes[i]}</div>`); labWire(); i++; lab.timer=setTimeout(show,800); }
+      else if(i===primes.length){ $("#arcArea").innerHTML=labShell(`<div class="lab-word">${fig}</div>`); labWire(); i++; lab.timer=setTimeout(show,450); }
+      else ask(); }; show(); };
+  const ask=()=>{ $("#arcArea").innerHTML=labShell(`<div class="q">What was the last thing you saw?</div><div class="card-actions" style="justify-content:center"><button class="btn" data-b="B" style="font-size:22px;min-width:90px">B</button><button class="btn" data-b="13" style="font-size:22px;min-width:90px">13</button></div>`); labWire();
+    document.querySelectorAll("[data-b]").forEach(b=>b.onclick=()=>{ const saw=b.dataset.b, expect=group==="letters"?"B":"13";
+      labDone(20, `<div class="q">You saw <b>${saw}</b>. You were in the <b>${group}</b> group.</div><div style="text-align:center;margin:6px 0">${fig}</div>
+        <p>${saw===expect?`🎯 <b>Perceptual set in action!</b> After seeing ${group}, your brain expected ${group==="letters"?"a letter":"a number"}.`:`You went against your set this time. Most people in the ${group} group see ${expect}.`}</p>
+        <p class="muted">The figure is ambiguous: it can be read as a B or a 13. Bruner and Minturn found that 92% of people shown letters first saw a B, and 83% shown numbers first saw 13. <b>Expectation</b> creates a perceptual set.</p>`); }); };
 }
 
 /* ================= PSYCHLE (daily key term) ================= */
@@ -4632,7 +4901,7 @@ function showYearPicker(){
     <div class="yp-btns"><button class="btn" data-yr="y10">Year 10</button><button class="btn" data-yr="y11">Year 11</button></div>
     <p style="text-align:center;margin:14px 0 0"><a class="linkbtn" href="${esc(location.pathname)}?teacher">🧑‍🏫 I'm a teacher</a>${YEAR?` · <button class="linkbtn" id="ypX">Cancel</button>`:""}</p></div>`;
   document.body.appendChild(o);
-  o.querySelectorAll("[data-yr]").forEach(b=>b.onclick=()=>{ G.year=b.dataset.yr; save(); location.replace(location.pathname); });
+  o.querySelectorAll("[data-yr]").forEach(b=>b.onclick=()=>{ G.year=b.dataset.yr; save(); location.replace(location.pathname+"?"+b.dataset.yr); });   // year in the address too, so it can't be lost
   const x=o.querySelector("#ypX"); if(x) x.onclick=()=>o.remove();
   o.querySelector("[data-yr]").focus();
 }
@@ -4691,6 +4960,12 @@ function modeLock(k){
   if(k==="order" && ORDERS.length<3) return "Needs a few more topics first."+when;
   if(k==="swipe" && !SWIPE.some(d=>d[3].length>=SWIPE_MIN)) return "Needs a few more topics first."+when;
   if(k==="terms" && TERMS.filter(x=>taught(x.t)).length<10) return "Needs a few more topics first."+when;
+  if(k==="synoptic" && YR==="y10") return "A Year 11 game: synoptic links come up in the 9-mark questions.";
+  if(k==="truths" && STUDY_FACTS.length<4) return "Needs a few more studies first."+when;
+  if(k==="examiner" && EXAMINER.filter(e=>taught(e[0])).length<3) return "Needs a few more topics first."+when;
+  if(k==="tdee" && TDEE.filter(e=>taught(e[0])).length<3) return "Needs a few more topics first."+when;
+  if(k==="synoptic" && SYNOPTIC.filter(l=>taught(l[0])&&taught(l[2])).length<6) return "Needs a few more topics first."+when;
+  if(k==="odd" && NX_BUILD.odd().length<4) return "Needs a few more topics first."+when;
   return "";
 }
 function demoFill(){
