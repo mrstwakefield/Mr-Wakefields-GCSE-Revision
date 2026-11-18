@@ -899,6 +899,12 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
 :root[data-skin="petowl"] .h1t{font-family:Georgia,"Times New Roman",serif;background:linear-gradient(180deg,#B88A1E,#7E8F3A);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.01em}
 :root[data-skin="petowl"] h1::before{content:"🦉 "}
 :root[data-skin="petowl"] .h1t::after{content:" 🏛️";color:initial;-webkit-text-fill-color:initial}
+:root[data-skin="petalien"]{--paper:#120B2E;--card:#1E1645;--ink:#F1EEFF;--muted:#B9B2E0;--line:#382C73;--soft:#271D57;--good:#8CF06A;--good-bg:#1D3A1A;--warn:#FFA27A;--warn-bg:#40261E;color-scheme:dark}
+:root[data-skin="petalien"] body{background-image:radial-gradient(circle,#fff 0 1.2px,transparent 1.6px),radial-gradient(circle,rgba(140,240,106,.9) 0 1.5px,transparent 2px),radial-gradient(ellipse 70% 40% at 85% 10%,rgba(255,111,216,.28),transparent 70%),radial-gradient(ellipse 60% 40% at 10% 60%,rgba(94,230,255,.20),transparent 70%);background-size:90px 90px,140px 140px,100% 100%,100% 100%;background-position:0 0,40px 70px,0 0,0 0}
+:root[data-skin="petalien"] .h1t{background:linear-gradient(90deg,#8CF06A,#5EE6FF 60%,#FF6FD8);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-skin="petalien"] h1::before{content:"👽 "}
+:root[data-skin="petalien"] .h1t::after{content:" 🛸";color:initial;-webkit-text-fill-color:initial}
+:root[data-skin="petalien"] .btn.good{color:#120B2E}
 /* Year 10 themes */
 :root[data-skin="y10sensory"]{--paper:#EAF7FF;--card:#FFFFFF;--ink:#0B2A3D;--muted:#3F6175;--line:#C6E4F5;--soft:#D9EFFB;--good:#0F7350;--good-bg:#D6F2E6;--warn:#A2421A;--warn-bg:#FCE6DA;color-scheme:light}
 :root[data-skin="y10sensory"] .h1t{background:linear-gradient(90deg,#0B2A3D,#1FA2E0 70%,#0B2A3D);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -2185,7 +2191,7 @@ const BADGES = [
   ["ragequit","🏃","Rage quit","End an Arcade game within 5 seconds",()=>!!G.flags.ragequit, "Nope. Not today."],
   ["fashion","🎨","Fashionista","Try 4 different themes",()=>Object.keys(G.skinsTried||{}).length>=4, "Dress for the job you want"],
   ["labpartner","🐀","Lab Partner","Try all four Psych Lab experiments",()=>Object.keys(G.st.lab||{}).length>=4],
-  ["petpals","🐝","Pet Pals","Unlock all six revision pets",()=>Object.keys((G.pet||{}).got||{}).length>=6],
+  ["petpals","🐝","Pet Pals","Unlock every revision pet",()=>Object.keys(PETS).every(k=>((G.pet||{}).got||{})[k])],
   ["examiner","📝","Chief Examiner","Mark 5 answers spot on in Be the Examiner",()=>(G.st.examinerBest||0)>=15],
   ["backup","💾","Backup buddy","Copy or download a save code",()=>!!G.flags.backup, "Better safe than sorry"],
   ["stan","⭐","Title clicker","Click the site title 5 times",()=>!!G.flags.stan, "Show the title some love"],
@@ -2247,6 +2253,7 @@ const THEMES = [
   {k:"petgoat", name:"🐐 Visual Cliff", lvl:0, pet:"goat", sw:["#1D2329","#EEF1F4","#9AA0AE"]},
   {k:"petfinch", name:"🐦 Galápagos", lvl:0, pet:"finch", sw:["#E6F6F4","#0E2F33","#E8B04A"]},
   {k:"petowl", name:"🦉 Socrates' Agora", lvl:0, pet:"owl", sw:["#F7F5EF","#2B2A1F","#7E8F3A"]},
+  {k:"petalien", name:"👽 Affordance Alien", lvl:0, pet:"alien", sw:["#120B2E","#F1EEFF","#8CF06A"]},
   {k:"wakefield", name:"✦ Wakefield Mode", lvl:1, secret:true, sw:["#0D2A1E","#F6F0DC","#E6C35C"]},
   {k:"retro", name:"👾 Electrical Impulse", note:"Brain & neuro: messages zap along the axon to the synapse", lvl:1, secret:true, scroll:"konami", sw:["#0A0A12","#39FF14","#FF2BD6"]},
   {k:"snowdome", name:"❄️ Snowdome", lvl:1, secret:true, scroll:"tamworth", sw:["#EFEBDD","#4E9C8E","#2B54C8"]},
@@ -3439,6 +3446,7 @@ const PETS = {
   goat:  {title:"Gibson's Mountain Goat", noun:"mountain goat", icon:"🐐", def:"Cliff", at:60, treat:["🌿","Grass"], pr:["him","he","his"], topic:"Perception", fact:"Gibson and Walk tested baby goats on the visual cliff too: none of them would step onto the 'deep' side."},
   finch: {title:"Darwin's Finch", noun:"finch", icon:"🐦", def:"Charlie", at:80, treat:["🌾","Seeds"], pr:["him","he","his"], topic:"Language, thought & communication", fact:"Darwin studied finches, and his evolutionary theory says facial expressions are innate and universal: we're born able to show emotions."},
   owl:   {title:"The Wise Owl", noun:"owl", icon:"🦉", def:"Socrates", at:100, treat:["📚","Books"], pr:["him","he","his"], topic:"", fact:"Named after Socrates, the ancient Greek philosopher who asked big questions about how we think and know things, long before psychology was a subject. Only students who know every single card get to meet him."},
+  alien: {title:"Affordance Alien", noun:"alien", icon:"👽", def:"Gibby", at:null, done:"Perception", treat:["✨","Stardust"], pr:["it","it","its"], topic:"Perception", fact:"Gibson said we see affordances: what objects are FOR, like a chair affording sitting. Gibby has just discovered chairs."},
 };
 const PET_STAGES = [[0,"Baby"],[100,"Little"],[400,"Teen"],[1000,"Grown-up"],[2500,"Wise"],[6000,"Legendary"]];
 function petInit(){ G.pet=G.pet||{name:"Professor Squeaks", born:today(), stage:0, mood:""}; const p=G.pet; p.kind=PETS[p.kind]?p.kind:"rat"; p.names=p.names||{}; if(!p.names.rat) p.names.rat = p.kind==="rat" ? p.name : "Professor Squeaks"; p.got=p.got||{rat:1};
@@ -3448,10 +3456,11 @@ function petInit(){ G.pet=G.pet||{name:"Professor Squeaks", born:today(), stage:
 const petKind = () => PETS[(G.pet&&G.pet.kind)||"rat"] ? (G.pet&&G.pet.kind)||"rat" : "rat";
 const petOf = () => PETS[petKind()];
 const knownPct = () => DATA.length ? knownTotal()/DATA.length*100 : 0;
-const petUnlocked = k => DEMO || k==="rat" || knownPct() >= PETS[k].at - 1e-9;
+const petUnlocked = k => DEMO || k==="rat" || (PETS[k].done ? topicFrac(PETS[k].done) >= 1-1e-9 : knownPct() >= PETS[k].at - 1e-9);
+const petNeed = k => PETS[k].done ? `Know all of ${TMAP[PETS[k].done].name}` : `${PETS[k].at}% of cards known`;
 const petStageName = (st,k) => `${PET_STAGES[st][1]} ${PETS[k||petKind()].noun}`;
 // later pets grow faster so they can still reach Legendary
-const PET_SCALE = {rat:1, bee:.8, teddy:.65, goat:.5, finch:.4, owl:.3};
+const PET_SCALE = {rat:1, bee:.8, teddy:.65, goat:.5, finch:.4, owl:.3, alien:.5};
 const petStagesFor = k => PET_STAGES.map(([v,n])=>[Math.round(v*(PET_SCALE[k]||1)), n]);
 const petAnswers = k => Math.max(0, (G.st.cards||0) - ((((G.pet||{}).start)||{})[k]||0));
 function petStage(k){ k=k||petKind(); const n=petAnswers(k); let s=0; petStagesFor(k).forEach(([v],i)=>{ if(n>=v) s=i; }); return s; }
@@ -3531,6 +3540,17 @@ const PET_ART = {
       <circle cx="66" cy="60" r="14" fill="#F5EBD6"/><circle cx="94" cy="60" r="14" fill="#F5EBD6"/>
       <path d="M76 68 l4 8 l4 -8z" fill="#E8A13A"/>`,
     face:()=>""},
+  alien:{ a:{e:[68,92,56], m:[80,72], hd:[80,26], nk:[80,82], ch:[92,98]},
+    body:()=>`<rect x="104" y="58" width="8" height="40" rx="3" fill="#8A5A34"/><rect x="50" y="94" width="66" height="8" rx="3" fill="#A86F42"/>
+      <rect x="54" y="100" width="6" height="18" fill="#8A5A34"/><rect x="106" y="100" width="6" height="18" fill="#8A5A34"/>
+      <path d="M70 104 q-4 8 -10 10 M90 104 q4 8 10 10" stroke="#7FC94A" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <ellipse cx="80" cy="90" rx="20" ry="16" fill="#9BE15D"/>
+      <path d="M62 86 q-12 2 -16 -8 M98 86 q12 2 16 -8" stroke="#9BE15D" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <path d="M68 34 l-10 -18" stroke="#7FC94A" stroke-width="3"/><circle cx="57" cy="14" r="5" fill="#FF6FD8"/>
+      <path d="M92 34 l10 -18" stroke="#7FC94A" stroke-width="3"/><circle cx="103" cy="14" r="5" fill="#FF6FD8"/>
+      <ellipse cx="80" cy="56" rx="32" ry="27" fill="#9BE15D"/>`,
+    face:()=>`<ellipse cx="62" cy="68" rx="4" ry="2.6" fill="#F6A6D8" opacity=".8"/><ellipse cx="98" cy="68" rx="4" ry="2.6" fill="#F6A6D8" opacity=".8"/>`,
+    eyes:(m)=>m==="sleepy"||m==="asleep"?null:`<ellipse cx="68" cy="56" rx="7" ry="9" fill="#1B1340"/><ellipse cx="92" cy="56" rx="7" ry="9" fill="#1B1340"/><circle cx="70" cy="52" r="2.4" fill="#fff"/><circle cx="94" cy="52" r="2.4" fill="#fff"/>`},
 };
 function petSVG(stage, mood, px, kind){
   kind = kind || petKind(); const A=PET_ART[kind]||PET_ART.rat, a=A.a;
@@ -3554,7 +3574,7 @@ function petLine(m){ const P=petOf(); return m==="new" ? `Meet <b>${esc(G.pet.na
 function petPickerHTML(){
   const pct=knownPct();
   return `<div class="pet-pick"><h4 style="margin:14px 0 6px">Your pets <small class="muted">· unlock more by knowing more cards (you know ${Math.floor(pct)}%)</small></h4><div class="pet-pick-row">${Object.entries(PETS).map(([k,P])=>{ const open=petUnlocked(k), on=k===petKind();
-    return `<button class="pet-opt ${on?"on":""}" data-pet="${k}" ${open?"":"disabled"} aria-pressed="${on}" title="${esc(P.title)}${P.fact?": "+esc(P.fact):""}"><span class="pet-opt-art">${petSVG(open?petStage(k):0, open?"happy":"asleep", 70, k)}</span><b>${esc(P.title)}</b><span>${open?(on?"✓ With you":"Tap to switch"):"🔒 "+P.at+"% of cards known"}</span></button>`; }).join("")}</div>
+    return `<button class="pet-opt ${on?"on":""}" data-pet="${k}" ${open?"":"disabled"} aria-pressed="${on}" title="${esc(P.title)}${P.fact?": "+esc(P.fact):""}"><span class="pet-opt-art">${petSVG(open?petStage(k):0, open?"happy":"asleep", 70, k)}</span><b>${esc(P.title)}</b><span>${open?(on?"✓ With you":"Tap to switch"):"🔒 "+petNeed(k)}</span></button>`; }).join("")}</div>
     ${petOf().fact?`<p class="muted" style="font-size:14px;margin:6px 0 0">💡 ${esc(petOf().fact)}</p>`:""}<p class="muted" style="font-size:13px;margin:4px 0 0">🎨 Each new pet also unlocks a matching theme.</p></div>`;
 }
 function petBoxHTML(){
@@ -3582,7 +3602,7 @@ function cleanName(raw){
   if(words.some(w=>NAME_BLOCK[1].some(b=>squash(b)===w)) || NAME_BLOCK[1].some(b=>squash(b)===flat)) return null;
   return n;
 }
-const PET_SAYS = {rat:"Squeak squeak! 🧀", bee:"Waggle waggle! 🌼", teddy:"Hehe, I messed up your counters!", goat:"Baa! Mind the cliff!", finch:"Tweet tweet! 🌾", owl:"Hoot! Know thyself. 🦉"};
+const PET_SAYS = {rat:"Squeak squeak! 🧀", bee:"Waggle waggle! 🌼", teddy:"Hehe, I messed up your counters!", goat:"Baa! Mind the cliff!", finch:"Tweet tweet! 🌾", owl:"Hoot! Know thyself. 🦉", alien:"Ooh, a chair! It affords sitting! 🪑"};
 function petTapDance(){
   const art=$("#petArt"); if(!art) return; const svg=art.querySelector(".pet-svg"), m=petMood(), asleep=m==="sleepy"||m==="asleep";
   if(svg){ svg.classList.remove("tapdance","tapsnooze"); void svg.getBoundingClientRect(); svg.classList.add(asleep?"tapsnooze":"tapdance"); setTimeout(()=>svg.classList.remove("tapdance","tapsnooze"),1300); }
@@ -3613,8 +3633,8 @@ function petCheck(){
   if((p.mood==="sleepy"||p.mood==="asleep") && (m==="happy"||m==="ecstatic")) setTimeout(()=>toast(P.icon,`${p.name} woke up!`,`${He}'s so happy to see you revising again.`,true),400);
   if(p.mood!=="ecstatic" && m==="ecstatic" && p.mood) setTimeout(()=>toast(P.icon,`${p.name} is ${petKind()==="bee"?"doing a waggle dance":"dancing"}!`,`Daily goal smashed. ${P.treat[0].repeat(3)}`,true),800);
   if(p.mood!==m){ p.mood=m; save(); }
-  if(!DEMO) Object.keys(PETS).forEach((k,i)=>{ if(!p.got[k] && petUnlocked(k)){ p.got[k]=1; p.start[k]=G.st.cards||0; p.stages[k]=0; save();
-    setTimeout(()=>{ toast(PETS[k].icon,`New pet: ${PETS[k].title}!`,`You know ${PETS[k].at}% of the cards. ${PETS[k].pr[1][0].toUpperCase()+PETS[k].pr[1].slice(1)} starts as a baby: switch pets in 📈 Progress, and try ${PETS[k].noun==="owl"?"his":"its"} new theme: ${(THEMES.find(t=>t.pet===k)||{}).name||""}.`,true); confetti(160); sfx("lvl"); },1500+i*900); } });
+  let newN=0; if(!DEMO) Object.keys(PETS).forEach(k=>{ if(!p.got[k] && petUnlocked(k)){ const i=newN++; p.got[k]=1; p.start[k]=G.st.cards||0; p.stages[k]=0; save();
+    setTimeout(()=>{ toast(PETS[k].icon,`New pet: ${PETS[k].title}!`,`${PETS[k].done?`You completed ${TMAP[PETS[k].done].name}!`:`You know ${PETS[k].at}% of the cards.`} ${PETS[k].pr[1][0].toUpperCase()+PETS[k].pr[1].slice(1)} starts as a baby: switch pets in 📈 Progress, and try ${PETS[k].noun==="owl"?"his":"its"} new theme: ${(THEMES.find(t=>t.pet===k)||{}).name||""}.`,true); confetti(160); sfx("lvl"); },1500+i*900); } });
   petHud();
 }
 
@@ -4949,7 +4969,7 @@ function scrollBoxHTML(){
     </div>`;
 }
 function themeCard(th){ const open=themeOpen(th), on=(G.skin||"")===th.k;
-  return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b>${th.year?`<span class="th-year">${th.year==="y10"?"Year 10 only":"Year 11 only"}</span>`:""}<span>${open?(on?"✓ In use":"Tap to use"):th.pet?`🔒 Unlock ${esc(PETS[th.pet].title)} (${PETS[th.pet].at}% known)`:th.scroll?"🔒 "+esc(SEALS[th.k].text):"🔒 Level "+th.lvl}</span></button>`; }
+  return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b>${th.year?`<span class="th-year">${th.year==="y10"?"Year 10 only":"Year 11 only"}</span>`:""}<span>${open?(on?"✓ In use":"Tap to use"):th.pet?`🔒 Unlock ${esc(PETS[th.pet].title)} (${esc(petNeed(th.pet))})`:th.scroll?"🔒 "+esc(SEALS[th.k].text):"🔒 Level "+th.lvl}</span></button>`; }
 function themesHTML(){
   const mine=THEMES.filter(th=>themeOpen(th)), sealed=THEMES.filter(th=>th.scroll && G.scrolls[th.scroll] && !themeOpen(th)), next=THEMES.filter(th=>!th.secret && themeMine(th) && !themeOpen(th));
   const hiddenSecrets=THEMES.filter(th=>th.secret && !themeOpen(th) && !(th.scroll && G.scrolls[th.scroll])).length;
