@@ -1854,7 +1854,7 @@ function rate(s){ const id=deck[pos], wasDue=isDue(id); sessionRes[id]=s; if(s==
 document.addEventListener("keydown",e=>{
   if(tab!=="cards" || cardMode==="gap" || e.target.matches("input,textarea") || e.metaKey||e.ctrlKey||e.altKey) return;
   if(pos>=deck.length) return;
-  if(cardMode==="mc"){ const oi=optKey(e.key); if(mcPicked===null && oi>=0 && oi<4){ e.preventDefault(); mcPick(oi); } else if(mcPicked!==null && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); mcNext(); } return; }
+  if(cardMode==="mc"){ const oi=optKey(e.key); if(mcPicked===null && oi>=0 && mcCur && oi<mcCur.opts.length){ e.preventDefault(); mcPick(oi); } else if(mcPicked!==null && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); mcNext(); } return; }
   if(e.key===" "){ e.preventDefault(); flip(); }
   else if(flipped && flipVerdict && (e.key==="Enter")) { e.preventDefault(); flipNext(); }
   else if(e.key==="ArrowRight"){ pos++; flipped=false; renderCard(); }
@@ -2366,14 +2366,24 @@ function mcSwap(a, ctx, skip){
     if(m){ const w=m[2], rep2=w[0]===w[0].toUpperCase() ? (w===w.toUpperCase()&&w.length>1 ? to.toUpperCase() : to[0].toUpperCase()+to.slice(1)) : to; if(skip) skip.add(x); return a.replace(re, m[1]+rep2); } } }
   return null;
 }
+// what shape is an answer? (name, list, yes/no, number, short term, phrase, sentence)
+function mcShape(a){ const s=a.trim(), n=s.split(/\s+/).filter(Boolean).length;
+  if(/^(true|false)\b/i.test(s)) return "truefalse";
+  if(/^(yes|no)\b/i.test(s)) return "yesno";
+  const isName=/\(\d{4}\)/.test(s) && s.replace(/\(.*?\)/g,"").trim().split(/\s+/).length<=6 || /^([A-Z][a-z'’]+|von|van|de|and|&|et|al\.?)( ([A-Z][a-z'’]+|von|van|de|and|&|et|al\.?))*$/.test(s) && n<=5;
+  if(isName && !/\b(the|a|an|is|are)\b/.test(s)) return "name";
+  if((s.match(/,/g)||[]).length>=2 && n<=16 && !/\b(is|are|was|were|because|so|that|which)\b/i.test(s)) return "list";
+  if(/\d/.test(s) && n<=4) return "number";
+  return n<=3 ? "term" : n<=7 ? "phrase" : "sentence"; }
+const mcShapeOK=(A,B)=> A===B || (["term","phrase"].includes(A)&&["term","phrase"].includes(B)) || (["phrase","sentence"].includes(A)&&["phrase","sentence"].includes(B));
 let MC_FEAT=null;
 function mcFeat(d){
   if(!MC_FEAT) MC_FEAT=new Map();
   let f=MC_FEAT.get(d.id); if(f) return f;
   const names=qNames(d.q), wc=d.a.split(/\s+/).filter(Boolean).length;
   let tmpl=d.q.toLowerCase(); names.forEach(n=>{ tmpl=tmpl.split(n.toLowerCase()).join("x"); }); tmpl=tmpl.replace(/\d+/g,"#").replace(/[^a-z#x ]/g," ").replace(/\s+/g," ").trim();
-  const qw=mcWords(tmpl.replace(/\bx\b/g,"")); ['give','what','which','describe','explain','study','one','two','called'].forEach(w=>qw.delete(w));
-  f={kind:qKind(d.q), qw, list:(d.a.match(/,/g)||[]).length>=2 && !/\b(is|are|was|were|so|because|that)\b/.test(d.a), dash:/ – /.test(d.a), open2:d.a.split(/\s+/).slice(0,2).join(" ").toLowerCase(), asksNum:/\b(how many|what percentage|what %|how long|how old|what age|what year|what decade|when did|when was|how much|how often|how big|how large|what proportion)\b/i.test(d.q), names, tmpl, t4:tmpl.split(" ").slice(0,4).join(" "), pol:mcPol(d.q), wc, first:d.a.split(/\s+/)[0].toLowerCase(), last:(d.a.toLowerCase().replace(/\(.*?\)/g,"").trim().match(/[a-z'-]+$/)||[""])[0], num:/\d/.test(d.a), nameLike:mcNameLike(d.a), words:mcWords(d.a)};
+  const qw=mcWords(tmpl.replace(/\bx\b/g,"")), qecho=new Set([...mcWords(d.q)].filter(w=>w.length>5 && mcWords(d.a).has(w))); ['give','what','which','describe','explain','study','one','two','called'].forEach(w=>qw.delete(w));
+  f={kind:qKind(d.q), qw, qecho, list:(d.a.match(/,/g)||[]).length>=2 && !/\b(is|are|was|were|so|because|that)\b/.test(d.a), dash:/ – /.test(d.a), open2:d.a.split(/\s+/).slice(0,2).join(" ").toLowerCase(), asksNum:/\b(how many|what percentage|how long|how old|what age|what year|what decade|when did|when was|how much|how often|how big|how large|what proportion)\b|\bwhat %|\bwhat percent/i.test(d.q), names, tmpl, t4:tmpl.split(" ").slice(0,4).join(" "), pol:mcPol(d.q), wc, shape:mcShape(d.a), first:d.a.split(/\s+/)[0].toLowerCase(), last:(d.a.toLowerCase().replace(/\(.*?\)/g,"").trim().match(/[a-z'-]+$/)||[""])[0], num:/\d/.test(d.a), nameLike:mcNameLike(d.a), words:mcWords(d.a)};
   MC_FEAT.set(d.id,f); return f;
 }
 // near-miss numbers for number answers: "65%" -> "35%", "80%" …
@@ -2397,6 +2407,7 @@ function mcFor(d, rng=Math.random){
   const F=mcFeat(d), seen=new Set([d.a.toLowerCase()]), picks=[];
   // number questions: invent near-miss numbers
   if(F.asksNum && F.num) for(const v of mcNumbers(d.a,rng)){ if(picks.length<3 && !seen.has(v.toLowerCase())){ seen.add(v.toLowerCase()); picks.push(v); } }
+  if(F.dash && F.wc>8 && / or /i.test(d.q)){ const [head,...rest]=d.a.split(" – "); const sw=mcSwap(head, d.q+" "+head); if(sw && !seen.has((sw+" – "+rest.join(" – ")).toLowerCase())){ const v=sw+" – "+rest.join(" – "); seen.add(v.toLowerCase()); picks.push(v); } }
   if(F.wc<=8 && !F.asksNum){ const used=new Set(), ctx=d.q+" "+d.a;
     for(let i=0;i<2;i++){ const sw=mcSwap(d.a, ctx, used); if(sw && sw.toLowerCase()!==d.a.toLowerCase() && !seen.has(sw.toLowerCase())){ seen.add(sw.toLowerCase()); picks.push(sw); } }
     if(picks.length && / or /i.test(d.q) && F.wc<=5 && !/\bboth\b/i.test(d.a)) for(const x of ["Both equally","Neither"]) if(picks.length<3){ seen.add(x.toLowerCase()); picks.push(x); } }
@@ -2407,14 +2418,15 @@ function mcFor(d, rng=Math.random){
       const C=mcFeat(x);
       if(C.kind===F.kind && /^(eval|find|aim|method|apply|eg)$/.test(F.kind) && C.tmpl!==F.tmpl && [...C.names].some(n=>F.names.has(n))) continue;   // another answer about the same study could also be right
       if(C.tmpl===F.tmpl && [...C.names].some(n=>F.names.has(n)) && /^(eval|find|eg|apply)$/.test(F.kind)) continue;
-      let inter=0; C.words.forEach(w=>{ if(F.words.has(w)) inter++; });
-      if(F.words.size && inter/Math.max(1,Math.min(F.words.size,C.words.size))>=.6) continue;   // near-duplicate of the right answer
+      let cu=0, fu=0; C.words.forEach(w=>{ if(!F.words.has(w)) cu++; }); F.words.forEach(w=>{ if(!C.words.has(w)) fu++; });
+      if(F.words.size && cu<=1 && fu<=1) continue;   // a paraphrase of the right answer (could also be right)
       let s=rng()*25;
       if(C.kind!==F.kind) s+=350;
       if(C.tmpl===F.tmpl) s-=250; else if(C.t4===F.t4) s-=120;
       if(F.pol && C.pol && F.pol!==C.pol) s+=500; else if(F.pol && !C.pol) s+=150;
-      s += x.t===d.t ? -70 : 40;
-      s += Math.abs(Math.log((C.wc+1)/(F.wc+1)))*140;
+      s += x.t===d.t ? -70 : (x.t==="Exam skills"||d.t==="Exam skills" ? 40 : 450);
+      if(!mcShapeOK(F.shape,C.shape)) s+=600;
+      { const r=Math.max(C.wc,F.wc)/Math.max(1,Math.min(C.wc,F.wc)); s += Math.abs(Math.log((C.wc+1)/(F.wc+1)))*140 + (r>=2.5 && Math.abs(C.wc-F.wc)>=4 ? 350 : 0); }
       if(F.wc<=3 && C.wc>5) s+=800;
       if(F.wc>=12 && C.wc<6) s+=400;
       if(C.first===F.first) s-=40;
@@ -2424,6 +2436,7 @@ function mcFor(d, rng=Math.random){
       if(C.list!==F.list) s+=250;
       if(C.dash===F.dash && F.dash) s-=60;
       let qs=0; C.qw.forEach(w=>{ if(F.qw.has(w)) qs++; }); s-=Math.min(3,qs)*60;
+      let echo=0; F.qecho.forEach(w=>{ if(C.words.has(w)) echo++; }); s-=Math.min(2,echo)*120;
       if(C.num!==F.num) s+=150;
       if(F.nameLike!==C.nameLike) s+=400;
       if(F.kind==="name" && C.kind==="name") s-=200;
@@ -2436,7 +2449,7 @@ function mcFor(d, rng=Math.random){
         cands.push([s, cap ? term[0].toUpperCase()+term.slice(1) : term]); } }
     cands.sort((a,b)=>a[0]-b[0]);
     const top=cands.slice(0,8); for(let i=top.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [top[i],top[j]]=[top[j],top[i]]; }
-    for(const [,a] of top.concat(cands.slice(8))){ const k=a.toLowerCase(); if(!seen.has(k)){ seen.add(k); picks.push(a); } if(picks.length===3) break; }
+    for(const [sc,a] of top.concat(cands.slice(8))){ const k=a.toLowerCase(); if(sc>260 && picks.length>=2) break; if(!seen.has(k)){ seen.add(k); picks.push(a); } if(picks.length===3) break; }
   }
   const opts=shuffleR([d.a,...picks],rng);
   return {opts, correct:opts.indexOf(d.a)};
@@ -3912,7 +3925,7 @@ function renderTrophies(){
 
 document.addEventListener("keydown",e=>{
   if(tab!=="arcade" || arc.phase!=="play" || arc.mode==="terms" || e.target.matches("input,textarea") || e.metaKey||e.ctrlKey||e.altKey) return;
-  const oi=optKey(e.key); if(oi>=0 && oi<4){ e.preventDefault(); arcPick(oi); }
+  const oi=optKey(e.key); if(oi>=0 && oi<4 && arc.cur && oi<arc.cur.opts.length){ e.preventDefault(); arcPick(oi); }
 });
 $("#backupLink").onclick=()=>{ goTab("trophies","save"); setTimeout(()=>$("#saveCopy").scrollIntoView({behavior:"smooth",block:"center"}),50); };
 
