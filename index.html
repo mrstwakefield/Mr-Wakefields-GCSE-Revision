@@ -3619,7 +3619,7 @@ function petBoxHTML(){
       <p class="muted" style="margin:6px 0 0;font-size:15px">${P.treat[1]} today: ${P.treat[0].repeat(treats)}${`<span style='opacity:.25'>${P.treat[0]}</span>`.repeat(3-treats)} <span style="font-size:13px">(one for every 10 answers)</span></p></div>
     ${petPickerHTML()}</div>`;
 }
-const NAME_BLOCK = (()=>{ try{ return JSON.parse(atob("W1siZnVjayIsICJmdWsiLCAiZmNrIiwgInNoaXQiLCAiY3VudCIsICJiaXRjaCIsICJiYXN0YXJkIiwgIndhbmsiLCAidHdhdCIsICJwdXNzeSIsICJzbHV0IiwgIndob3JlIiwgIm5pZ2ciLCAibmlnZ2EiLCAiZmFnZyIsICJmYWdnb3QiLCAicmV0YXJkIiwgInJhcGUiLCAicmFwaXN0IiwgInBvcm4iLCAicGVuaXMiLCAidmFnaW5hIiwgImRpbGRvIiwgImJvbGxvY2siLCAiYmVsbGVuZCIsICJ0b3NzZXIiLCAibm9uY2UiLCAic3Bhc3RpYyIsICJuYXppIiwgImhpdGxlciIsICJqaXp6IiwgImJ1a2tha2UiLCAiY2xpdCIsICJzaGFnIiwgImJ1Z2dlciIsICJtaW5nZSIsICJrbm9iIiwgIm1vdGhlcmYiLCAic2gxdCIsICJwYWVkbyIsICJwZWRvIiwgImluY2VsIiwgImhvcm55IiwgImJvb2IiLCAidGVzdGljbGUiLCAic2Nyb3QiLCAiZGlja2hlYWQiLCAiY29ja3N1Y2siLCAiYXJzZWhvbGUiLCAiYXNzaG9sZSIsICJ3YW5rZXIiLCAibWlsZiIsICJvbmx5ZmFucyIsICJreXMiLCAia2lsbHlvdXJzZWxmIiwgInN1aWNpZGUiLCAiY29vbiIsICJjaGluayIsICJnb29rIiwgImtpa2UiLCAid29nIiwgInRyYW5ueSIsICJkeWtlIiwgImhvbW8iXSwgWyJkaWNrIiwgImNvY2siLCAiYXJzZSIsICJhc3MiLCAidGl0IiwgInRpdHMiLCAidGl0dHkiLCAiY3VtIiwgInNleCIsICJzZXh5IiwgImFuYWwiLCAiYW51cyIsICJwb28iLCAicG9vcCIsICJwZWUiLCAicGlzcyIsICJwcmljayIsICJjcmFwIiwgInNsYWciLCAic2thbmsiLCAiaG9lIiwgImhvIiwgInNwYXoiLCAicGFraSIsICJnYXkiLCAibGVzYm8iLCAiYnV0dCIsICJidW0iLCAiYmFsbHMiLCAibnV0IiwgIm51dHMiLCAiZmFydCIsICJ0dXJkIiwgImRhbW4iLCAiaGVsbCIsICJ3aWxseSIsICJ3ZWUiLCAiYmoiLCAiZGsiLCAic3RmdSIsICJ3dGYiLCAiZnUiLCAiZm1sIiwgImxtZmFvIiwgImhvcmUiLCAidGhvdCIsICJzaW1wIiwgImR1bWIiLCAiaWRpb3QiLCAic3R1cGlkIiwgInVnbHkiLCAiZmF0IiwgImxvc2VyIiwgIm1vcm9uIiwgInN1Y2tzIiwgInNtZWxseSIsICJzdGlua3kiLCAia2lsbCIsICJkaWUiLCAiZGVhZCIsICJtdXJkZXIiLCAiZ3VuIiwgImJvbWIiLCAiZHJ1Z3MiLCAid2VlZCIsICJjcmFjayJdXQ==")); }catch(e){ return [[],[]]; } })();
+const NAME_BLOCK = (()=>{ try{ return JSON.parse(atob("W1siZnVjayIsICJmdWsiLCAiZmNrIiwgInNoaXQiLCAiY3VudCIsICJiaXRjaCIsICJiYXN0YXJkIiwgIndhbmsiLCAidHdhdCIsICJwdXNzeSIsICJzbHV0IiwgIndob3JlIiwgIm5pZ2ciLCAibmlnZ2EiLCAiZmFnZyIsICJmYWdnb3QiLCAicmV0YXJkIiwgInJhcGUiLCAicmFwaXN0IiwgInBvcm4iLCAicGVuaXMiLCAidmFnaW5hIiwgImRpbGRvIiwgImJvbGxvY2siLCAiYmVsbGVuZCIsICJ0b3NzZXIiLCAibm9uY2UiLCAic3Bhc3RpYyIsICJuYXppIiwgImhpdGxlciIsICJqaXp6IiwgImJ1a2tha2UiLCAiY2xpdCIsICJzaGFnIiwgImJ1Z2dlciIsICJtaW5nZSIsICJrbm9iIiwgIm1vdGhlcmYiLCAic2gxdCIsICJwYWVkbyIsICJwZWRvIiwgImluY2VsIiwgImhvcm55IiwgImJvb2IiLCAidGVzdGljbGUiLCAic2Nyb3QiLCAiZGlja2hlYWQiLCAiY29ja3N1Y2siLCAiYXJzZWhvbGUiLCAiYXNzaG9sZSIsICJ3YW5rZXIiLCAibWlsZiIsICJvbmx5ZmFucyIsICJreXMiLCAia2lsbHlvdXJzZWxmIiwgInN1aWNpZGUiLCAiY29vbiIsICJjaGluayIsICJnb29rIiwgImtpa2UiLCAid29nIiwgInRyYW5ueSIsICJkeWtlIiwgImhvbW8iLCAic21lZ21hIiwgInNtZWciLCAic3B1bmsiLCAibnVkZSIsICJibG93am9iIiwgImhhbmRqb2IiLCAiZmFubnkiLCAidGVzdGljIiwgInNwZXJtIiwgIm9yZ2FzbSIsICJib25lciJdLCBbImRpY2siLCAiY29jayIsICJhcnNlIiwgImFzcyIsICJ0aXQiLCAidGl0cyIsICJ0aXR0eSIsICJjdW0iLCAic2V4IiwgInNleHkiLCAiYW5hbCIsICJhbnVzIiwgInBvbyIsICJwb29wIiwgInBlZSIsICJwaXNzIiwgInByaWNrIiwgImNyYXAiLCAic2xhZyIsICJza2FuayIsICJob2UiLCAiaG8iLCAic3BheiIsICJwYWtpIiwgImdheSIsICJsZXNibyIsICJidXR0IiwgImJ1bSIsICJiYWxscyIsICJudXQiLCAibnV0cyIsICJmYXJ0IiwgInR1cmQiLCAiZGFtbiIsICJoZWxsIiwgIndpbGx5IiwgIndlZSIsICJiaiIsICJkayIsICJzdGZ1IiwgInd0ZiIsICJmdSIsICJmbWwiLCAibG1mYW8iLCAiaG9yZSIsICJ0aG90IiwgInNpbXAiLCAiZHVtYiIsICJpZGlvdCIsICJzdHVwaWQiLCAidWdseSIsICJmYXQiLCAibG9zZXIiLCAibW9yb24iLCAic3Vja3MiLCAic21lbGx5IiwgInN0aW5reSIsICJraWxsIiwgImRpZSIsICJkZWFkIiwgIm11cmRlciIsICJndW4iLCAiYm9tYiIsICJkcnVncyIsICJ3ZWVkIiwgImNyYWNrIiwgIm5vYiIsICJmYWciLCAibmlnIiwgImZhcCIsICJzZW1lbiJdXQ==")); }catch(e){ return [[],[]]; } })();
 function cleanName(raw){
   // returns a tidy name, or null if it's empty, uses odd characters or contains a rude word
   const n=String(raw||"").replace(/\s+/g," ").trim().slice(0,20);
@@ -4154,6 +4154,7 @@ function wireReport(){
   n.oninput=()=>{ G.name=n.value.trim().slice(0,24); save(); };
   $("#repCopy").onclick=async()=>{
     if(!G.name){ n.focus(); $("#repMsg").innerHTML='<span style="color:var(--warn)">Type your name or initials first, so your teacher knows it\'s you.</span>'; return; }
+    if(!cleanName(G.name)){ n.focus(); n.select(); $("#repMsg").innerHTML='<span style="color:var(--warn)">Please use your real name or initials (letters only), so your teacher knows it\'s you.</span>'; return; }
     const c=makeReport();
     try{ await navigator.clipboard.writeText(c); $("#repMsg").innerHTML=`<span style="color:var(--good)">Copied ✓</span> <code>${esc(c)}</code>`; }
     catch(e){ $("#repMsg").innerHTML=`Copy this code: <code>${esc(c)}</code>`; }
@@ -4894,7 +4895,7 @@ function openCert(id){
       <div class="cert-seal">⛲</div>
       <div class="cert-kick">Certificate of Achievement</div>
       <p class="cert-small">This is to certify that</p>
-      <div class="cert-name" id="certNameOut">${esc(G.name||"Your name")}</div>
+      <div class="cert-name" id="certNameOut">${esc((G.name&&cleanName(G.name))||"Your name")}</div>
       <p class="cert-small">has achieved</p>
       <div class="cert-ach">${esc(c.title)}</div>
       <p class="cert-small">in <b>Mr Wakefield's Fount of Knowledge and Wisdom</b> · GCSE Psychology</p>
@@ -4904,7 +4905,7 @@ function openCert(id){
   const close=()=>{ o.remove(); document.body.classList.remove("printing-cert"); document.removeEventListener("keydown",k,true); };
   const k=e=>{ if(e.key==="Escape"){ e.stopPropagation(); close(); } };
   document.addEventListener("keydown",k,true);
-  $("#certName").oninput=e=>{ G.name=e.target.value.trim().slice(0,24); save(); $("#certNameOut").textContent=G.name||"Your name"; };
+  $("#certName").oninput=e=>{ G.name=e.target.value.trim().slice(0,24); save(); const okN=!G.name||cleanName(G.name); $("#certNameOut").textContent=(okN&&G.name)||"Your name"; e.target.setCustomValidity(okN?"":"Please use your real name (letters only)."); e.target.title=okN?"":"Please use your real name (letters only)."; };
   $("#certClose").onclick=close;
   o.onclick=e=>{ if(e.target===o) close(); };
   $("#certPrint").onclick=()=>{ if(!G.name){ $("#certName").focus(); return; } document.body.classList.add("printing-cert"); window.print(); setTimeout(()=>document.body.classList.remove("printing-cert"),500); };
