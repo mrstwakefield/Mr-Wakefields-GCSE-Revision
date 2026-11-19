@@ -904,6 +904,16 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
 :root[data-skin="petalien"] h1::before{content:"👽 "}
 :root[data-skin="petalien"] .h1t::after{content:" 🛸";color:initial;-webkit-text-fill-color:initial}
 :root[data-skin="petalien"] .btn.good{color:#120B2E}
+:root[data-skin="petrabbit"]{--paper:#E3F8EA;--card:#FFFFFF;--ink:#1F1635;--muted:#4A3F63;--line:#B9E6C8;--soft:#F1E6FA;--good:#13704E;--good-bg:#D6F0E3;--warn:#9A3A12;--warn-bg:#FCE2D2;color-scheme:light}
+:root[data-skin="petrabbit"] body{background-image:radial-gradient(circle,rgba(255,123,176,.45) 0 6px,transparent 7px),radial-gradient(circle,rgba(255,123,176,.45) 0 6px,transparent 7px),radial-gradient(circle,rgba(150,110,220,.30) 0 6px,transparent 7px),radial-gradient(circle,rgba(150,110,220,.30) 0 6px,transparent 7px);background-size:64px 64px;background-position:0 0,18px 0,32px 32px,50px 32px}
+:root[data-skin="petrabbit"] .h1t{background:linear-gradient(90deg,#E8457F,#8A5BD6 50%,#E8457F);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-skin="petrabbit"] h1::before{content:"🐇 "}
+:root[data-skin="petrabbit"] .h1t::after{content:" 🐇";color:initial;-webkit-text-fill-color:initial;opacity:.45}
+:root[data-skin="petsnake"]{--paper:#0E2416;--card:#163222;--ink:#ECF8E8;--muted:#AFCBB2;--line:#28503A;--soft:#1C3D2A;--good:#F5D547;--good-bg:#3A3414;--warn:#FFA27A;--warn-bg:#40261E;color-scheme:dark}
+:root[data-skin="petsnake"] body{background-image:radial-gradient(ellipse 18px 12px at 50% 100%,rgba(79,175,94,.22) 0 60%,transparent 62%),radial-gradient(ellipse 18px 12px at 50% 100%,rgba(79,175,94,.22) 0 60%,transparent 62%);background-size:36px 22px;background-position:0 0,18px 11px}
+:root[data-skin="petsnake"] .h1t{background:repeating-linear-gradient(90deg,#F5D547 0 .7em,#7BE08A .7em 1.4em);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-skin="petsnake"] h1::before{content:"🐍 "}
+:root[data-skin="petsnake"] .btn.good{color:#0E2416}
 /* Year 10 themes */
 :root[data-skin="y10sensory"]{--paper:#EAF7FF;--card:#FFFFFF;--ink:#0B2A3D;--muted:#3F6175;--line:#C6E4F5;--soft:#D9EFFB;--good:#0F7350;--good-bg:#D6F2E6;--warn:#A2421A;--warn-bg:#FCE6DA;color-scheme:light}
 :root[data-skin="y10sensory"] .h1t{background:linear-gradient(90deg,#0B2A3D,#1FA2E0 70%,#0B2A3D);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -2253,6 +2263,8 @@ const THEMES = [
   {k:"petfinch", name:"🐦 Galápagos", lvl:0, pet:"finch", sw:["#E6F6F4","#0E2F33","#E8B04A"]},
   {k:"petowl", name:"🦉 Socrates' Agora", lvl:0, pet:"owl", sw:["#F7F5EF","#2B2A1F","#7E8F3A"]},
   {k:"petalien", name:"👽 Affordance Alien", lvl:0, pet:"alien", sw:["#120B2E","#F1EEFF","#8CF06A"]},
+  {k:"petrabbit", name:"🐇 Replication Rabbit", lvl:0, pet:"rabbit", sw:["#E3F8EA","#1F1635","#FF7BB0"]},
+  {k:"petsnake", name:"🐍 Serial Position", lvl:0, pet:"snake", sw:["#0E2416","#ECF8E8","#F5D547"]},
   {k:"wakefield", name:"✦ Wakefield Mode", lvl:1, secret:true, sw:["#0D2A1E","#F6F0DC","#E6C35C"]},
   {k:"retro", name:"👾 Electrical Impulse", note:"Brain & neuro: messages zap along the axon to the synapse", lvl:1, secret:true, scroll:"konami", sw:["#0A0A12","#39FF14","#FF2BD6"]},
   {k:"snowdome", name:"❄️ Snowdome", lvl:1, secret:true, scroll:"tamworth", sw:["#EFEBDD","#4E9C8E","#2B54C8"]},
@@ -3446,6 +3458,8 @@ const PETS = {
   finch: {title:"Darwin's Finch", noun:"finch", icon:"🐦", def:"Charlie", at:80, treat:["🌾","Seeds"], pr:["him","he","his"], topic:"Language, thought & communication", fact:"Darwin studied finches, and his evolutionary theory says facial expressions are innate and universal: we're born able to show emotions."},
   owl:   {title:"The Wise Owl", noun:"owl", icon:"🦉", def:"Socrates", at:100, treat:["📚","Books"], pr:["him","he","his"], topic:"", fact:"Named after Socrates, the ancient Greek philosopher who asked big questions about how we think and know things, long before psychology was a subject. Only students who know every single card get to meet him."},
   alien: {title:"Affordance Alien", noun:"alien", icon:"👽", def:"Gibby", at:null, done:"Perception", treat:["✨","Stardust"], pr:["it","it","its"], topic:"Perception", fact:"Gibson said we see affordances: what objects are FOR, like a chair affording sitting. Gibby has just discovered chairs."},
+  rabbit:{title:"Replication Rabbit", noun:"rabbit", icon:"🐇", def:"Replica", at:null, streak:50, treat:["🥕","Carrots"], pr:["him","he","his"], topic:"RM", fact:"Replication means repeating a study and getting the same results. 50 right in a row? That's reliable!"},
+  snake: {title:"Serial Position Snake", noun:"snake", icon:"🐍", def:"Murdock", at:null, streak:100, treat:["🥚","Eggs"], pr:["him","he","his"], topic:"Memory", fact:"Murdock found we remember the start and end of a list best: the serial position effect. 100 in a row is one very long list!"},
 };
 const PET_STAGES = [[0,"Baby"],[100,"Little"],[400,"Teen"],[1000,"Grown-up"],[2500,"Wise"],[6000,"Legendary"]];
 function petInit(){ G.pet=G.pet||{name:"Professor Squeaks", born:today(), stage:0, mood:""}; const p=G.pet; p.kind=PETS[p.kind]?p.kind:"rat"; p.names=p.names||{}; if(!p.names.rat) p.names.rat = p.kind==="rat" ? p.name : "Professor Squeaks"; p.got=p.got||{rat:1};
@@ -3455,11 +3469,11 @@ function petInit(){ G.pet=G.pet||{name:"Professor Squeaks", born:today(), stage:
 const petKind = () => PETS[(G.pet&&G.pet.kind)||"rat"] ? (G.pet&&G.pet.kind)||"rat" : "rat";
 const petOf = () => PETS[petKind()];
 const knownPct = () => DATA.length ? knownTotal()/DATA.length*100 : 0;
-const petUnlocked = k => DEMO || k==="rat" || (PETS[k].done ? topicFrac(PETS[k].done) >= 1-1e-9 : knownPct() >= PETS[k].at - 1e-9);
-const petNeed = k => PETS[k].done ? `Know all of ${TMAP[PETS[k].done].name}` : `${PETS[k].at}% of cards known`;
+const petUnlocked = k => DEMO || k==="rat" || (PETS[k].streak ? (G.st.combo||0) >= PETS[k].streak : PETS[k].done ? topicFrac(PETS[k].done) >= 1-1e-9 : knownPct() >= PETS[k].at - 1e-9);
+const petNeed = k => PETS[k].streak ? `${PETS[k].streak} correct in a row` : PETS[k].done ? `Know all of ${TMAP[PETS[k].done].name}` : `${PETS[k].at}% of cards known`;
 const petStageName = (st,k) => `${PET_STAGES[st][1]} ${PETS[k||petKind()].noun}`;
 // later pets grow faster so they can still reach Legendary
-const PET_SCALE = {rat:1, bee:.8, teddy:.65, goat:.5, finch:.4, owl:.3, alien:.5};
+const PET_SCALE = {rat:1, bee:.8, teddy:.65, goat:.5, finch:.4, owl:.3, alien:.5, rabbit:.6, snake:.45};
 const petStagesFor = k => PET_STAGES.map(([v,n])=>[Math.round(v*(PET_SCALE[k]||1)), n]);
 const petAnswers = k => Math.max(0, (G.st.cards||0) - ((((G.pet||{}).start)||{})[k]||0));
 function petStage(k){ k=k||petKind(); const n=petAnswers(k); let s=0; petStagesFor(k).forEach(([v],i)=>{ if(n>=v) s=i; }); return s; }
@@ -3550,6 +3564,23 @@ const PET_ART = {
       <ellipse cx="80" cy="56" rx="32" ry="27" fill="#9BE15D"/>`,
     face:()=>`<ellipse cx="62" cy="68" rx="4" ry="2.6" fill="#F6A6D8" opacity=".8"/><ellipse cx="98" cy="68" rx="4" ry="2.6" fill="#F6A6D8" opacity=".8"/>`,
     eyes:(m)=>m==="sleepy"||m==="asleep"?null:`<ellipse cx="68" cy="56" rx="7" ry="9" fill="#1B1340"/><ellipse cx="92" cy="56" rx="7" ry="9" fill="#1B1340"/><circle cx="70" cy="52" r="2.4" fill="#fff"/><circle cx="94" cy="52" r="2.4" fill="#fff"/>`},
+  rabbit:{ a:{e:[63,77,58], m:[70,70], hd:[70,40], nk:[72,82], ch:[98,96]},
+    body:()=>`<g opacity=".28" transform="translate(52 6)"><ellipse cx="86" cy="92" rx="24" ry="19" fill="#C9B8E8"/><circle cx="72" cy="66" r="17" fill="#C9B8E8"/><ellipse cx="65" cy="40" rx="5" ry="16" fill="#C9B8E8"/><ellipse cx="79" cy="38" rx="5" ry="16" fill="#C9B8E8"/></g>
+      <circle cx="116" cy="98" r="9" fill="#FFFFFF" stroke="#E4DDEB" stroke-width="2"/>
+      <ellipse cx="88" cy="92" rx="30" ry="23" fill="#F1EEF4"/>
+      <ellipse cx="72" cy="112" rx="12" ry="5" fill="#E4DDEB"/><ellipse cx="102" cy="112" rx="12" ry="5" fill="#E4DDEB"/>
+      <ellipse cx="60" cy="26" rx="7" ry="22" fill="#F1EEF4" transform="rotate(-8 60 26)"/><ellipse cx="60" cy="27" rx="3.5" ry="16" fill="#F7B8CB" transform="rotate(-8 60 27)"/>
+      <ellipse cx="81" cy="24" rx="7" ry="22" fill="#F1EEF4" transform="rotate(8 81 24)"/><ellipse cx="81" cy="25" rx="3.5" ry="16" fill="#F7B8CB" transform="rotate(8 81 25)"/>
+      <circle cx="70" cy="60" r="22" fill="#FAF8FC"/>`,
+    face:()=>`<ellipse cx="56" cy="66" rx="4" ry="2.6" fill="#F7B8CB" opacity=".9"/><ellipse cx="84" cy="66" rx="4" ry="2.6" fill="#F7B8CB" opacity=".9"/><path d="M67 64 l3 3 l3 -3z" fill="#E88AA2"/>
+      <g stroke="#B9AFC6" stroke-width="1.3"><path d="M60 67 l-16 -2"/><path d="M60 70 l-16 3"/><path d="M80 67 l16 -2"/><path d="M80 70 l16 3"/></g>`},
+  snake:{ a:{e:[116,130,54], m:[123,65], hd:[123,38], nk:[112,74], ch:[58,100]},
+    body:()=>`<path d="M18 104 C 36 84, 64 120, 90 102 S 132 92, 118 72" stroke="#4FAF5E" stroke-width="20" stroke-linecap="round" fill="none"/>
+      <path d="M18 104 C 36 84, 64 120, 90 102 S 132 92, 118 72" stroke="#F5D547" stroke-width="20" stroke-dasharray="5 15" fill="none"/>
+      <path d="M18 104 C 36 84, 64 120, 90 102 S 132 92, 118 72" stroke="#8FD99A" stroke-width="5" stroke-linecap="round" fill="none" opacity=".6" transform="translate(0 4)"/>
+      <path d="M142 64 l10 -3 m-10 3 l10 4" stroke="#E0533D" stroke-width="2.5" stroke-linecap="round"/>
+      <ellipse cx="123" cy="58" rx="21" ry="17" fill="#5BBF6A"/>`,
+    face:()=>`<ellipse cx="110" cy="64" rx="4" ry="2.6" fill="#F7B8CB" opacity=".8"/><ellipse cx="136" cy="64" rx="4" ry="2.6" fill="#F7B8CB" opacity=".8"/>`},
 };
 function petSVG(stage, mood, px, kind){
   kind = kind || petKind(); const A=PET_ART[kind]||PET_ART.rat, a=A.a;
@@ -3601,7 +3632,7 @@ function cleanName(raw){
   if(words.some(w=>NAME_BLOCK[1].some(b=>squash(b)===w)) || NAME_BLOCK[1].some(b=>squash(b)===flat)) return null;
   return n;
 }
-const PET_SAYS = {rat:"Squeak squeak! 🧀", bee:"Waggle waggle! 🌼", teddy:"Hehe, I messed up your counters!", goat:"Baa! Mind the cliff!", finch:"Tweet tweet! 🌾", owl:"Hoot! Know thyself. 🦉", alien:"Ooh, a chair! It affords sitting! 🪑"};
+const PET_SAYS = {rat:"Squeak squeak! 🧀", bee:"Waggle waggle! 🌼", teddy:"Hehe, I messed up your counters!", goat:"Baa! Mind the cliff!", finch:"Tweet tweet! 🌾", owl:"Hoot! Know thyself. 🦉", alien:"Ooh, a chair! It affords sitting! 🪑", rabbit:"Same result again! So reliable! 🥕", snake:"Ssstart and end of the list are my favourite! 🐍"};
 function petTapDance(){
   const art=$("#petArt"); if(!art) return; const svg=art.querySelector(".pet-svg"), m=petMood(), asleep=m==="sleepy"||m==="asleep";
   if(svg){ svg.classList.remove("tapdance","tapsnooze"); void svg.getBoundingClientRect(); svg.classList.add(asleep?"tapsnooze":"tapdance"); setTimeout(()=>svg.classList.remove("tapdance","tapsnooze"),1300); }
@@ -3633,7 +3664,7 @@ function petCheck(){
   if(p.mood!=="ecstatic" && m==="ecstatic" && p.mood) setTimeout(()=>toast(P.icon,`${p.name} is ${petKind()==="bee"?"doing a waggle dance":"dancing"}!`,`Daily goal smashed. ${P.treat[0].repeat(3)}`,true),800);
   if(p.mood!==m){ p.mood=m; save(); }
   let newN=0; if(!DEMO) Object.keys(PETS).forEach(k=>{ if(!p.got[k] && petUnlocked(k)){ const i=newN++; p.got[k]=1; p.start[k]=G.st.cards||0; p.stages[k]=0; save();
-    setTimeout(()=>{ toast(PETS[k].icon,`New pet: ${PETS[k].title}!`,`${PETS[k].done?`You completed ${TMAP[PETS[k].done].name}!`:`You know ${PETS[k].at}% of the cards.`} ${PETS[k].pr[1][0].toUpperCase()+PETS[k].pr[1].slice(1)} starts as a baby: switch pets in 📈 Progress, and try ${PETS[k].noun==="owl"?"his":"its"} new theme: ${(THEMES.find(t=>t.pet===k)||{}).name||""}.`,true); confetti(160); sfx("lvl"); },1500+i*900); } });
+    setTimeout(()=>{ toast(PETS[k].icon,`New pet: ${PETS[k].title}!`,`${PETS[k].streak?`${PETS[k].streak} right in a row!`:PETS[k].done?`You completed ${TMAP[PETS[k].done].name}!`:`You know ${PETS[k].at}% of the cards.`} ${PETS[k].pr[1][0].toUpperCase()+PETS[k].pr[1].slice(1)} starts as a baby: switch pets in 📈 Progress, and try ${PETS[k].noun==="owl"?"his":"its"} new theme: ${(THEMES.find(t=>t.pet===k)||{}).name||""}.`,true); confetti(160); sfx("lvl"); },1500+i*900); } });
   petHud();
 }
 
