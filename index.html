@@ -883,6 +883,11 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
 .fx-layer{position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden}
 #fountFx{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
 .fx-retro svg{width:100%;height:100%;opacity:.75}
+.fx-ufo{position:fixed;left:0;top:0;z-index:60;pointer-events:none;transition:transform 7s cubic-bezier(.45,.05,.55,.95)}
+.fx-ufo .u{display:block;font-size:34px;line-height:1;animation:ufoBob 2.4s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(140,240,106,.6))}
+.fx-ufo .beam{position:absolute;left:50%;top:26px;width:46px;height:90px;margin-left:-23px;background:linear-gradient(180deg,rgba(140,240,106,.55),rgba(140,240,106,0));clip-path:polygon(38% 0,62% 0,100% 100%,0 100%);opacity:0;transition:opacity .6s}
+.fx-ufo.beaming .beam{opacity:1}
+@keyframes ufoBob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}}
 .fx-retro .axon{fill:none;stroke:rgba(57,255,20,.16);stroke-width:2.2;stroke-linecap:round}
 .fx-retro .dend{fill:none;stroke:rgba(57,255,20,.22);stroke-width:1.6;stroke-linecap:round}
 .fx-retro .soma{fill:rgba(57,255,20,.12);stroke:rgba(57,255,20,.35);stroke-width:1.5}
@@ -2466,6 +2471,13 @@ function fxStart(kind){
   fxStop(); if(TEACHER || (reduced() && kind!=="fount")) return;   // the fountains draw a still picture for reduced motion
   const el=document.createElement("div"); el.className="fx-layer fx-"+kind; el.setAttribute("aria-hidden","true"); document.body.appendChild(el); FX.el=el; FX.kind=kind;
   if(kind==="fount"){ el.remove(); FX.el=null; FX.kind="fount"; fountStart(); return; }
+  if(kind==="petalien"){   // a mini UFO drifting around, now and then switching on its tractor beam
+    el.className="fx-ufo"; el.innerHTML='<span class="beam"></span><span class="u">🛸</span>';
+    const hop=()=>{ if(!FX.el || document.hidden) return; const w=innerWidth-60, hh=innerHeight-140;
+      el.style.transform=`translate(${Math.round(20+Math.random()*w)}px,${Math.round(60+Math.random()*hh)}px)`;
+      if(Math.random()<.4) setTimeout(()=>{ if(!FX.el) return; el.classList.add("beaming"); setTimeout(()=>el.classList.remove("beaming"),1800); }, 7200); };
+    el.style.transform=`translate(${innerWidth-90}px,90px)`; setTimeout(hop,400); FX.timer=setInterval(hop, 10000); return;
+  }
   if(kind==="retro"){
     // a few neurons across the screen; impulses zap along each axon and flash at the synapse
     const rnd=(a,b)=>a+Math.random()*(b-a); let s='<svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice"><defs><filter id="fxGlow" x="-2" y="-2" width="5" height="5"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
@@ -2482,7 +2494,7 @@ function fxStart(kind){
     el.innerHTML=s+"</svg>";
   }
 }
-function fxSync(){ const k=document.documentElement.dataset.skin||"", want=(k==="fount"||k==="retro")?k:null; if(want!==FX.kind){ if(want) fxStart(want); else fxStop(); } }
+function fxSync(){ const k=document.documentElement.dataset.skin||"", want=(k==="fount"||k==="retro"||k==="petalien")?k:null; if(want!==FX.kind){ if(want) fxStart(want); else fxStop(); } }
 new MutationObserver(fxSync).observe(document.documentElement,{attributes:true, attributeFilter:["data-skin"]});
 setTimeout(fxSync,0);
 function applySkin(){ const k=G.skin||""; const th=THEMES.find(t=>t.k===k); if(k && th && themeOpen(th)) document.documentElement.dataset.skin=k; else delete document.documentElement.dataset.skin; }
