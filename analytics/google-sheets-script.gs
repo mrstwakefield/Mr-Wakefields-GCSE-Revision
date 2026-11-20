@@ -160,3 +160,14 @@ function pct_(r, n) { return n ? Math.round(r / n * 100) : 0; }
 /** Plain text only: stops anything that looks like a formula being stored. */
 function clean_(s, max) { s = String(s == null ? "" : s).replace(/[\r\n\t]+/g, " ").slice(0, max); return /^[=+\-@]/.test(s) ? "'" + s : s; }
 function done_() { return ContentService.createTextOutput("ok"); }
+
+/** Run from the editor to clear all the data (keeps the tabs and headings). */
+function wipeData() {
+  const ss = SpreadsheetApp.getActive();
+  ["Daily", "Games", "Modes", "Cards"].forEach(name => {
+    const sh = ss.getSheetByName(name);
+    if (sh && sh.getLastRow() > 1) sh.deleteRows(2, sh.getLastRow() - 1);
+  });
+  const summary = ss.getSheetByName("Summary");
+  if (summary) summary.clear();
+}
