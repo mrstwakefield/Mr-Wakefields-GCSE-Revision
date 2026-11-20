@@ -401,6 +401,7 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .t-table th,.t-table td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;white-space:nowrap}
 .t-heat td{text-align:center;font-weight:700;font-size:14px}.t-heat td:first-child{text-align:left;font-weight:700}
 .t-table tr.t-avg td{border-top:2px solid var(--ink);font-weight:800}
+.t-reps td{white-space:normal;vertical-align:top} .t-reps td:nth-child(1){white-space:nowrap} .t-reps td:nth-child(2){min-width:280px} .t-reps td:nth-child(3){min-width:110px} .t-reps td:nth-child(4){min-width:170px}
 .t-table tr.t-inactive td:first-child::after{content:" 😴"}
 .t-sort{border:0;background:none;font-weight:800;padding:0;font-size:14px;color:var(--ink)}
 .proj{max-width:1300px;margin:0 auto;padding:16px 20px 40px;min-height:100vh}
@@ -4184,7 +4185,7 @@ function tReportsHTML(rs){
   T.repText="Please check these cards that students reported on my GCSE Psychology revision site (index.html). For each one, decide whether the student has a point. If so, fix the card (answer, wrong options or wording) and tell me what you changed; if not, tell me why it's fine.\n\n"+list.map(a=>{ const d=BY_ID[a.id]; if(!d) return `#${a.id}: card no longer exists`;
     return `#${a.id} [${TMAP[d.t]?TMAP[d.t].name:d.t}]\nQ: ${d.sc?d.sc+" ":""}${d.q}\nAnswer: ${d.opt||d.a}${d.wrong?"\nWrong options: "+d.wrong.join(" | "):"\nWrong options: chosen automatically"}\nReported by ${a.who.length} student${a.who.length===1?"":"s"}: ${Object.entries(a.why).sort((x,y)=>y[1]-x[1]).map(([r,n])=>(REP_REASONS[r]||"Other")+(n>1?" ×"+n:"")).join("; ")} (seen in ${[...a.modes].map(m=>REP_MODES[m]||"?").join(", ")})`; }).join("\n\n");
   return `<div class="box"><h3>⚑ Cards students reported <small>${list.length} card${list.length===1?"":"s"} · most reported first</small></h3>
-    <div class="t-scroll"><table class="t-table"><thead><tr><th>Card</th><th>Question and answer</th><th>Students</th><th>Why</th><th>Seen in</th></tr></thead><tbody>
+    <div class="t-scroll"><table class="t-table t-reps"><thead><tr><th>Card</th><th>Question and answer</th><th>Students</th><th>Why</th><th>Seen in</th></tr></thead><tbody>
     ${list.map(a=>{ const d=BY_ID[a.id]; return `<tr><td>#${a.id}<br><span class="muted">${d?esc(shortName(d.t)):""}</span></td><td>${d?`<b>${esc(d.q)}</b><br><span class="muted">${esc(d.opt||d.a)}</span>${d.wrong?`<br><span class="muted" style="font-size:13px">Wrong options: ${esc(d.wrong.join(" · "))}</span>`:""}`:"(card no longer exists)"}</td><td><b>${a.who.length}</b><br><span class="muted" style="font-size:13px">${a.who.map(esc).join(", ")}</span></td><td>${Object.entries(a.why).sort((x,y)=>y[1]-x[1]).map(([r,n])=>`${esc(REP_REASONS[r]||"Other")}${n>1?` ×${n}`:""}`).join("<br>")}</td><td style="font-size:13px">${[...a.modes].map(m=>esc(REP_MODES[m]||"")).join("<br>")}</td></tr>`; }).join("")}
     </tbody></table></div><div class="card-actions t-noprint"><button class="btn" id="tRepCopy">📋 Copy for Claude</button><span class="muted" id="tRepMsg" style="font-size:14px" aria-live="polite">Copies every reported card as a request you can paste into Claude. Student names aren't included.</span></div></div>`;
 }
