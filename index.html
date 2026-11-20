@@ -2025,7 +2025,7 @@ function flag(k){ if(G.flags[k]) return; G.flags[k]=1; checkBadges(); save(); }
 /* ---- anonymous usage counts → Mr Wakefield's Google Sheet ----
    Sends only totals: which games are started, right/wrong per mode and per card, year group and date.
    No names, no device or browser IDs, no progress codes. Off until ANALYTICS_URL is filled in. */
-const ANALYTICS_URL = "";   // the Google Apps Script web-app URL (…/exec)
+const ANALYTICS_URL = "https://script.google.com/macros/s/AKfycbxYOYvCkZ9_7cUvtwZlptNa6HIGceFXp_MtJGnCt0fGi3Fb7YRBad25CysCIpaBI1cJng/exec";   // the Google Apps Script web-app URL (…/exec)
 const AN_KEY = "fount-an-q";
 const anOn = () => !!ANALYTICS_URL && !TEACHER && !DEMO && location.protocol!=="file:";
 let AN = (()=>{ try{ const x=JSON.parse(localStorage.getItem(AN_KEY)||"null"); if(x && x.cards) return x; }catch(e){} return {plays:{}, modes:{}, cards:{}, n:0}; })();
