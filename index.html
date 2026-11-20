@@ -866,6 +866,20 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
 :root[data-skin="royale"] h1{background:linear-gradient(90deg,#FFD54A,#F7F0FF);-webkit-background-clip:text;background-clip:text;color:transparent}
 :root[data-skin="stan"]{--paper:#FFE9F3;--card:#FFFFFF;--ink:#3D0F2A;--muted:#85506D;--line:#F5C6DC;--soft:#FBD9E8;--good:#1C8A5E;--good-bg:#DDF3E8;--warn:#C2185B;--warn-bg:#FCE0EC;color-scheme:light}
 :root[data-skin="stan"] .h1t::after{content:" ⭐"}
+:root[data-skin="cliff"]{--paper:#E8F6FB;--card:#FFFFFF;--ink:#0E2F3D;--muted:#4D6F7D;--line:#BFE3F0;--soft:#D6EEF7;--good:#187651;--good-bg:#DDF3E8;--warn:#B3401F;--warn-bg:#FBE5DD;color-scheme:light}
+:root[data-skin="cliff"] body{background-image:linear-gradient(45deg,rgba(14,47,61,.05) 25%,transparent 25%,transparent 75%,rgba(14,47,61,.05) 75%),linear-gradient(45deg,rgba(14,47,61,.05) 25%,transparent 25%,transparent 75%,rgba(14,47,61,.05) 75%);background-size:28px 28px;background-position:0 0,14px 14px}
+:root[data-skin="cliff"] .h1t::after{content:" 🧊"}
+:root[data-skin="spark"]{--paper:#120B24;--card:#1C1336;--ink:#EDE6FF;--muted:#B3A6D9;--line:#33265A;--soft:#251A45;--good:#5EE6A8;--good-bg:#173A2E;--warn:#FF8FA3;--warn-bg:#3D1A2A;color-scheme:dark}
+:root[data-skin="spark"] .h1t{background:linear-gradient(90deg,#B57BFF,#5EE6F0,#B57BFF);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-skin="spark"] .h1t::after{content:" ⚡";-webkit-text-fill-color:initial}
+:root[data-skin="spark"] .btn.good{color:#120B24}
+:root[data-skin="pinkpen"]{--paper:#FFF4F8;--card:#FFFFFF;--ink:#3A0D22;--muted:#86506A;--line:#F6CFE0;--soft:#FCE3EE;--good:#187651;--good-bg:#DDF3E8;--warn:#C2185B;--warn-bg:#FCE0EC;color-scheme:light}
+:root[data-skin="pinkpen"] .h1t{text-decoration:underline wavy #E0418A 3px;text-underline-offset:8px}
+:root[data-skin="pinkpen"] .h1t::after{content:" 🖊️"}
+:root[data-skin="fount"]{--paper:#06221F;--card:#0C2F2B;--ink:#EAF7F2;--muted:#A6CFC3;--line:#1E4A43;--soft:#123A35;--good:#F2C14E;--good-bg:#3A3214;--warn:#FF9B7A;--warn-bg:#3E2418;color-scheme:dark}
+:root[data-skin="fount"] .h1t{background:linear-gradient(180deg,#FFF1C2,#F2C14E 55%,#B88A1E);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-skin="fount"] h1::before{content:"⛲ "}
+:root[data-skin="fount"] .btn.good{color:#06221F}
 :root[data-skin="uniform"]{--paper:#E9E9E9;--card:#FFFFFF;--ink:#141414;--muted:#5A5A5A;--line:#D2D2D2;--soft:#EFEFEF;--good:#1C7A4E;--good-bg:#DCEFE3;--warn:#A3191F;--warn-bg:#F8DEDF;color-scheme:light}
 :root[data-skin="uniform"] .top{position:relative;background:linear-gradient(118deg,transparent 0,transparent 80%,#E56B63 80%,#E56B63 84%,transparent 84%),repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 2px,transparent 2px 6px),#4E5A65;box-shadow:0 0 0 100vmax #4E5A65;clip-path:inset(-100vmax -100vmax 0 -100vmax);padding-bottom:22px;margin-bottom:22px}
 :root[data-skin="uniform"],:root[data-skin="uniform"] body{overflow-x:clip}
@@ -1588,7 +1602,7 @@ function topicsChanged(){ newDeck(); if(quiz.phase!=="run") renderQuiz(); render
 let tab="cards";
 function goTab(name, tp){
   if(name==="trophies" && tp) G.tpage=tp;
-  if(tab==="arcade" && name!=="arcade" && arc.phase==="play") arcFinish();
+  if(tab==="arcade" && name!=="arcade" && arc.phase==="play"){ arc.quit=true; arcFinish(); }
   if(name!==tab) resetCombo();
   tab=name;
   const tpNow=G.tpage||"progress";
@@ -1923,7 +1937,7 @@ function renderQuiz(){
     $("#qQuit").onclick=()=>{quiz.phase="setup";renderQuiz();};
     if(quiz.shown){
       const next=ok=>{ quiz.marks[quiz.i]=ok; const wasDue=isDue(d.id); mark(d.id, ok?"k":"l"); trackMistake(d.id, ok); answer({ok, el:$(ok?"#qYes":"#qNo"), mode:"quiz", review:wasDue&&ok, topic:d.t}); quiz.i++; quiz.shown=false; if(quiz.i>=quiz.items.length){ quiz.phase="done"; quizDone(); } renderQuiz(); const ta=$("#qAns"); if(ta) ta.focus(); };
-      $("#qYes").onclick=()=>next(true); $("#qNo").onclick=()=>next(false);
+      $("#qYes").onclick=()=>{ if(!(quiz.answers[quiz.i]||"").trim()){ toast("✍️","Write an answer first","A blank answer can't be marked as right. Tap Not quite instead.",true); return; } next(true); }; $("#qNo").onclick=()=>next(false);
       $("#qYes").focus({preventScroll:true});
     } else {
       $("#qShow").onclick=()=>{ quiz.answers[quiz.i]=$("#qAns").value.trim(); quiz.shown=true; renderQuiz(); };
@@ -1932,9 +1946,9 @@ function renderQuiz(){
   }
   const score=quiz.marks.filter(Boolean).length, n=quiz.items.length;
   area.innerHTML=`<div class="empty">
-    ${score===n?'<div class="newbest">💯 FLAWLESS · +50 XP</div>':""}
+    ${score===n&&quiz.flawless?'<div class="newbest">💯 FLAWLESS · +50 XP</div>':""}
     <p class="score">${score}/${n}</p>
-    <p style="margin-top:10px">${score===n?"Full marks. Everything here is now marked as known.":score>=n*0.7?"Solid. The ones you missed are saved as still learning.":"The ones you missed are saved as still learning, so you can drill them in Flashcards."}</p>
+    <p style="margin-top:10px">${score===n?(quiz.flawless?"Full marks. Everything here is now marked as known.":"You marked them all right, but some written answers didn't match the model answers, so no flawless bonus this time."):score>=n*0.7?"Solid. The ones you missed are saved as still learning.":"The ones you missed are saved as still learning, so you can drill them in Flashcards."}</p>
     <ul class="results">${quiz.items.map((id,i)=>{const d=BY_ID[id];return `<li class="${quiz.marks[i]?"ok":"no"}"><b>${esc(d.q)}</b>${quiz.marks[i]?"":`<div class="ans">${esc(d.a)}</div>${whyHTML(d)}`}</li>`}).join("")}</ul>
     <button class="btn" id="qAgain">New quiz</button>
   </div>`;
@@ -1942,7 +1956,8 @@ function renderQuiz(){
 }
 
 function quizDone(){ const score=quiz.marks.filter(Boolean).length, n=quiz.items.length; G.st.quizzes++; setTimeout(checkPal,50);
-  if(score===n){ G.st.perfect++; confetti(220); sfx("lvl"); addXP(50,false); } checkBadges(); save(); }
+  const real = quiz.items.every((id,i)=>!quiz.marks[i] || checkTyped(quiz.answers[i]||"", BY_ID[id]).score>=0.5);   // flawless bonus only when the written answers really match
+  if(score===n && real){ G.st.perfect++; confetti(220); sfx("lvl"); addXP(50,false); } quiz.flawless=score===n && real; checkBadges(); save(); }
 
 /* ---------- browse ---------- */
 let bLimit=60;
@@ -2038,9 +2053,9 @@ const dueCount = () => pool().filter(d=>isDue(d.id)).length;
 Object.keys(store.p).forEach(id=>{ if(store.p[id]==="k" && !G.srs[id]) G.srs[id]={b:1, d:addDays(1+Math.floor(Math.random()*14))}; });
 let combo = 0;
 
-const RANKS = [[1,"Lab Newbie"],[2,"Wakefield Minion"],[3,"Naive Participant"],[4,"Professional Guesser"],[5,"Working Memory Warm-Up"],[6,"Chunking Champion"],[7,"Procrastination Survivor"],[8,"Placebo Effect"],[9,"Flashcard Fanatic"],[10,"Certified Deep Thinker"],[11,"Wakefield's Favourite (Allegedly)"],[12,"Junior Psychologist"],[13,"Wakefield's Star Student"],[14,"Neuron Navigator"],[15,"Mr Wallace"],[16,"Research Assistant"],[17,"Fount Sipper"],[18,"Brain Cell Collector"],[19,"Bystander (Not Helping)"],[20,"Agentic State Survivor"],[21,"Wakefield's Homework Hero"],[22,"Mind Palace Builder"],[23,"Serial Position Specialist"],[24,"Fount Paddler"],[25,"Schema Builder"],[26,"Synapse Surfer"],[27,"Wakefield's Wildcard"],[28,"Shockingly Brilliant"],[29,"Classical Conditioning Champ"],[30,"Walking Visual Illusion"],[31,"Big-Picture Thinker"],[32,"Lab Technician"],[33,"Graduate Researcher"],[34,"Myelin Master"],[35,"Fount Swimmer"],[36,"Piaget's Prodigy"],[37,"Wakefield's Favourite (Confirmed)"],[38,"Doctor of Psychology"],[39,"Ethical Guidelines Enforcer"],[40,"Wakefield's Pink Pen"],[41,"Wakefield's Deputy"],[42,"Theory Titan"],[43,"Head of Department"],[44,"Hippocampus Hero"],[45,"Psychology Powerhouse"],[46,"Guardian of the Fount"],[47,"Mark Scheme Mind-Reader"],[48,"Wakefield's Successor (In Training)"],[49,"Grand Master of the Mind"],[50,"Keeper of the Sacred Mark Scheme"],[51,"Revision Royalty"],[52,"Walking Revision Guide"],[53,"Fount Overlord"],[54,"Examiner's Nightmare"],[55,"Wakefield Fan Club President"],[56,"Living Legend"],[57,"Psychology Final Boss"],[58,"Long-Term Memory Legend"],[59,"Wakefield's Seating Plan VIP"],[60,"Grade 9 Energy"],[61,"Neuroplasticity Ninja"],[62,"Sapir-Whorf Wordsmith"],[63,"Wakefield's Register Regular"],[64,"Confounding Variable Crusher"],[65,"Bee Dance Choreographer"],[66,"Keeper of Wakefield's Spare Pen"],[67,"Classically Conditioned to Revise"],[68,"Ethics Committee Chair"],[69,"Peer Reviewer"],[70,"Fount Lifeguard"],[71,"Mock Exam Menace"],[72,"Professor Emeritus"],[73,"Wakefield's Stunt Double"],[74,"The Chief Examiner's Rival"],[75,"Study Superstar"],[76,"Hall of Fame Inductee"],[77,"Wakefield's Understudy"],[78,"Wakefield's Mini-Me"],[79,"Basically Mr Wakefield"],[80,"Dedicated Wakefield Stan"]];
+const RANKS = [[1,"Lab Newbie"],[2,"Wakefield Minion"],[3,"Naive Participant"],[4,"Professional Guesser"],[5,"Working Memory Warm-Up"],[6,"Chunking Champion"],[7,"Procrastination Survivor"],[8,"Placebo Effect"],[9,"Flashcard Fanatic"],[10,"Certified Deep Thinker"],[11,"Wakefield's Favourite (Allegedly)"],[12,"Junior Psychologist"],[13,"Wakefield's Star Student"],[14,"Neuron Navigator"],[15,"Mr Wallace"],[16,"Research Assistant"],[17,"Fount Sipper"],[18,"Brain Cell Collector"],[19,"Bystander (Not Helping)"],[20,"Agentic State Survivor"],[21,"Wakefield's Homework Hero"],[22,"Mind Palace Builder"],[23,"Serial Position Specialist"],[24,"Fount Paddler"],[25,"Schema Builder"],[26,"Synapse Surfer"],[27,"Wakefield's Wildcard"],[28,"Shockingly Brilliant"],[29,"Classical Conditioning Champ"],[30,"Walking Visual Illusion"],[31,"Big-Picture Thinker"],[32,"Lab Technician"],[33,"Graduate Researcher"],[34,"Myelin Master"],[35,"Fount Swimmer"],[36,"Piaget's Prodigy"],[37,"Wakefield's Favourite (Confirmed)"],[38,"Doctor of Psychology"],[39,"Ethical Guidelines Enforcer"],[40,"Wakefield's Pink Pen"],[41,"Wakefield's Deputy"],[42,"Theory Titan"],[43,"Head of Department"],[44,"Hippocampus Hero"],[45,"Psychology Powerhouse"],[46,"Guardian of the Fount"],[47,"Mark Scheme Mind-Reader"],[48,"Wakefield's Successor (In Training)"],[49,"Grand Master of the Mind"],[50,"Keeper of the Sacred Mark Scheme"],[51,"Revision Royalty"],[52,"Walking Revision Guide"],[53,"Fount Overlord"],[54,"Examiner's Nightmare"],[55,"Wakefield Fan Club President"],[56,"Living Legend"],[57,"Psychology Final Boss"],[58,"Long-Term Memory Legend"],[59,"Wakefield's Seating Plan VIP"],[60,"Grade 9 Energy"],[61,"Neuroplasticity Ninja"],[62,"Sapir-Whorf Wordsmith"],[63,"Wakefield's Register Regular"],[64,"Confounding Variable Crusher"],[65,"Bee Dance Choreographer"],[66,"Keeper of Wakefield's Spare Pen"],[67,"Classically Conditioned to Revise"],[68,"Ethics Committee Chair"],[69,"Peer Reviewer"],[70,"Fount Lifeguard"],[71,"Mock Exam Menace"],[72,"Professor Emeritus"],[73,"Wakefield's Stunt Double"],[74,"The Chief Examiner's Rival"],[75,"Study Superstar"],[76,"Hall of Fame Inductee"],[77,"Wakefield's Understudy"],[78,"Wakefield's Mini-Me"],[79,"Hypothesis Whisperer"],[80,"Grade 9 Guaranteed (Probably)"],[81,"Wakefield's Lesson Plan"],[82,"Interpretive Cortex Explorer"],[83,"Inter-Observer Reliability"],[84,"Reconstructive Memory Architect"],[85,"Wakefield's Coffee Fetcher"],[86,"Statistically Significant"],[87,"Visual Cliff Diver"],[88,"Fount Deep-Sea Diver"],[89,"Wakefield's Department Meeting"],[90,"Unconfounded"],[91,"The Agentic State Itself"],[92,"Wakefield's Report Writer"],[93,"Peer-Reviewed Genius"],[94,"Replication Legend"],[95,"Wakefield's Whiteboard Pen"],[96,"Peak of the Normal Distribution"],[97,"Fount of All Knowledge"],[98,"Wakefield's Retirement Plan"],[99,"Basically Mr Wakefield"],[100,"Dedicated Wakefield Stan"]];
 const lvlStart = n => 50*(n-1)*n;           // XP needed to reach level n
-const MAX_LVL = 80;
+const MAX_LVL = 100;
 function lvlFor(xp){ let n=1; while(n<MAX_LVL && xp>=lvlStart(n+1)) n++; return n; }
 function rankFor(n){ let r=RANKS[0][1]; RANKS.forEach(([l,name])=>{ if(n>=l) r=name; }); return r; }
 const comboMult = () => combo>=20?3 : combo>=10?2 : combo>=5?1.5 : 1;
@@ -2245,7 +2260,9 @@ const BADGES = [
   ["l20","🏆","Elite","Reach level 20",()=>lvlFor(G.xp)>=20],
   ["l2","🫡","Wakefield Minion","Reach level 2 and join the ranks",()=>lvlFor(G.xp)>=2],
   ["l60","🎓","Grade 9 Energy","Reach level 60",()=>lvlFor(G.xp)>=60],
-  ["l80","👑","Dedicated Wakefield Stan","Reach level 80, the very top",()=>lvlFor(G.xp)>=80],
+  ["l80","👑","Grade 9 Guaranteed","Reach level 80",()=>lvlFor(G.xp)>=80],
+  ["l90","💎","Unconfounded","Reach level 90",()=>lvlFor(G.xp)>=90],
+  ["l100","⛲","Dedicated Wakefield Stan","Reach level 100, the very top",()=>lvlFor(G.xp)>=100],
   // ---- secret badges: the last item is the cryptic hint shown while locked ----
   ["gold1","✨","Lucky find","Get a golden card right",()=>G.st.gold>=1, "Not all cards are created equal…"],
   ["gold10","🪙","Treasure hunter","Get 10 golden cards right",()=>G.st.gold>=10, "…and some people collect them"],
@@ -2309,6 +2326,10 @@ const THEMES = [
   {k:"school", name:"The School Building", lvl:70, sw:["#F4DD1E","#1F3FD6","#6E4B35"]},
   {k:"gold", name:"Gold Standard", lvl:75, sw:["#16140F","#F6F0DE","#E2B53E"]},
   {k:"stan", name:"Stan Mode", lvl:80, sw:["#FFE9F3","#3D0F2A","#E11D74"]},
+  {k:"cliff", name:"Visual Cliff", note:"Perception: babies refused to crawl over the glass 'drop' (Gibson and Walk)", lvl:85, sw:["#E8F6FB","#0E2F3D","#1E88B4"]},
+  {k:"spark", name:"Action Potential", note:"Brain & neuro: the electrical spark that fires a neuron", lvl:90, sw:["#120B24","#EDE6FF","#B57BFF"]},
+  {k:"pinkpen", name:"Wakefield's Pink Pen", lvl:95, sw:["#FFF4F8","#3A0D22","#E0418A"]},
+  {k:"fount", name:"The Fount", note:"The very top: you've drunk from the Fount of Knowledge and Wisdom", lvl:100, sw:["#06221F","#EAF7F2","#F2C14E"]},
   // year-group themes: only that year can unlock them
   {k:"y10sensory", name:"Sensory Register", lvl:7, year:"y10", sw:["#EAF7FF","#0B2A3D","#1FA2E0"]},
   {k:"y10sensorimotor", name:"Sensorimotor Stage", lvl:23, year:"y10", sw:["#FFF6E0","#2B1F0E","#E8442E"]},
@@ -2369,7 +2390,7 @@ function ring(r,frac){ const c=2*Math.PI*r; return `stroke-dasharray="${c.toFixe
 let shownLvl = lvlFor(G.xp);
 function renderHud(){
   const n=lvlFor(G.xp);
-  if(n>shownLvl){ shownLvl=n; setTimeout(()=>levelUp(n), 450); if(n>=79) setTimeout(()=>foundScroll("handover"), 2600); }
+  if(n>shownLvl){ shownLvl=n; setTimeout(()=>levelUp(n), 450); if(n>=99) setTimeout(()=>foundScroll("handover"), 2600); }
   const s=lvlStart(n), e=lvlStart(n+1), frac=n>=MAX_LVL?1:(G.xp-s)/(e-s), t=today(), done=G.hist[t]||0;
   const live = G.last===t || (G.last && dayNum(t)-dayNum(G.last)===1) ? G.streak : 0;
   $("#hudLvlNum").textContent=n;
@@ -2667,7 +2688,7 @@ function renderArcade(){
         <div class="opts">${arc.cur.opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="k">${"ABCDEF"[i]}</span><span>${esc(o)}</span></button>`).join("")}</div><div class="rep-row">${repBtnHTML(d.id,3)}</div></div>`+quit;
       area.querySelectorAll(".opt").forEach(b=>b.onclick=()=>arcPick(+b.dataset.i));
     }
-    $("#arcQuit").onclick=()=>arcFinish();
+    $("#arcQuit").onclick=()=>{ arc.quit=true; arcFinish(); };
     arcTick();
     return;
   }
@@ -2840,8 +2861,9 @@ function arcFinish(){
   let bonus=0; const st=G.st;
   if(arc.mode==="blitz"){ bonus=arc.right*2; if(arc.score>st.blitz && arc.score>0){ st.blitz=arc.score; arc.best=true; } if(arc.right>st.blitzR) st.blitzR=arc.right; }
   if(arc.mode==="surv"){ bonus=arc.right*3; if(arc.right>st.surv && arc.right>0){ st.surv=arc.right; arc.best=true; } }
-  if(arc.mode==="exam"){ bonus=20+arc.right*6; if(arc.right>st.exam){ st.exam=arc.right; arc.best=true; } }
-  if(arc.mode==="maths"){ bonus=10+arc.right*4; if(arc.right>st.mathsBest){ st.mathsBest=arc.right; arc.best=true; } }
+  const fin=!arc.quit && arc.right>0; arc.quit=false;
+  if(arc.mode==="exam"){ bonus=(fin?20:0)+arc.right*6; if(arc.right>st.exam){ st.exam=arc.right; arc.best=true; } }
+  if(arc.mode==="maths"){ bonus=(fin?10:0)+arc.right*4; if(arc.right>st.mathsBest){ st.mathsBest=arc.right; arc.best=true; } }
   if(arc.mode==="boss"){
     const win=arc.hp<=0, flaw=win&&arc.lives===3, r=G.bosses[arc.boss]||{tries:0,wins:0,bestHp:BOSS_HP};
     r.tries++; r.bestHp=Math.min(r.bestHp,arc.hp);
@@ -2970,7 +2992,7 @@ function gmRender(){
       list.ondragleave=e=>{ if(!list.contains(e.relatedTarget) && slot) slot.classList.remove("over"); };
       list.ondrop=e=>{ e.preventDefault(); const s=e.dataTransfer.getData("text/plain"); const btn=document.querySelector(`[data-s="${s}"]`); if(btn) gmOrder(+s, btn); }; }
   }
-  $("#arcQuit").onclick=()=>gmFinish();
+  $("#arcQuit").onclick=()=>{ gm.quit=true; gmFinish(); };
 }
 function gmPick(i){
   if(gm.locked) return; gm.locked=true;
@@ -3005,7 +3027,7 @@ function gmFinish(){
   if(arc.phase!=="game") return; arc.phase="gdone";
   const key=gm.kind==="flaw"?"flawBest":"orderBest", best=gm.score>(G.st[key]||0);
   if(best) G.st[key]=gm.score;
-  const bonus=(10+gm.score*3)*2*gotdMult(); gm.xp+=bonus; addXP(bonus,false);
+  const fin=!gm.quit && gm.score>0; gm.quit=false; const bonus=((fin?10:0)+gm.score*3)*2*gotdMult(); gm.xp+=bonus; addXP(bonus,false);
   if(best && gm.score>0){ confetti(150); sfx("lvl"); }
   checkBadges(); save();
   const m=MODES[gm.kind], missed=gm.log.filter(x=>!x.ok);
@@ -3211,7 +3233,7 @@ function swRender(){
     <div class="sw-stage"><div class="sw-card" id="swCard"><p>${esc(it[0])}</p></div><div id="swFb" class="sw-fb" aria-live="polite"></div></div>
     <div class="sw-btns"><button class="btn ghost sw-l" id="swL">← ${esc(d[1])}</button><button class="btn ghost sw-r" id="swR">${esc(d[2])} →</button></div>
     <p style="text-align:right;margin-top:10px"><button class="linkbtn" id="arcQuit">End game</button></p>`;
-  $("#swL").onclick=()=>swPick(0); $("#swR").onclick=()=>swPick(1); $("#arcQuit").onclick=()=>swFinish();
+  $("#swL").onclick=()=>swPick(0); $("#swR").onclick=()=>swPick(1); $("#arcQuit").onclick=()=>{ sw.quit=true; swFinish(); };
   const c=$("#swCard"); let x0=null, dx=0;
   c.onpointerdown=e=>{ x0=e.clientX; dx=0; c.setPointerCapture(e.pointerId); c.style.transition="none"; };
   c.onpointermove=e=>{ if(x0===null) return; dx=e.clientX-x0; c.style.transform=`translateX(${dx}px) rotate(${dx/18}deg)`; c.classList.toggle("tl",dx<-40); c.classList.toggle("tr",dx>40); };
@@ -3231,7 +3253,7 @@ document.addEventListener("keydown",e=>{ if(arc.phase!=="swipe" || !$("#swCard")
 function swFinish(){
   if(arc.phase!=="swipe") return; clearInterval(sw.timer); arc.phase="swdone";
   G.st.swipe=G.st.swipe||{}; const best=sw.score>(G.st.swipe[sw.deck]||0); if(best) G.st.swipe[sw.deck]=sw.score;
-  const bonus=(5+sw.score*2)*2*gotdMult(); sw.xp+=bonus; addXP(bonus,false); if(best&&sw.score>0){ confetti(150); sfx("lvl"); }
+  const fin=!sw.quit && sw.score>0; sw.quit=false; const bonus=((fin?5:0)+sw.score*2)*2*gotdMult(); sw.xp+=bonus; addXP(bonus,false); if(best&&sw.score>0){ confetti(150); sfx("lvl"); }
   checkBadges(); save();
   const d=SWIPE[sw.deck];
   $("#arcArea").innerHTML=`<div class="empty">${best&&sw.score>0?'<div class="newbest">🏆 NEW PERSONAL BEST</div>':""}<h3>👉 ${esc(d[0])}</h3><p class="score">${sw.score}</p><p class="muted">${sw.wrong} wrong · +${sw.xp} XP (2× exam skills XP)</p>
@@ -3277,7 +3299,7 @@ function wsRender(){
     <p style="text-align:right;margin-top:10px"><button class="linkbtn" id="arcQuit">End game</button></p>`;
   $("#wsMore").onclick=()=>{ if(ws.clue<4){ ws.clue++; sfx("tick"); wsRender(); } };
   document.querySelectorAll("[data-ws]").forEach(b=>b.onclick=()=>wsPick(+b.dataset.ws, b));
-  $("#arcQuit").onclick=()=>wsFinish();
+  $("#arcQuit").onclick=()=>{ ws.quit=true; wsFinish(); };
 }
 function wsPick(i, btn){
   if(ws.locked) return;
@@ -3293,7 +3315,7 @@ function wsPick(i, btn){
 function wsFinish(){
   if(arc.phase!=="which") return; arc.phase="wdone";
   const best=ws.score>(G.st.whichBest||0); if(best) G.st.whichBest=ws.score;
-  const bonus=(10+ws.score*2)*2*gotdMult(); ws.xp+=bonus; addXP(bonus,false); if(best&&ws.score>0){ confetti(150); sfx("lvl"); }
+  const fin=!ws.quit && ws.score>0; ws.quit=false; const bonus=((fin?10:0)+ws.score*2)*2*gotdMult(); ws.xp+=bonus; addXP(bonus,false); if(best&&ws.score>0){ confetti(150); sfx("lvl"); }
   checkBadges(); save();
   const missed=ws.log.filter(x=>!x.ok);
   $("#arcArea").innerHTML=`<div class="empty">${best&&ws.score>0?'<div class="newbest">🏆 NEW PERSONAL BEST</div>':""}<h3>🕵️ Which Study? over</h3><p class="score">${ws.score}/40</p><p class="muted">+${ws.xp} XP (2× exam skills XP)</p>
@@ -3391,7 +3413,7 @@ function nxRender(){
       <div class="q">Which idea from another topic links best to: <b>${esc(l[1])}</b>?</div>${nxOpts(it.opts)}<div id="nxFb" class="gapfb" aria-live="polite"></div></div>`+nxQuit;
   }
   a.querySelectorAll("[data-nx]").forEach(b=>b.onclick=()=>nxPick(+b.dataset.nx, b));
-  $("#arcQuit").onclick=()=>nxFinish();
+  $("#arcQuit").onclick=()=>{ nx.quit=true; nxFinish(); };
 }
 function nxNext(ms){ setTimeout(()=>{ nx.locked=false; nx.i++; nx.picked=[]; nx.wrongs=0; nxRender(); }, ms); }
 function nxPick(i, btn){
@@ -3427,7 +3449,7 @@ function nxTdee(s, btn){
 function nxFinish(){
   if(arc.phase!=="nx") return; arc.phase="nxdone";
   const k=nx.kind, m=MODES[k], key=NX_BEST[k], best=nx.score>(G.st[key]||0); if(best) G.st[key]=nx.score;
-  const bonus=(10+nx.score*2)*(NX_EXAM[k]?2:1)*gotdMult(); nx.xp+=bonus; addXP(bonus,false);
+  const fin=!nx.quit && nx.score>0; nx.quit=false; const bonus=((fin?10:0)+nx.score*2)*(NX_EXAM[k]?2:1)*gotdMult(); nx.xp+=bonus; addXP(bonus,false);
   if(best&&nx.score>0){ confetti(150); sfx("lvl"); }
   checkBadges(); save();
   const missed=nx.log.filter(x=>!x.ok);
@@ -3463,8 +3485,12 @@ function labMenu(){
 function labShell(inner){ const x=LAB[lab.exp]; return `<div class="arc-top"><span class="big">${x.icon} ${esc(x.name)}</span><span class="spacer"></span><button class="btn ghost" id="labBack" style="padding:7px 14px">Lab menu</button></div><div class="quiz-q lab-q" style="--c:${TMAP[x.topic].c}">${inner}</div>`; }
 function labWire(){ const b=$("#labBack"); if(b) b.onclick=()=>{ clearTimeout(lab.timer); labMenu(); }; }
 function labDone(xp, html){
-  G.st.lab=G.st.lab||{}; G.st.lab[lab.exp]=(G.st.lab[lab.exp]||0)+1; addXP(xp,false); checkBadges(); save();
-  $("#arcArea").innerHTML=labShell(html+`<p class="muted" style="margin-top:10px">+${xp} XP</p><div class="card-actions"><button class="btn" id="labAgain">Try again</button><button class="btn ghost" id="labMenuB">Another experiment</button></div>`);
+  G.st.lab=G.st.lab||{}; G.st.lab[lab.exp]=(G.st.lab[lab.exp]||0)+1;
+  if(!G.labDay || G.labDay.d!==today()) G.labDay={d:today()}; const run=G.labDay[lab.exp]=(G.labDay[lab.exp]||0)+1;
+  const full=xp; xp = run===1 ? full : run<=3 ? Math.max(1,Math.round(full/5)) : 0;
+  const note = run===1 ? "" : xp ? " (repeat runs today earn less)" : " (you've had today's XP for this experiment: try another one, or come back tomorrow)";
+  if(xp) addXP(xp,false); checkBadges(); save();
+  $("#arcArea").innerHTML=labShell(html+`<p class="muted" style="margin-top:10px">+${xp} XP${note}</p><div class="card-actions"><button class="btn" id="labAgain">Try again</button><button class="btn ghost" id="labMenuB">Another experiment</button></div>`);
   labWire(); $("#labAgain").onclick=()=>labStart(lab.exp); $("#labMenuB").onclick=labMenu; confetti(80);
 }
 function labStart(k){
@@ -4685,11 +4711,12 @@ function renderExt(){
   area.querySelectorAll("[data-lv]").forEach(b=>b.onclick=()=>{ ext.level=+b.dataset.lv; area.querySelectorAll("[data-lv]").forEach(z=>z.setAttribute("aria-pressed", +z.dataset.lv===ext.level)); $("#extDone").disabled=false; });
   $("#extEdit").onclick=()=>{ ext.phase="write"; renderExt(); };
   $("#extDone").onclick=()=>{
-    const first=!G.ext.done[x.id], xp = (first ? Math.min(30+5*ext.ticks.size, 80) : 10) * 2;   // 9-mark answers earn double XP
+    const prevE=G.ext.done[x.id], first=!prevE, words=String(G.ext.drafts[x.id]||"").trim().split(/\s+/).filter(Boolean).length;
+    const xp = words<30 ? 0 : (first ? Math.min(30+5*ext.ticks.size, 80) : prevE.d===today() ? 0 : 10) * 2;   // 9-mark answers earn double XP; needs a real attempt, and repeats pay once a day
     G.ext.done[x.id]={lvl:ext.level, ticks:ext.ticks.size, d:today()}; delete G.ext.drafts[x.id];
     G.st.ext=(G.st.ext||0)+1; G.hist[today()]=(G.hist[today()]||0)+1;
-    addXP(xp, $("#extDone"), `+${xp} XP`); sfx("badge"); if(ext.level===3) confetti(120);
-    toast("✍️", `Extended answer done! +${xp} XP`, first?`${ext.ticks.size} creditworthy point${ext.ticks.size===1?"":"s"} ticked.`:"Repeat answers earn a smaller bonus.");
+    if(xp) addXP(xp, $("#extDone"), `+${xp} XP`); sfx("badge"); if(ext.level===3) confetti(120);
+    toast("✍️", `Extended answer done!${xp?` +${xp} XP`:""}`, words<30?"Write at least 30 words to earn XP for a 9-mark answer.":!xp?"You've already had XP for this one today.":first?`${ext.ticks.size} creditworthy point${ext.ticks.size===1?"":"s"} ticked.`:"Repeat answers earn a smaller bonus.");
     checkBadges(); save(); ext.phase="list"; renderExt();
   };
 }
@@ -4784,12 +4811,13 @@ function skItemHTML(it, ii){
 }
 function skClaim(id, btn){
   const it=sk.cur.items.find(x=>x.id===id), mk=sk.marks[id], max=skItemMax(it), got=it.parts.reduce((a,p)=>a+(mk[p.no]||0),0);
-  const prev=G.skills.done[id], first=!prev, xp=(first ? 10+3*got : 4) * 2;   // exam skills earn double XP
+  const prev=G.skills.done[id], first=!prev, wrote=Object.values(G.skills.drafts[id]||{}).some(v=>String(v).trim().split(/\s+/).filter(Boolean).length>=2);
+  const xp = !wrote ? 0 : (first ? 10+3*got : prev.d===today() ? 0 : 4) * 2;   // exam skills earn double XP; needs a written answer, repeats pay once a day
   if(!prev || got>=prev.m) G.skills.done[id]={m:got, of:max, d:today()};
   delete G.skills.drafts[id]; delete sk.rev[id]; delete sk.marks[id];
   G.st.skillsQ=(G.st.skillsQ||0)+1; G.hist[today()]=(G.hist[today()]||0)+1;
-  addXP(xp, btn, `+${xp} XP`); sfx(got===max?"badge":"ok"); if(got===max && max>=4) confetti(80);
-  toast("🧩", `${got}/${max} · +${xp} XP`, first? (got===max?"Full marks! Examiner-proof.":"Check the mark scheme for what you missed, then try again later.") : "Repeat answers earn a smaller bonus.");
+  if(xp) addXP(xp, btn, `+${xp} XP`); sfx(got===max?"badge":"ok"); if(got===max && max>=4) confetti(80);
+  toast("🧩", `${got}/${max}${xp?` · +${xp} XP`:""}`, !wrote ? "Write your answer before revealing the mark scheme to earn XP." : !xp ? "You've already had XP for this one today." : first? (got===max?"Full marks! Examiner-proof.":"Check the mark scheme for what you missed, then try again later.") : "Repeat answers earn a smaller bonus.");
   checkBadges(); save(); renderSkills();
 }
 
@@ -4945,7 +4973,7 @@ function mockScore(){
 }
 function mockResults(){
   const cur=mockCur(), r=mockScore(), prev=G.mocks.done[cur.id], full=cur.secs.length===4;
-  const xp=((prev?20:40)+r.score)*(full?2:1);
+  const xp=((r.score>0?(prev?20:40):0)+r.score)*(full?2:1);   // no base XP for a blank paper
   r.d=today(); r.secsDone=cur.secs.length;
   if(!prev || r.score/r.of >= prev.score/prev.of) G.mocks.done[cur.id]={score:r.score, of:r.of, d:r.d};
   G.mocks.topic=G.mocks.topic||{}; Object.entries(r.secs).forEach(([t,x])=>G.mocks.topic[t]=x);
@@ -5037,7 +5065,7 @@ function pmRate(r, el){
 }
 
 /* ================= PRINTABLE CERTIFICATES ================= */
-const CERT_LEVELS = [5,10,20,30,40,50,60,70,80];
+const CERT_LEVELS = [5,10,20,30,40,50,60,70,80,90,100];
 function certList(){
   const n=lvlFor(G.xp);
   const l=CERT_LEVELS.map(v=>({id:"L"+v, open:n>=v, title:`Level ${v}: ${rankFor(v)}`, need:`Reach level ${v}`}));
@@ -5123,7 +5151,7 @@ const SECRET_SCROLLS = [
    text:"Did you just get hungry? That's classical conditioning. Pavlov's dogs learned to expect food when they heard a bell, and you've learned to expect XP when you hear that ding. We are not so different. — Mr W", hint:"Ring a bell? Try the gap fills."},
   {id:"april", trigger:"Open the site on 1 April", title:"Insider exam tip",
    text:"Every answer in this year's exam is C. … April Fool. Please, PLEASE do not put C for everything. — Mr W", hint:"Some days, nothing is what it seems"},
-  {id:"handover", trigger:"Reach level 79", title:"The handover",
+  {id:"handover", trigger:"Reach level 99", title:"The handover",
    text:"You are now Basically Mr Wakefield. I have nothing left to teach you. Please don't take my lanyard. One step remains: Dedicated Wakefield Stan. — Mr W", hint:"Become the teacher"},
 ];
 function foundScroll(id){
@@ -5199,7 +5227,7 @@ function dateEggs(){
   const t=today();
   if(t==="2026-12-04"||t==="2026-12-11"||(t>"2026-12-11" && Object.keys(G.hist).some(k=>k<"2026-12-04"))) G.flags.survivor=1;
   if(t.slice(5)==="04-01") setTimeout(()=>foundScroll("april"),1500);
-  if(lvlFor(G.xp)>=79 && !G.scrolls.handover) setTimeout(()=>foundScroll("handover"),1800);
+  if(lvlFor(G.xp)>=99 && !G.scrolls.handover) setTimeout(()=>foundScroll("handover"),1800);
 }
 
 
@@ -5336,7 +5364,7 @@ function modeLock(k){
 }
 function demoFill(){
   const t=today(), day=n=>{ const d=new Date(t+"T12:00:00"); d.setDate(d.getDate()-n); return ymd(d); };
-  Object.assign(G,{xp:lvlStart(80)+1234, streak:42, best:42, last:t, toured:1, newsSeen:WHATS_NEW_V, backupAt:t, skin:G.skin||""}); shownLvl=lvlFor(G.xp);
+  Object.assign(G,{xp:lvlStart(100)+1234, streak:42, best:42, last:t, toured:1, newsSeen:WHATS_NEW_V, backupAt:t, skin:G.skin||""}); shownLvl=lvlFor(G.xp);
   G.hist={}; for(let i=1;i<60;i++) G.hist[day(i)]=i%9===4?0:25+((i*37)%40); G.hist[t]=Math.max(45,G.goal+5);
   Object.assign(G.st,{reviews:6800, cards:6800, right:5900, quizzes:120, perfect:40, blitz:48, blitzR:40, surv:35, combo:60, gold:90, exam:10, examR:200, terms:30, maths:300, mathsBest:12, focus:12, flawBest:16, orderBest:18, hardWins:9, bossWins:20, flawless:9});
   TOPICS.forEach(tp=>{ G.bosses[tp.key]={tries:3, wins:2, bestHp:0, won:true, flawless:true, hardWon:true}; });
