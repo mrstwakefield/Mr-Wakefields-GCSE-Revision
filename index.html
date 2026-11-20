@@ -2030,13 +2030,17 @@ const AN_KEY = "fount-an-q";
 const anOn = () => !!ANALYTICS_URL && !TEACHER && !DEMO && location.protocol!=="file:";
 let AN = (()=>{ try{ const x=JSON.parse(localStorage.getItem(AN_KEY)||"null"); if(x && x.cards) return x; }catch(e){} return {plays:{}, modes:{}, cards:{}, n:0}; })();
 function anSave(){ try{ localStorage.setItem(AN_KEY, JSON.stringify(AN)); }catch(e){} }
+// assessment objective of a card, roughly: scenario/application cards are AO2, strengths and weaknesses AO3, the rest AO1
+function anAO(d){ if(d.t==="Exam skills") return "Exam skills"; if((d.id>=7001 && d.id<7500) || d.sc) return "AO2"; const k=qKind(d.q); return k==="eval" ? "AO3" : k==="apply" ? "AO2" : "AO1"; }
 function anPlay(game){ if(!anOn()) return; AN.plays[game]=(AN.plays[game]||0)+1; anSave(); }
 function anAnswer(mode, ok){ if(!anOn()) return; const m=AN.modes[mode||"other"]=AN.modes[mode||"other"]||[0,0]; m[ok?0:1]++; AN.n++; if(AN.n>=25) anFlush(false); else anSave(); }
 function anCard(id, ok){ if(!anOn() || !BY_ID[id] || (id>=5000 && id<6000)) return; const c=AN.cards[id]=AN.cards[id]||[0,0]; c[ok?0:1]++; anSave(); }
 function anFlush(beacon){
   if(!anOn() || (!AN.n && !Object.keys(AN.plays).length && !Object.keys(AN.cards).length)) return;
-  const body=JSON.stringify({v:1, d:today(), y:YEAR||"", plays:AN.plays, modes:AN.modes,
-    cards:Object.entries(AN.cards).slice(0,300).map(([id,[r,w]])=>{ const d=BY_ID[id]; return [+id, r, w, d?d.t:"", d?String(d.q).slice(0,90):""]; })});
+  // one-off flags instead of an ID: "first batch ever from this device" and "first batch today" let the sheet count students without tracking anyone
+  const u={}; try{ if(!localStorage.getItem("fount-an-ever")){ u.n=1; localStorage.setItem("fount-an-ever","1"); } if(localStorage.getItem("fount-an-day")!==today()){ u.d=1; localStorage.setItem("fount-an-day",today()); } }catch(e){}
+  const body=JSON.stringify({v:1, d:today(), y:YEAR||"", u, plays:AN.plays, modes:AN.modes,
+    cards:Object.entries(AN.cards).slice(0,300).map(([id,[r,w]])=>{ const d=BY_ID[id]; return [+id, r, w, d?d.t:"", d?String(d.q).slice(0,90):"", d?anAO(d):""]; })});
   AN={plays:{}, modes:{}, cards:{}, n:0}; anSave();
   try{ if(beacon && navigator.sendBeacon) navigator.sendBeacon(ANALYTICS_URL, new Blob([body],{type:"text/plain"}));
        else fetch(ANALYTICS_URL,{method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain"}, body, keepalive:true}).catch(()=>{}); }catch(e){}
