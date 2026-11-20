@@ -3624,7 +3624,7 @@ const PETS = {
   goat:  {title:"Gibson's Mountain Goat", noun:"mountain goat", icon:"🐐", def:"Cliff", at:60, treat:["🌿","Grass"], pr:["him","he","his"], topic:"Perception", fact:"Gibson and Walk tested baby goats on the visual cliff too: none of them would step onto the 'deep' side."},
   finch: {title:"Darwin's Finch", noun:"finch", icon:"🐦", def:"Charlie", at:80, treat:["🌾","Seeds"], pr:["him","he","his"], topic:"Language, thought & communication", fact:"Darwin studied finches, and his evolutionary theory says facial expressions are innate and universal: we're born able to show emotions."},
   owl:   {title:"The Wise Owl", noun:"owl", icon:"🦉", def:"Socrates", at:100, treat:["📚","Books"], pr:["him","he","his"], topic:"", fact:"Named after Socrates, the ancient Greek philosopher who asked big questions about how we think and know things, long before psychology was a subject. Only students who know every single card get to meet him."},
-  alien: {title:"Affordance Alien", noun:"alien", icon:"👽", def:"Gibby", at:null, done:"Perception", treat:["✨","Stardust"], pr:["it","it","its"], topic:"Perception", fact:"Gibson said we see affordances: what objects are FOR, like a chair affording sitting. Gibby has just discovered chairs."},
+  alien: {title:"Affordance Alien", noun:"alien", icon:"👽", def:"Gibby", at:null, lvl:100, treat:["✨","Stardust"], pr:["it","it","its"], topic:"Perception", fact:"Gibson said we see affordances: what objects are FOR, like a chair affording sitting. Gibby has just discovered chairs."},
   rabbit:{title:"Replication Rabbit", noun:"rabbit", icon:"🐇", def:"Replica", at:null, streak:50, treat:["🥕","Carrots"], pr:["him","he","his"], topic:"RM", fact:"Replication means repeating a study and getting the same results. 50 right in a row? That's reliable!"},
   snake: {title:"Serial Position Snake", noun:"snake", icon:"🐍", def:"Murdock", at:null, streak:100, treat:["🥚","Eggs"], pr:["him","he","his"], topic:"Memory", fact:"Murdock found we remember the start and end of a list best: the serial position effect. 100 in a row is one very long list!"},
 };
@@ -3636,8 +3636,8 @@ function petInit(){ G.pet=G.pet||{name:"Professor Squeaks", born:today(), stage:
 const petKind = () => PETS[(G.pet&&G.pet.kind)||"rat"] ? (G.pet&&G.pet.kind)||"rat" : "rat";
 const petOf = () => PETS[petKind()];
 const knownPct = () => DATA.length ? knownTotal()/DATA.length*100 : 0;
-const petUnlocked = k => DEMO || k==="rat" || (PETS[k].streak ? (G.st.combo||0) >= PETS[k].streak : PETS[k].done ? topicFrac(PETS[k].done) >= 1-1e-9 : knownPct() >= PETS[k].at - 1e-9);
-const petNeed = k => PETS[k].streak ? `${PETS[k].streak} correct in a row` : PETS[k].done ? `Know all of ${TMAP[PETS[k].done].name}` : `${PETS[k].at}% of cards known`;
+const petUnlocked = k => DEMO || k==="rat" || (PETS[k].lvl ? (lvlFor(G.xp)>=PETS[k].lvl || !!(G.pet&&G.pet.got&&G.pet.got[k])) : PETS[k].streak ? (G.st.combo||0) >= PETS[k].streak : PETS[k].done ? topicFrac(PETS[k].done) >= 1-1e-9 : knownPct() >= PETS[k].at - 1e-9);
+const petNeed = k => PETS[k].lvl ? `Reach level ${PETS[k].lvl}` : PETS[k].streak ? `${PETS[k].streak} correct in a row` : PETS[k].done ? `Know all of ${TMAP[PETS[k].done].name}` : `${PETS[k].at}% of cards known`;
 const petStageName = (st,k) => `${PET_STAGES[st][1]} ${PETS[k||petKind()].noun}`;
 // later pets grow faster so they can still reach Legendary
 const PET_SCALE = {rat:1, bee:.8, teddy:.65, goat:.5, finch:.4, owl:.3, alien:.5, rabbit:.6, snake:.45};
@@ -3831,7 +3831,7 @@ function petCheck(){
   if(p.mood!=="ecstatic" && m==="ecstatic" && p.mood) setTimeout(()=>toast(P.icon,`${p.name} is ${petKind()==="bee"?"doing a waggle dance":"dancing"}!`,`Daily goal smashed. ${P.treat[0].repeat(3)}`,true),800);
   if(p.mood!==m){ p.mood=m; save(); }
   let newN=0; if(!DEMO) Object.keys(PETS).forEach(k=>{ if(!p.got[k] && petUnlocked(k)){ const i=newN++; p.got[k]=1; p.start[k]=G.st.cards||0; p.stages[k]=0; save();
-    setTimeout(()=>{ toast(PETS[k].icon,`New pet: ${PETS[k].title}!`,`${PETS[k].streak?`${PETS[k].streak} right in a row!`:PETS[k].done?`You completed ${TMAP[PETS[k].done].name}!`:`You know ${PETS[k].at}% of the cards.`} ${PETS[k].pr[1][0].toUpperCase()+PETS[k].pr[1].slice(1)} starts as a baby: switch pets in 📈 Progress, and try ${PETS[k].noun==="owl"?"his":"its"} new theme: ${(THEMES.find(t=>t.pet===k)||{}).name||""}.`,true); confetti(160); sfx("lvl"); },1500+i*900); } });
+    setTimeout(()=>{ toast(PETS[k].icon,`New pet: ${PETS[k].title}!`,`${PETS[k].lvl?`You reached level ${PETS[k].lvl}!`:PETS[k].streak?`${PETS[k].streak} right in a row!`:PETS[k].done?`You completed ${TMAP[PETS[k].done].name}!`:`You know ${PETS[k].at}% of the cards.`} ${PETS[k].pr[1][0].toUpperCase()+PETS[k].pr[1].slice(1)} starts as a baby: switch pets in 📈 Progress, and try ${PETS[k].noun==="owl"?"his":"its"} new theme: ${(THEMES.find(t=>t.pet===k)||{}).name||""}.`,true); confetti(160); sfx("lvl"); },1500+i*900); } });
   petHud();
 }
 
