@@ -451,6 +451,18 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .plan-count > span{flex:1;min-width:200px}
 .plan-days{font-family:var(--display);font-size:24px}
 .plan-btn{padding:6px 12px;font-size:14px}
+.plan-go{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;border-radius:14px;padding:12px 16px;background:var(--ink);color:var(--paper);cursor:pointer;font:inherit;box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.plan-go:hover{filter:brightness(1.06)} .plan-go:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.18)}
+.plan-go .pg-ic{font-size:28px;line-height:1} .plan-go b{display:block;font-family:var(--display);font-size:20px;font-weight:800} .plan-go small{display:block;font-size:14px;opacity:.92}
+.rep-btn{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;padding:4px 6px;border-radius:8px;margin-left:auto}
+.rep-btn:hover,.rep-btn:focus-visible{color:var(--ink);background:color-mix(in srgb,var(--line) 60%,transparent)}
+.rep-row{display:flex;justify-content:flex-end;margin-top:6px}
+.rep-ov{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+.rep-sheet{background:var(--card);color:var(--ink);border-radius:18px;max-width:420px;width:100%;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.rep-sheet h3{margin:0 0 4px;font-family:var(--display)} .rep-sheet .rep-q{font-size:14px;margin:0 0 12px}
+.rep-sheet .rep-opt{display:block;width:100%;text-align:left;margin:0 0 8px;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;cursor:pointer}
+.rep-sheet .rep-opt:hover,.rep-sheet .rep-opt:focus-visible{border-color:var(--ink)} .rep-sheet .rep-opt[aria-pressed="true"]{border-color:var(--good);background:var(--good-bg)}
+.rep-sheet .rep-foot{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px}
 .plan-tasks{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .plan-h{font-family:var(--display);font-size:16px;margin-right:4px}
 .task{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:6px 10px;font-size:15px;text-align:left}
@@ -1667,6 +1679,7 @@ function renderGapCard(){
       <div id="cgFb" class="gapfb" aria-live="polite"></div>
       <div class="card-actions" id="cgActs"><div class="nav"><button id="prevC" aria-label="Previous card" ${pos===0?"disabled":""}>‹</button><button id="nextC" aria-label="Skip to next card">›</button></div>
         <button class="btn ghost" id="cgHint">Hint<kbd>?</kbd></button><button class="btn ghost" id="cgSkip">I don't know</button><button class="btn" id="cgGo">Check<kbd>Enter</kbd></button></div>
+      <div class="rep-row">${repBtnHTML(id,2)}</div>
     </div>`;
   const inp=$("#cgIn"); inp.focus({preventScroll:true});
   inp.onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); cgCheck(); } else if(e.key==="?"){ e.preventDefault(); cgHint(); } };
@@ -1687,6 +1700,7 @@ function renderMathCard(){
       <div id="cgFb" class="gapfb" aria-live="polite"></div>
       <div class="card-actions" id="cgActs"><div class="nav"><button id="prevC" aria-label="Previous card" ${pos===0?"disabled":""}>‹</button><button id="nextC" aria-label="Skip to next card">›</button></div>
         <button class="btn ghost" id="cgSkip">I don't know</button><button class="btn" id="cgGo">Check<kbd>Enter</kbd></button></div>
+      <div class="rep-row">${repBtnHTML(id,0)}</div>
     </div>`;
   const inp=$("#cgIn"); inp.focus({preventScroll:true});
   const check=()=>{ if(cgLocked) return; if(!inp.value.trim()){ inp.focus(); return; }
@@ -1779,7 +1793,7 @@ function renderCard(){
     <div class="card-actions">
       <div class="nav"><button id="prevC" aria-label="Previous card" ${pos===0?"disabled":""}>‹</button><button id="nextC" aria-label="Skip to next card">›</button></div>
       <span id="acts" style="display:contents">${actionsHTML()}</span>
-    </div>`;
+    </div><div class="rep-row">${repBtnHTML(d.id,0)}</div>`;
   const dg=$("#dueGo"); if(dg) dg.onclick=()=>setFilter("due");
   const card=$("#card");
   card.onclick=flip; card.onkeydown=e=>{ if(e.key==="Enter"){e.preventDefault();flip();} };
@@ -1807,7 +1821,7 @@ function renderMcCard(){
     <div class="card-actions">
       <div class="nav"><button id="prevC" aria-label="Previous card" ${pos===0?"disabled":""}>‹</button><button id="nextC" aria-label="Skip to next card">›</button></div>
       ${done?`<button class="btn" id="mcNext">Next card<kbd>Enter</kbd></button>`:`<span class="muted" style="font-size:14px">Pick an answer: tap it or press A–D</span>`}
-    </div>`;
+    </div><div class="rep-row">${repBtnHTML(d.id,1)}</div>`;
   const dg=$("#dueGo"); if(dg) dg.onclick=()=>setFilter("due");
   area.querySelectorAll("[data-mc]").forEach(b=>b.onclick=()=>mcPick(+b.dataset.mc));
   $("#prevC").onclick=()=>{ if(pos>0){ pos--; mcPicked=null; renderCard(); } };
@@ -1899,7 +1913,7 @@ function renderQuiz(){
         ${scHTML(d)}<div class="q ${d.sc?"has-sc":""}">${esc(d.q)}</div>${optsHTML(d)}
         ${quiz.shown
           ? `<div class="compare"><div><h4>Your answer</h4>${mine?esc(mine).replace(/\n/g,"<br>"):'<span class="muted">You didn\'t write anything.</span>'}</div><div class="model"><h4>Model answer</h4><div class="a" style="font-size:17px">${fmtAnswer(d.a,d.id)}</div>${whyHTML(d)}</div></div>
-             <div class="card-actions"><button class="btn warn" id="qNo">Not quite</button><button class="btn good" id="qYes">I got it</button></div>`
+             <div class="card-actions"><button class="btn warn" id="qNo">Not quite</button><button class="btn good" id="qYes">I got it</button></div><div class="rep-row">${repBtnHTML(d.id,5)}</div>`
           : `<label for="qAns" class="muted" style="display:block;margin-bottom:6px;font-size:15px">Your answer</label>
              <textarea id="qAns" placeholder="Write what you remember">${esc(mine)}</textarea>
              <div class="card-actions"><button class="btn" id="qShow">Check answer</button></div>`}
@@ -1974,6 +1988,36 @@ store.g = Object.assign({}, GDEF, store.g||{}); store.g.st = Object.assign({}, G
 const G = store.g; delete G.lb; delete G.wk;
 G.srs=G.srs||{}; G.bosses=G.bosses||{}; G.mistakes=G.mistakes||{}; G.flags=G.flags||{}; G.scrolls=G.scrolls||{}; G.lcount=G.lcount||{}; G.skinsTried=G.skinsTried||{}; G.bossDays=G.bossDays||{};
 function flag(k){ if(G.flags[k]) return; G.flags[k]=1; checkBadges(); save(); }
+/* ---- report a card: saved on this device, sent to the teacher inside the progress code ---- */
+G.creps=G.creps||{};
+const REP_REASONS={1:"The answer is wrong",2:"Another option is also right",3:"Too easy: only one option made sense",4:"My answer was right but marked wrong",5:"It's confusing or has a typo"};
+const REP_MODES={0:"flashcard (typed)",1:"flashcard (multiple choice)",2:"key-term gap fill",3:"arcade (multiple choice)",4:"arcade (key term)",5:"quiz (self-marked)"};
+const REP_BY_MODE={0:[1,4,5],1:[1,2,3,5],2:[1,4,5],3:[1,2,3,5],4:[1,4,5],5:[1,5]};
+const canReport = id => id!=null && !!BY_ID[id] && !(id>=5000 && id<6000);   // made-up RM scenarios change every time, so they can't be reported by number
+const repBtnHTML = (id, m) => canReport(id) ? `<button type="button" class="rep-btn" data-rep="${id}" data-repm="${m}" aria-label="Report a problem with this card">${G.creps[id]?"⚑ Reported":"⚑ Report card"}</button>` : "";
+let repOpen=null;
+function closeReport(){ if(!repOpen) return; repOpen.el.remove(); const f=repOpen.from; repOpen=null; if(f && document.body.contains(f)) f.focus({preventScroll:true}); }
+function openReport(id, m, from){
+  closeReport(); const d=BY_ID[id]; if(!d) return; const cur=G.creps[id];
+  const el=document.createElement("div"); el.className="rep-ov";
+  el.innerHTML=`<div class="rep-sheet" role="dialog" aria-modal="true" aria-labelledby="repH"><h3 id="repH">⚑ Report this card</h3>
+    <p class="rep-q muted">${esc(d.q.length>140?d.q.slice(0,137)+"…":d.q)}</p>
+    ${(REP_BY_MODE[m]||[1,5]).map(r=>`<button class="rep-opt" data-rr="${r}" aria-pressed="${cur&&cur.r===r}">${esc(REP_REASONS[r])}</button>`).join("")}
+    <p class="muted" style="font-size:13px;margin:4px 0 8px">Mr Wakefield sees reports when you send your progress code from the Save tab. Nothing else is sent anywhere.</p>
+    <div class="rep-foot">${cur?'<button class="btn ghost" id="repDel">Remove my report</button>':""}<button class="btn ghost" id="repX">Cancel</button></div></div>`;
+  document.body.appendChild(el); repOpen={el, from};
+  el.onclick=e=>{ if(e.target===el) closeReport(); };
+  el.querySelectorAll("[data-rr]").forEach(b=>b.onclick=()=>{
+    G.creps[id]={r:+b.dataset.rr, m, d:dayNum(today())-dayNum("2026-01-01")};
+    const ks=Object.keys(G.creps); if(ks.length>40) ks.sort((a,b)=>G.creps[a].d-G.creps[b].d).slice(0,ks.length-40).forEach(k=>delete G.creps[k]);
+    save(); closeReport(); repRefresh(id); toast("⚑","Thanks, card reported","Mr Wakefield will see it next time you send your progress code.",true); });
+  const del=el.querySelector("#repDel"); if(del) del.onclick=()=>{ delete G.creps[id]; save(); closeReport(); repRefresh(id); toast("⚑","Report removed","",true); };
+  el.querySelector("#repX").onclick=closeReport;
+  el.querySelector(".rep-opt").focus();
+}
+function repRefresh(id){ document.querySelectorAll(`[data-rep="${id}"]`).forEach(b=>b.textContent=G.creps[id]?"⚑ Reported":"⚑ Report card"); }
+document.addEventListener("click", e=>{ const b=e.target.closest && e.target.closest("[data-rep]"); if(!b) return; e.preventDefault(); e.stopPropagation(); openReport(+b.dataset.rep, +b.dataset.repm, b); }, true);
+document.addEventListener("keydown", e=>{ if(!repOpen) return; if(e.key==="Escape"){ e.preventDefault(); closeReport(); } e.stopPropagation(); }, true);
 function checkPal(){ const s=String(G.xp); if(s.length>=3 && s===[...s].reverse().join("")) flag("palindrome"); }
 /* ---- mistakes bank: wrong anywhere -> bank; right twice in a row -> fixed ---- */
 const mistakeCount = () => Object.keys(G.mistakes).filter(id=>BY_ID[id]).length;
@@ -2613,13 +2657,13 @@ function renderArcade(){
         <label for="gapIn" class="muted" style="display:block;margin:4px 0 6px;font-size:15px">Type the key term</label>
         <input id="gapIn" class="search gapin" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go">
         <div id="gapFb" class="gapfb" aria-live="polite"></div>
-        <div class="card-actions" id="gapActs"><button class="btn ghost" id="gapHint">Hint<kbd>?</kbd></button><button class="btn ghost" id="gapSkip">I don't know</button><button class="btn" id="gapGo">Check<kbd>Enter</kbd></button></div></div>`+quit;
+        <div class="card-actions" id="gapActs"><button class="btn ghost" id="gapHint">Hint<kbd>?</kbd></button><button class="btn ghost" id="gapSkip">I don't know</button><button class="btn" id="gapGo">Check<kbd>Enter</kbd></button></div><div class="rep-row">${repBtnHTML(d.id,4)}</div></div>`+quit;
       const inp=$("#gapIn"); inp.focus({preventScroll:true});
       inp.onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); gapCheck(); } else if(e.key==="?"){ e.preventDefault(); gapHint(); } };
       $("#gapGo").onclick=gapCheck; $("#gapHint").onclick=gapHint; $("#gapSkip").onclick=()=>gapDone(false);
     } else {
       area.innerHTML=top+`<div class="quiz-q" style="--c:${t.c}"><div class="tag">${esc(t.name)}${d.t==="Exam skills"&&arc.mode!=="exam"?' <span class="goldtag">Bonus: exam skills</span>':""}</div>${scHTML(d)}<div class="q ${d.sc?"has-sc":""}">${esc(d.q)}</div>
-        <div class="opts">${arc.cur.opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="k">${"ABCDEF"[i]}</span><span>${esc(o)}</span></button>`).join("")}</div></div>`+quit;
+        <div class="opts">${arc.cur.opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="k">${"ABCDEF"[i]}</span><span>${esc(o)}</span></button>`).join("")}</div><div class="rep-row">${repBtnHTML(d.id,3)}</div></div>`+quit;
       area.querySelectorAll(".opt").forEach(b=>b.onclick=()=>arcPick(+b.dataset.i));
     }
     $("#arcQuit").onclick=()=>arcFinish();
@@ -3990,7 +4034,7 @@ const b64u = bytes => b64e(bytes).replace(/\+/g,"-").replace(/\//g,"_").replace(
 const unb64u = s => b64d(s.replace(/-/g,"+").replace(/_/g,"/") + "===".slice((s.length+3)%4));
 const popcount = n => { let c=0; while(n){ c+=n&1; n=Math.floor(n/2); } return c; };
 function makeReport(){
-  const bytes=[2];
+  const bytes=[3];
   const nm=[...new TextEncoder().encode((G.name||"").trim().slice(0,24))].slice(0,40); bytes.push(nm.length, ...nm);
   bytes.push(YEAR==="y10"?10:YEAR==="y11"?11:0);
   varint(bytes, dayNum(today())-dayNum("2026-01-01"));
@@ -4001,23 +4045,25 @@ function makeReport(){
   let bm=0; TOPICS.forEach((t,i)=>{ if(G.bosses[t.key] && G.bosses[t.key].won) bm+=Math.pow(2,i); }); varint(bytes, bm);
   varint(bytes, G.st.cards);
   let act=0; for(let i=0;i<14;i++){ const d=new Date(); d.setDate(d.getDate()-i); if(G.hist[ymd(d)]) act+=Math.pow(2,i); } varint(bytes, act);
+  const reps=Object.entries(G.creps||{}).filter(([id])=>canReport(+id)).slice(-40); bytes.push(reps.length); reps.forEach(([id,r])=>{ varint(bytes,+id); bytes.push((r.r&15)*8+(r.m&7)); });   // reported cards
   const c=ck16(bytes); bytes.push(c>>8, c&255);
   return "FR1."+b64u(new Uint8Array(bytes));
 }
 function parseReport(code){
   const b=unb64u(code.slice(4)); if(b.length<12) throw new Error("short");
   const body=b.slice(0,-2), c=(b[b.length-2]<<8)|b[b.length-1]; if(ck16(body)!==c) throw new Error("checksum");
-  const p={i:0}, ver=body[p.i++]; if(ver!==1 && ver!==2) throw new Error("version");
+  const p={i:0}, ver=body[p.i++]; if(ver<1 || ver>3) throw new Error("version");
   const nl=body[p.i++]; const name=new TextDecoder().decode(body.slice(p.i,p.i+nl)).trim(); p.i+=nl;
-  const yb=ver===2?body[p.i++]:0, year=yb===10?"y10":yb===11?"y11":"";
+  const yb=ver>=2?body[p.i++]:0, year=yb===10?"y10":yb===11?"y11":"";
   const day=readVar(body,p), xp=readVar(body,p), known=readVar(body,p);
   const k=[], l=[]; for(let i=0;i<TOPICS.length;i++){ const v=body[p.i++]; if(v===undefined||v>100) throw new Error("bad"); k.push(v); }
   for(let i=0;i<TOPICS.length;i++){ const v=body[p.i++]; if(v===undefined||v>100) throw new Error("bad"); l.push(v); }
   const acc=body[p.i++], streak=readVar(body,p), best=readVar(body,p), bm=readVar(body,p), qs=readVar(body,p), act=readVar(body,p);
+  const reps=[]; if(ver>=3){ const n=body[p.i++]; if(n===undefined||n>40) throw new Error("bad"); for(let j=0;j<n;j++){ const id=readVar(body,p), x=body[p.i++]; if(x===undefined) throw new Error("short"); reps.push({id, r:x>>3, m:x&7}); } }
   if(p.i!==body.length) throw new Error("length");
   const d=new Date(2026,0,1); d.setDate(d.getDate()+day);
   let last=-1; for(let i=0;i<14;i++) if(Math.floor(act/Math.pow(2,i))%2){ last=i; break; }
-  return {name:name||"(no name)", year, date:ymd(d), xp, level:lvlFor(xp), known, k, l, acc, streak, best, bosses:popcount(bm), qs, act14:popcount(act), act7:popcount(act%128), lastDaysAgo:last};
+  return {reps, name:name||"(no name)", year, date:ymd(d), xp, level:lvlFor(xp), known, k, l, acc, streak, best, bosses:popcount(bm), qs, act14:popcount(act), act7:popcount(act%128), lastDaysAgo:last};
 }
 
 /* ================= TEACHER PAGE (hidden: index.html?teacher) ================= */
@@ -4115,7 +4161,8 @@ function tRender(){
     <div class="box"><h3>Class table <small>Click a heading to sort</small></h3>
       <div class="t-scroll"><table class="t-table"><thead><tr>${th("name","Student")}${th("year","Year")}${th("level","Level")}${th("stage","Stage")}${th("xp","XP")}${th("known","Cards known")}${th("acc","Accuracy")}${th("streak","Streak")}${th("act14","Days active (14d)")}${th("bosses","Bosses")}${th("qs","Answered")}${th("date","Report date")}</tr></thead>
       <tbody>${rs.map(r=>`<tr class="${r.act7===0?"t-inactive":""}"><td>${esc(r.name)}</td><td>${r.year==="y10"?"10":r.year==="y11"?"11":"–"}</td><td>${r.level}</td><td title="${r.lockedT.length?"Locked (review only): "+esc(r.lockedT.join(", ")):""}">${STAGE_STEP?(r.stage>100/STAGE_STEP?"All done":"Stage "+r.stage):"–"}${r.lockedT.length?` <span class="muted">🔒${r.lockedT.length}</span>`:""}</td><td>${r.xp.toLocaleString()}</td><td>${r.known}</td><td>${r.acc}%</td><td>${r.streak} <span class="muted">(best ${r.best})</span></td><td>${r.act14}</td><td>${r.bosses}/9</td><td>${r.qs.toLocaleString()}</td><td>${r.date}</td></tr>`).join("")}</tbody></table></div>
-      <div class="card-actions t-noprint"><button class="btn ghost" id="tCsv">⬇️ Export CSV</button></div></div>`;
+      <div class="card-actions t-noprint"><button class="btn ghost" id="tCsv">⬇️ Export CSV</button></div></div>
+    ${tReportsHTML(rs)}`;
   wireYear();
   out.querySelectorAll(".t-sort").forEach(b=>b.onclick=()=>{ const k=b.dataset.k; T.sort = {key:k, dir: T.sort.key===k ? -T.sort.dir : (k==="name"?1:-1)}; tRender(); });
   $("#tCsv").onclick=()=>{
@@ -4124,6 +4171,16 @@ function tRender(){
     const rows=rs.map(r=>[r.name,r.year==="y10"?10:r.year==="y11"?11:"",r.level,r.stage,r.lockedT.join("; "),r.xp,r.known,r.acc,r.streak,r.best,r.act14,r.bosses,r.qs,r.date,...r.k,...r.l].map(q).join(","));
     const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([[head.map(q).join(","),...rows].join("\n")],{type:"text/csv"})); a.download=`class-progress-${today()}.csv`; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
   };
+}
+
+function tReportsHTML(rs){
+  const agg=new Map(); rs.forEach(r=>(r.reps||[]).forEach(x=>{ const a=agg.get(x.id)||{id:x.id, who:[], why:{}, modes:new Set()}; a.who.push(r.name); a.why[x.r]=(a.why[x.r]||0)+1; a.modes.add(x.m); agg.set(x.id,a); }));
+  if(!agg.size) return `<div class="box"><h3>⚑ Cards students reported <small>none yet</small></h3><p class="muted" style="margin:0">Students can tap "⚑ Report card" on any flashcard or arcade question. Reports come in with their progress codes and appear here.</p></div>`;
+  const list=[...agg.values()].sort((a,b)=>b.who.length-a.who.length || a.id-b.id);
+  return `<div class="box"><h3>⚑ Cards students reported <small>${list.length} card${list.length===1?"":"s"} · most reported first</small></h3>
+    <div class="t-scroll"><table class="t-table"><thead><tr><th>Card</th><th>Question and answer</th><th>Students</th><th>Why</th><th>Seen in</th></tr></thead><tbody>
+    ${list.map(a=>{ const d=BY_ID[a.id]; return `<tr><td>#${a.id}<br><span class="muted">${d?esc(shortName(d.t)):""}</span></td><td>${d?`<b>${esc(d.q)}</b><br><span class="muted">${esc(d.opt||d.a)}</span>${d.wrong?`<br><span class="muted" style="font-size:13px">Wrong options: ${esc(d.wrong.join(" · "))}</span>`:""}`:"(card no longer exists)"}</td><td><b>${a.who.length}</b><br><span class="muted" style="font-size:13px">${a.who.map(esc).join(", ")}</span></td><td>${Object.entries(a.why).sort((x,y)=>y[1]-x[1]).map(([r,n])=>`${esc(REP_REASONS[r]||"Other")}${n>1?` ×${n}`:""}`).join("<br>")}</td><td style="font-size:13px">${[...a.modes].map(m=>esc(REP_MODES[m]||"")).join("<br>")}</td></tr>`; }).join("")}
+    </tbody></table></div><p class="muted" style="font-size:13px;margin:8px 0 0">To fix a card, send Claude the card number and what's wrong.</p></div>`;
 }
 
 /* ================= PROJECTOR MODE (teacher page) ================= */
@@ -4293,14 +4350,23 @@ function renderPlan(){
     {id:"planWeak", done:weakN>=10, txt:`10 cards on ${esc(TMAP[weak].name)} <span class="muted">(${Math.min(weakN,10)}/10)</span>`},
   ];
   const all=tasks.every(x=>x.done);
+  // one big button: always does the most useful next thing
+  const mist=mistakeCount(), dailyDone=!!(dd&&dd.done);
+  const go = dueAll ? {ic:"▶️", h:"Start revising", s:`${dueAll} card${dueAll===1?"":"s"} due for review`, f:()=>$("#planDue").onclick()}
+    : weakN<10 ? {ic:"▶️", h:"Start revising", s:`${10-weakN} card${10-weakN===1?"":"s"} on ${esc(TMAP[weak].name)}, your weakest topic`, f:()=>$("#planWeak").onclick()}
+    : !dailyDone ? {ic:"▶️", h:"Keep revising", s:"Play today's Daily 10", f:()=>$("#planDaily").onclick()}
+    : mist ? {ic:"🩹", h:"Keep revising", s:`Fix ${Math.min(mist,10)} of your ${mist} mistake${mist===1?"":"s"}`, f:()=>{ goTab("arcade"); startArc("fix"); }}
+    : {ic:"🔀", h:"Keep revising", s:"A mixed deck of cards you don't know yet", f:()=>{ selectTopics(TOPICS.map(x=>x.key).filter(taught)); goTab("cards"); setFilter("notknown"); $("#cardArea").scrollIntoView({behavior:reduced()?"auto":"smooth", block:"center"}); }};
   if(all && !G.plan.done){ G.plan.done=true; G.st.plans=(G.st.plans||0)+1; save();
     setTimeout(()=>{ toast("🗒️",`Today's plan complete! +${PLAN_BONUS} XP`,"See you tomorrow."); confetti(160); sfx("badge"); addXP(PLAN_BONUS,false); checkBadges(); save(); },600); }
-  el.innerHTML=`<div class="plan-count">${count}</div>
+  el.innerHTML=`<button class="plan-go" id="planGo"><span class="pg-ic" aria-hidden="true">${go.ic}</span><span><b>${go.h}</b><small>${go.s}</small></span></button>
+    <div class="plan-count">${count}</div>
     <div class="plan-tasks"><b class="plan-h">Today's plan</b>${tasks.map(x=>`<button class="task ${x.done?"done":""}" id="${x.id}" ${x.done&&x.id==="planDaily"?"disabled":""}><span class="tick">${x.done?"✅":"⬜"}</span><span>${x.txt}</span></button>`).join("")}
     <span class="plan-bonus ${all?"got":""}">${all?`✓ +${PLAN_BONUS} XP earned`:`All 3 = +${PLAN_BONUS} XP`}</span></div>`;
   const m=$("#planMock"); if(m) m.onclick=()=>{ selectTopics(MOCK_TOPICS); toast("🎯","Mock topics selected","Everything except Language, thought & communication."); };
   $("#planDue").onclick=()=>{ if(!dueAll) return; selectTopics(TOPICS.map(x=>x.key)); goTab("cards"); setFilter("due"); };
   $("#planDaily").onclick=()=>{ goTab("arcade"); startArc("daily"); };
+  $("#planGo").onclick=go.f;
   $("#planWeak").onclick=()=>{ selectTopics([weak]); goTab("cards"); setFilter("notknown"); $("#cardArea").scrollIntoView({behavior:reduced()?"auto":"smooth", block:"center"}); };
 }
 $("#mockTopics").onclick=()=>selectTopics(MOCK_TOPICS);
@@ -5175,8 +5241,8 @@ const TOUR = [
   ["💾","Keep your progress safe","<p>Your progress is saved in <b>this browser only</b>. Nothing goes online.</p><p>Back it up in the <b>💾 Save</b> tab every week or so, especially before you change phone or clear your browser.</p><p>Good luck. Keep right on! 💙</p>"],
 ];
 // bump WHATS_NEW_V and edit WHATS_NEW when you add features; returning students see it once
-const WHATS_NEW_V = 3;
-const WHATS_NEW = ["🐝 5 new pets to unlock (📈 Progress)","🧪 6 new arcade games, like Psych Lab","🎯 Topics unlock in 20% stages","🎓 Year 10 or 11? Change it at the bottom of the page","💾 A simpler Save tab"];
+const WHATS_NEW_V = 4;
+const WHATS_NEW = ["▶️ A Start revising button that picks what to do next","⚑ Spot a wrong card? Tap Report card under it","✅ Smarter marking for typed answers and key terms","🔍 Better wrong answers in multiple choice and Spot the Flaw"];
 function showTour(steps, onDone){
   let i=0; const o=document.createElement("div"); o.className="overlay";
   const close=()=>{ o.remove(); document.removeEventListener("keydown",kd,true); if(onDone) onDone(); };
