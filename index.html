@@ -876,10 +876,28 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
 :root[data-skin="pinkpen"]{--paper:#FFF4F8;--card:#FFFFFF;--ink:#3A0D22;--muted:#86506A;--line:#F6CFE0;--soft:#FCE3EE;--good:#187651;--good-bg:#DDF3E8;--warn:#C2185B;--warn-bg:#FCE0EC;color-scheme:light}
 :root[data-skin="pinkpen"] .h1t{text-decoration:underline wavy #E0418A 3px;text-underline-offset:8px}
 :root[data-skin="pinkpen"] .h1t::after{content:" 🖊️"}
-:root[data-skin="fount"]{--paper:#06221F;--card:#0C2F2B;--ink:#EAF7F2;--muted:#A6CFC3;--line:#1E4A43;--soft:#123A35;--good:#F2C14E;--good-bg:#3A3214;--warn:#FF9B7A;--warn-bg:#3E2418;color-scheme:dark}
-:root[data-skin="fount"] .h1t{background:linear-gradient(180deg,#FFF1C2,#F2C14E 55%,#B88A1E);-webkit-background-clip:text;background-clip:text;color:transparent}
-:root[data-skin="fount"] h1::before{content:"⛲ "}
-:root[data-skin="fount"] .btn.good{color:#06221F}
+:root[data-skin="bell"]{--paper:#F3F1FF;--card:#FFFFFF;--ink:#1D1A3A;--muted:#5E5A86;--line:#D9D4FA;--soft:#E7E3FD;--good:#187651;--good-bg:#DDF3E8;--warn:#B3261E;--warn-bg:#FBE3E1;color-scheme:light}
+:root[data-skin="bell"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='90' viewBox='0 0 240 90'%3E%3Cpath d='M0 86 C70 86 85 8 120 8 S170 86 240 86' fill='none' stroke='%235B4BD6' stroke-opacity='.10' stroke-width='3'/%3E%3Cline x1='120' y1='8' x2='120' y2='86' stroke='%235B4BD6' stroke-opacity='.08' stroke-width='2' stroke-dasharray='4 4'/%3E%3C/svg%3E");background-size:240px 90px}
+:root[data-skin="bell"] .h1t::after{content:" 🔔"}
+/* ---- level 100: The Fount (deliberately over the top) ---- */
+:root[data-skin="fount"]{--paper:#05201D;--card:rgba(10,46,42,.86);--ink:#F2FBF7;--muted:#A9D6C9;--line:rgba(242,193,78,.35);--soft:rgba(20,70,63,.7);--good:#F2C14E;--good-bg:#3A3214;--warn:#FF9B7A;--warn-bg:#3E2418;color-scheme:dark}
+:root[data-skin="fount"] body{background:linear-gradient(125deg,#04201C,#0B4A42 25%,#1B1450 50%,#0B4A42 75%,#04201C);background-size:400% 400%;background-attachment:fixed;animation:fountBg 22s ease-in-out infinite}
+@keyframes fountBg{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+:root[data-skin="fount"] body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:2147483000;mix-blend-mode:screen;opacity:.55;
+  background-image:radial-gradient(circle,#FFE9A8 0 1.3px,transparent 2px),radial-gradient(circle,#8FF5D8 0 1.1px,transparent 1.8px),radial-gradient(circle,#fff 0 .9px,transparent 1.5px);
+  background-size:180px 220px,260px 190px,130px 150px;background-position:0 0,60px 90px,30px 40px;animation:fountSparkle 9s linear infinite}
+@keyframes fountSparkle{0%{background-position:0 0,60px 90px,30px 40px;opacity:.35}50%{opacity:.7}100%{background-position:0 -220px,60px -100px,30px -110px;opacity:.35}}
+:root[data-skin="fount"] .h1t{background:linear-gradient(100deg,#B88A1E 0%,#FFF1C2 20%,#F2C14E 40%,#FFFBEA 50%,#F2C14E 60%,#FFF1C2 80%,#B88A1E 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:fountShine 5s linear infinite;filter:drop-shadow(0 0 18px rgba(242,193,78,.35))}
+@keyframes fountShine{0%{background-position:100% 0}100%{background-position:-150% 0}}
+:root[data-skin="fount"] h1::before{content:"⛲ ";display:inline-block;animation:fountBob 3s ease-in-out infinite}
+:root[data-skin="fount"] .h1t::after{content:" 👑";-webkit-text-fill-color:initial;color:initial}
+@keyframes fountBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+:root[data-skin="fount"] .box,:root[data-skin="fount"] .plan,:root[data-skin="fount"] .hud,:root[data-skin="fount"] .card,:root[data-skin="fount"] .quiz-q,:root[data-skin="fount"] .tabs{border-color:rgba(242,193,78,.45);box-shadow:0 0 0 1px rgba(242,193,78,.18),0 10px 34px rgba(242,193,78,.14),inset 0 1px 0 rgba(255,241,194,.08);backdrop-filter:blur(6px)}
+:root[data-skin="fount"] .btn{background:linear-gradient(135deg,#FFE7A1,#F2C14E 45%,#C9941F);border-color:#F2C14E;color:#05201D;box-shadow:0 0 16px rgba(242,193,78,.35)}
+:root[data-skin="fount"] .btn.ghost{background:transparent;color:#F2C14E;box-shadow:none}
+:root[data-skin="fount"] .btn.good{color:#05201D}
+:root[data-skin="fount"] .plan-go{background:linear-gradient(120deg,#C9941F,#FFE7A1 30%,#F2C14E 55%,#C9941F);background-size:220% 100%;color:#05201D;animation:fountShine 6s linear infinite}
+@media (prefers-reduced-motion:reduce){:root[data-skin="fount"] body,:root[data-skin="fount"] body::after,:root[data-skin="fount"] .h1t,:root[data-skin="fount"] h1::before,:root[data-skin="fount"] .plan-go{animation:none}}
 :root[data-skin="uniform"]{--paper:#E9E9E9;--card:#FFFFFF;--ink:#141414;--muted:#5A5A5A;--line:#D2D2D2;--soft:#EFEFEF;--good:#1C7A4E;--good-bg:#DCEFE3;--warn:#A3191F;--warn-bg:#F8DEDF;color-scheme:light}
 :root[data-skin="uniform"] .top{position:relative;background:linear-gradient(118deg,transparent 0,transparent 80%,#E56B63 80%,#E56B63 84%,transparent 84%),repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 2px,transparent 2px 6px),#4E5A65;box-shadow:0 0 0 100vmax #4E5A65;clip-path:inset(-100vmax -100vmax 0 -100vmax);padding-bottom:22px;margin-bottom:22px}
 :root[data-skin="uniform"],:root[data-skin="uniform"] body{overflow-x:clip}
@@ -2326,10 +2344,11 @@ const THEMES = [
   {k:"school", name:"The School Building", lvl:70, sw:["#F4DD1E","#1F3FD6","#6E4B35"]},
   {k:"gold", name:"Gold Standard", lvl:75, sw:["#16140F","#F6F0DE","#E2B53E"]},
   {k:"stan", name:"Stan Mode", lvl:80, sw:["#FFE9F3","#3D0F2A","#E11D74"]},
-  {k:"cliff", name:"Visual Cliff", note:"Perception: babies refused to crawl over the glass 'drop' (Gibson and Walk)", lvl:85, sw:["#E8F6FB","#0E2F3D","#1E88B4"]},
-  {k:"spark", name:"Action Potential", note:"Brain & neuro: the electrical spark that fires a neuron", lvl:90, sw:["#120B24","#EDE6FF","#B57BFF"]},
-  {k:"pinkpen", name:"Wakefield's Pink Pen", lvl:95, sw:["#FFF4F8","#3A0D22","#E0418A"]},
-  {k:"fount", name:"The Fount", note:"The very top: you've drunk from the Fount of Knowledge and Wisdom", lvl:100, sw:["#06221F","#EAF7F2","#F2C14E"]},
+  {k:"cliff", name:"Visual Cliff", note:"Perception: babies refused to crawl over the glass 'drop' (Gibson and Walk)", lvl:84, sw:["#E8F6FB","#0E2F3D","#1E88B4"]},
+  {k:"spark", name:"Action Potential", note:"Brain & neuro: the electrical spark that fires a neuron", lvl:88, sw:["#120B24","#EDE6FF","#B57BFF"]},
+  {k:"pinkpen", name:"Wakefield's Pink Pen", lvl:92, sw:["#FFF4F8","#3A0D22","#E0418A"]},
+  {k:"bell", name:"Bell Curve", note:"Research methods: a normal distribution, with the mean, median and mode all in the middle", lvl:96, sw:["#F3F1FF","#1D1A3A","#5B4BD6"]},
+  {k:"fount", name:"The Fount", note:"The very top: you've drunk from the Fount of Knowledge and Wisdom. Level 100: the showiest theme of all", lvl:100, sw:["#06221F","#EAF7F2","#F2C14E"]},
   // year-group themes: only that year can unlock them
   {k:"y10sensory", name:"Sensory Register", lvl:7, year:"y10", sw:["#EAF7FF","#0B2A3D","#1FA2E0"]},
   {k:"y10sensorimotor", name:"Sensorimotor Stage", lvl:23, year:"y10", sw:["#FFF6E0","#2B1F0E","#E8442E"]},
