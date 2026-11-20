@@ -881,13 +881,7 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
 :root[data-skin="bell"] .h1t::after{content:" 🔔"}
 /* ---- animated theme layers (behind the page, never clickable) ---- */
 .fx-layer{position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden}
-.fx-basin{position:absolute;bottom:6px;font-size:clamp(46px,7vw,84px);line-height:1;filter:drop-shadow(0 0 14px rgba(143,245,216,.45))}
-.fx-basin.l{left:calc(var(--bx,8vw) - .5em)} .fx-basin.r{right:calc(var(--bx,8vw) - .5em)}
-.fx-basin::before{content:"⛲"}
-.fx-drop{position:absolute;bottom:clamp(44px,6.4vw,78px);left:var(--x);width:0;height:0;animation:fxX var(--t) linear forwards}
-.fx-drop::after{content:"";position:absolute;left:calc(var(--s) / -2);width:var(--s);height:var(--s);border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff,#8FF5D8 45%,rgba(64,200,255,.55));box-shadow:0 0 8px rgba(143,245,216,.8);animation:fxY var(--t) forwards}
-@keyframes fxX{to{transform:translateX(var(--dx))}}
-@keyframes fxY{0%{transform:translateY(0);animation-timing-function:cubic-bezier(.15,.65,.35,1)}50%{transform:translateY(var(--h));animation-timing-function:cubic-bezier(.65,0,.85,.35)}100%{transform:translateY(60px);opacity:.15}}
+#fountFx{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
 .fx-retro svg{width:100%;height:100%;opacity:.75}
 .fx-retro .axon{fill:none;stroke:rgba(57,255,20,.16);stroke-width:2.2;stroke-linecap:round}
 .fx-retro .dend{fill:none;stroke:rgba(57,255,20,.22);stroke-width:1.6;stroke-linecap:round}
@@ -2443,21 +2437,36 @@ function checkSeals(){
     setTimeout(()=>{ toast("🔓",`Seal broken! ${t.name} unlocked`,"Switch it on in the Themes tab.",true); confetti(160,t.sw); sfx("badge"); },900+i*1400);
   });
 }
+/* ⛲ fountains for The Fount theme (the same as the A-level site): jets of water droplets with a little gold sparkle */
+const fountFx={raf:0,c:null,p:[]};
+function fountStart(){ if(fountFx.c) return; const c=document.createElement("canvas"); c.id="fountFx"; c.setAttribute("aria-hidden","true"); document.body.prepend(c); fountFx.c=c; const x=c.getContext("2d");
+  const still=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const size=()=>{ const d=Math.min(2,devicePixelRatio||1); c.width=innerWidth*d; c.height=innerHeight*d; x.setTransform(d,0,0,d,0,0); }; size(); addEventListener("resize",size); fountFx.size=size;
+  const jets=()=>{ const w=innerWidth, n=w<600?3:5; return [...Array(n)].map((_,i)=>({x:w*(i+0.5)/n, h:i===Math.floor(n/2)?1.25:0.85+0.15*Math.sin(i*2.1)})); };
+  const spawn=(j,H)=>({x:j.x+(Math.random()-.5)*6, y:H, vx:(Math.random()-.5)*1.6, vy:-(7.5+Math.random()*2.5)*j.h*Math.min(1.25,H/700), r:1.2+Math.random()*2.3, gold:Math.random()<.12, life:0});
+  let J=jets(); addEventListener("resize",fountFx.rj=()=>{ J=jets(); });
+  const draw=()=>{ const W=innerWidth,H=innerHeight; x.clearRect(0,0,W,H);
+    // pools of light at the base of each fountain
+    J.forEach(j=>{ const g=x.createRadialGradient(j.x,H,0,j.x,H,90); g.addColorStop(0,"rgba(127,219,255,.35)"); g.addColorStop(1,"rgba(127,219,255,0)"); x.fillStyle=g; x.fillRect(j.x-90,H-90,180,90); });
+    if(!still){ J.forEach(j=>{ for(let k=0;k<4;k++) fountFx.p.push(spawn(j,H)); }); }
+    fountFx.p=fountFx.p.filter(q=>q.y<H+10 && q.life<260);
+    for(const q of fountFx.p){ q.vy+=0.12; q.x+=q.vx; q.y+=q.vy; q.life++;
+      x.beginPath(); x.arc(q.x,q.y,q.r,0,6.283); x.fillStyle=q.gold?"rgba(242,193,78,.9)":`rgba(${170+Math.round(Math.random()*40)},235,255,${q.vy<0?.75:.45})`; x.fill(); }
+    if(still && !fountFx.p.length){ // a still picture of the fountains for reduced motion
+      J.forEach(j=>{ for(let k=0;k<70;k++){ const t=k/70, px=j.x+Math.sin(k)*14*t, py=H-Math.sin(t*Math.PI)*H*0.45*j.h; x.beginPath(); x.arc(px,py,1.6,0,6.283); x.fillStyle="rgba(190,240,255,.55)"; x.fill(); } }); return; }
+    fountFx.raf=requestAnimationFrame(draw); };
+  draw();
+  document.addEventListener("visibilitychange",fountFx.vis=()=>{ if(document.hidden){ cancelAnimationFrame(fountFx.raf); } else if(fountFx.c){ cancelAnimationFrame(fountFx.raf); draw(); } });
+}
+function fountStop(){ if(!fountFx.c) return; cancelAnimationFrame(fountFx.raf); fountFx.c.remove(); fountFx.c=null; fountFx.p=[]; removeEventListener("resize",fountFx.size); removeEventListener("resize",fountFx.rj); document.removeEventListener("visibilitychange",fountFx.vis); }
 /* ---- animated theme layers: squirting fountains for The Fount, nerve impulses for Electrical Impulse ---- */
 const FX={kind:null, el:null, timer:null};
-function fxStop(){ clearInterval(FX.timer); FX.timer=null; if(FX.el) FX.el.remove(); FX.el=null; FX.kind=null; }
+function fxStop(){ clearInterval(FX.timer); FX.timer=null; if(FX.el) FX.el.remove(); FX.el=null; FX.kind=null; fountStop(); }
 function fxStart(kind){
-  fxStop(); if(TEACHER || reduced()) return;
+  fxStop(); if(TEACHER || (reduced() && kind!=="fount")) return;   // the fountains draw a still picture for reduced motion
   const el=document.createElement("div"); el.className="fx-layer fx-"+kind; el.setAttribute("aria-hidden","true"); document.body.appendChild(el); FX.el=el; FX.kind=kind;
-  if(kind==="fount"){
-    el.innerHTML='<div class="fx-basin l"></div><div class="fx-basin r"></div>';
-    const spray=()=>{ if(document.hidden || !FX.el) return;
-      for(const side of ["l","r"]) for(let i=0;i<2;i++){ const d=document.createElement("i"), dir=side==="l"?1:-1, t=1.5+Math.random()*.9;
-        d.className="fx-drop"; d.style.setProperty("--x", side==="l"?"8vw":"92vw"); d.style.setProperty("--dx", (dir*(2+Math.random()*15)).toFixed(1)+"vw");
-        d.style.setProperty("--h", (-(26+Math.random()*32)).toFixed(1)+"vh"); d.style.setProperty("--t", t.toFixed(2)+"s"); d.style.setProperty("--s", (5+Math.random()*6).toFixed(1)+"px");
-        el.appendChild(d); setTimeout(()=>d.remove(), t*1000+100); } };
-    FX.timer=setInterval(spray, 120);
-  } else if(kind==="retro"){
+  if(kind==="fount"){ el.remove(); FX.el=null; FX.kind="fount"; fountStart(); return; }
+  if(kind==="retro"){
     // a few neurons across the screen; impulses zap along each axon and flash at the synapse
     const rnd=(a,b)=>a+Math.random()*(b-a); let s='<svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice"><defs><filter id="fxGlow" x="-2" y="-2" width="5" height="5"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
     for(let n=0;n<7;n++){
