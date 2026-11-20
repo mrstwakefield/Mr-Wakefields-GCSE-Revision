@@ -4164,6 +4164,9 @@ function tRender(){
       <div class="card-actions t-noprint"><button class="btn ghost" id="tCsv">⬇️ Export CSV</button></div></div>
     ${tReportsHTML(rs)}`;
   wireYear();
+  const rc=$("#tRepCopy"); if(rc) rc.onclick=async()=>{ let ok=false; try{ await navigator.clipboard.writeText(T.repText); ok=true; }catch(e){}
+    if(!ok){ const ta=document.createElement("textarea"); ta.value=T.repText; document.body.appendChild(ta); ta.select(); try{ ok=document.execCommand("copy"); }catch(e){} ta.remove(); }
+    $("#tRepMsg").textContent = ok ? "✓ Copied. Paste it into Claude Code (with this repository open) and it will check and fix the cards." : "Couldn't copy automatically. Try again, or use a different browser."; };
   out.querySelectorAll(".t-sort").forEach(b=>b.onclick=()=>{ const k=b.dataset.k; T.sort = {key:k, dir: T.sort.key===k ? -T.sort.dir : (k==="name"?1:-1)}; tRender(); });
   $("#tCsv").onclick=()=>{
     const head=["Student","Year","Level","Stage","Locked topics","XP","Cards known","Accuracy %","Streak","Best streak","Days active (14d)","Bosses defeated","Questions answered","Report date",...TOPICS.map(t=>TMAP[t.key].name+" % known"),...TOPICS.map(t=>TMAP[t.key].name+" % still learning")];
@@ -4177,10 +4180,13 @@ function tReportsHTML(rs){
   const agg=new Map(); rs.forEach(r=>(r.reps||[]).forEach(x=>{ const a=agg.get(x.id)||{id:x.id, who:[], why:{}, modes:new Set()}; a.who.push(r.name); a.why[x.r]=(a.why[x.r]||0)+1; a.modes.add(x.m); agg.set(x.id,a); }));
   if(!agg.size) return `<div class="box"><h3>⚑ Cards students reported <small>none yet</small></h3><p class="muted" style="margin:0">Students can tap "⚑ Report card" on any flashcard or arcade question. Reports come in with their progress codes and appear here.</p></div>`;
   const list=[...agg.values()].sort((a,b)=>b.who.length-a.who.length || a.id-b.id);
+  // ready-to-paste request for Claude (no student names)
+  T.repText="Please check these cards that students reported on my GCSE Psychology revision site (index.html). For each one, decide whether the student has a point. If so, fix the card (answer, wrong options or wording) and tell me what you changed; if not, tell me why it's fine.\n\n"+list.map(a=>{ const d=BY_ID[a.id]; if(!d) return `#${a.id}: card no longer exists`;
+    return `#${a.id} [${TMAP[d.t]?TMAP[d.t].name:d.t}]\nQ: ${d.sc?d.sc+" ":""}${d.q}\nAnswer: ${d.opt||d.a}${d.wrong?"\nWrong options: "+d.wrong.join(" | "):"\nWrong options: chosen automatically"}\nReported by ${a.who.length} student${a.who.length===1?"":"s"}: ${Object.entries(a.why).sort((x,y)=>y[1]-x[1]).map(([r,n])=>(REP_REASONS[r]||"Other")+(n>1?" ×"+n:"")).join("; ")} (seen in ${[...a.modes].map(m=>REP_MODES[m]||"?").join(", ")})`; }).join("\n\n");
   return `<div class="box"><h3>⚑ Cards students reported <small>${list.length} card${list.length===1?"":"s"} · most reported first</small></h3>
     <div class="t-scroll"><table class="t-table"><thead><tr><th>Card</th><th>Question and answer</th><th>Students</th><th>Why</th><th>Seen in</th></tr></thead><tbody>
     ${list.map(a=>{ const d=BY_ID[a.id]; return `<tr><td>#${a.id}<br><span class="muted">${d?esc(shortName(d.t)):""}</span></td><td>${d?`<b>${esc(d.q)}</b><br><span class="muted">${esc(d.opt||d.a)}</span>${d.wrong?`<br><span class="muted" style="font-size:13px">Wrong options: ${esc(d.wrong.join(" · "))}</span>`:""}`:"(card no longer exists)"}</td><td><b>${a.who.length}</b><br><span class="muted" style="font-size:13px">${a.who.map(esc).join(", ")}</span></td><td>${Object.entries(a.why).sort((x,y)=>y[1]-x[1]).map(([r,n])=>`${esc(REP_REASONS[r]||"Other")}${n>1?` ×${n}`:""}`).join("<br>")}</td><td style="font-size:13px">${[...a.modes].map(m=>esc(REP_MODES[m]||"")).join("<br>")}</td></tr>`; }).join("")}
-    </tbody></table></div><p class="muted" style="font-size:13px;margin:8px 0 0">To fix a card, send Claude the card number and what's wrong.</p></div>`;
+    </tbody></table></div><div class="card-actions t-noprint"><button class="btn" id="tRepCopy">📋 Copy for Claude</button><span class="muted" id="tRepMsg" style="font-size:14px" aria-live="polite">Copies every reported card as a request you can paste into Claude. Student names aren't included.</span></div></div>`;
 }
 
 /* ================= PROJECTOR MODE (teacher page) ================= */
