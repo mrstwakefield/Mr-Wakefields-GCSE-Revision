@@ -879,6 +879,20 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
 :root[data-skin="bell"]{--paper:#F3F1FF;--card:#FFFFFF;--ink:#1D1A3A;--muted:#5E5A86;--line:#D9D4FA;--soft:#E7E3FD;--good:#187651;--good-bg:#DDF3E8;--warn:#B3261E;--warn-bg:#FBE3E1;color-scheme:light}
 :root[data-skin="bell"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='90' viewBox='0 0 240 90'%3E%3Cpath d='M0 86 C70 86 85 8 120 8 S170 86 240 86' fill='none' stroke='%235B4BD6' stroke-opacity='.10' stroke-width='3'/%3E%3Cline x1='120' y1='8' x2='120' y2='86' stroke='%235B4BD6' stroke-opacity='.08' stroke-width='2' stroke-dasharray='4 4'/%3E%3C/svg%3E");background-size:240px 90px}
 :root[data-skin="bell"] .h1t::after{content:" 🔔"}
+/* ---- animated theme layers (behind the page, never clickable) ---- */
+.fx-layer{position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden}
+.fx-basin{position:absolute;bottom:6px;font-size:clamp(46px,7vw,84px);line-height:1;filter:drop-shadow(0 0 14px rgba(143,245,216,.45))}
+.fx-basin.l{left:calc(var(--bx,8vw) - .5em)} .fx-basin.r{right:calc(var(--bx,8vw) - .5em)}
+.fx-basin::before{content:"⛲"}
+.fx-drop{position:absolute;bottom:clamp(44px,6.4vw,78px);left:var(--x);width:0;height:0;animation:fxX var(--t) linear forwards}
+.fx-drop::after{content:"";position:absolute;left:calc(var(--s) / -2);width:var(--s);height:var(--s);border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff,#8FF5D8 45%,rgba(64,200,255,.55));box-shadow:0 0 8px rgba(143,245,216,.8);animation:fxY var(--t) forwards}
+@keyframes fxX{to{transform:translateX(var(--dx))}}
+@keyframes fxY{0%{transform:translateY(0);animation-timing-function:cubic-bezier(.15,.65,.35,1)}50%{transform:translateY(var(--h));animation-timing-function:cubic-bezier(.65,0,.85,.35)}100%{transform:translateY(60px);opacity:.15}}
+.fx-retro svg{width:100%;height:100%;opacity:.75}
+.fx-retro .axon{fill:none;stroke:rgba(57,255,20,.16);stroke-width:2.2;stroke-linecap:round}
+.fx-retro .dend{fill:none;stroke:rgba(57,255,20,.22);stroke-width:1.6;stroke-linecap:round}
+.fx-retro .soma{fill:rgba(57,255,20,.12);stroke:rgba(57,255,20,.35);stroke-width:1.5}
+.fx-retro .pulse{filter:url(#fxGlow)}
 /* ---- level 100: The Fount (deliberately over the top) ---- */
 :root[data-skin="fount"]{--paper:#05201D;--card:rgba(10,46,42,.86);--ink:#F2FBF7;--muted:#A9D6C9;--line:rgba(242,193,78,.35);--soft:rgba(20,70,63,.7);--good:#F2C14E;--good-bg:#3A3214;--warn:#FF9B7A;--warn-bg:#3E2418;color-scheme:dark}
 :root[data-skin="fount"] body{background:linear-gradient(125deg,#04201C,#0B4A42 25%,#1B1450 50%,#0B4A42 75%,#04201C);background-size:400% 400%;background-attachment:fixed;animation:fountBg 22s ease-in-out infinite}
@@ -2429,6 +2443,39 @@ function checkSeals(){
     setTimeout(()=>{ toast("🔓",`Seal broken! ${t.name} unlocked`,"Switch it on in the Themes tab.",true); confetti(160,t.sw); sfx("badge"); },900+i*1400);
   });
 }
+/* ---- animated theme layers: squirting fountains for The Fount, nerve impulses for Electrical Impulse ---- */
+const FX={kind:null, el:null, timer:null};
+function fxStop(){ clearInterval(FX.timer); FX.timer=null; if(FX.el) FX.el.remove(); FX.el=null; FX.kind=null; }
+function fxStart(kind){
+  fxStop(); if(TEACHER || reduced()) return;
+  const el=document.createElement("div"); el.className="fx-layer fx-"+kind; el.setAttribute("aria-hidden","true"); document.body.appendChild(el); FX.el=el; FX.kind=kind;
+  if(kind==="fount"){
+    el.innerHTML='<div class="fx-basin l"></div><div class="fx-basin r"></div>';
+    const spray=()=>{ if(document.hidden || !FX.el) return;
+      for(const side of ["l","r"]) for(let i=0;i<2;i++){ const d=document.createElement("i"), dir=side==="l"?1:-1, t=1.5+Math.random()*.9;
+        d.className="fx-drop"; d.style.setProperty("--x", side==="l"?"8vw":"92vw"); d.style.setProperty("--dx", (dir*(2+Math.random()*15)).toFixed(1)+"vw");
+        d.style.setProperty("--h", (-(26+Math.random()*32)).toFixed(1)+"vh"); d.style.setProperty("--t", t.toFixed(2)+"s"); d.style.setProperty("--s", (5+Math.random()*6).toFixed(1)+"px");
+        el.appendChild(d); setTimeout(()=>d.remove(), t*1000+100); } };
+    FX.timer=setInterval(spray, 120);
+  } else if(kind==="retro"){
+    // a few neurons across the screen; impulses zap along each axon and flash at the synapse
+    const rnd=(a,b)=>a+Math.random()*(b-a); let s='<svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice"><defs><filter id="fxGlow" x="-2" y="-2" width="5" height="5"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
+    for(let n=0;n<7;n++){
+      const y=70+n*130+rnd(-30,30), a=rnd(-70,70), b=rnd(-70,70), e=y+rnd(-40,40), flip=n%2, dur=rnd(2.2,4.2).toFixed(2), beg=rnd(0,4).toFixed(2), col=n%3===2?"#FF2BD6":"#39FF14";
+      const path=`M 70 ${y} C 300 ${y+a}, 600 ${y+b}, 930 ${e}`;
+      s+=`<g ${flip?'transform="translate(1000,0) scale(-1,1)"':""}>
+        <path class="dend" d="M 70 ${y} l -40 -28 M 70 ${y} l -46 6 M 70 ${y} l -34 34"/><circle class="soma" cx="70" cy="${y}" r="15"/>
+        <path class="axon" id="fxAx${n}" d="${path}"/>
+        <path class="dend" d="M 930 ${e} l 38 -26 M 930 ${e} l 44 4 M 930 ${e} l 32 30"/>
+        <circle class="pulse" r="7" fill="${col}"><animateMotion dur="${dur}s" begin="${beg}s" repeatCount="indefinite" path="${path}"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.06;.9;1" dur="${dur}s" begin="${beg}s" repeatCount="indefinite"/></circle>
+        <circle cx="930" cy="${e}" r="20" fill="${col}" opacity="0" class="pulse"><animate attributeName="opacity" values="0;0;.85;0" keyTimes="0;.88;.94;1" dur="${dur}s" begin="${beg}s" repeatCount="indefinite"/><animate attributeName="r" values="6;6;24;30" keyTimes="0;.88;.95;1" dur="${dur}s" begin="${beg}s" repeatCount="indefinite"/></circle></g>`;
+    }
+    el.innerHTML=s+"</svg>";
+  }
+}
+function fxSync(){ const k=document.documentElement.dataset.skin||"", want=(k==="fount"||k==="retro")?k:null; if(want!==FX.kind){ if(want) fxStart(want); else fxStop(); } }
+new MutationObserver(fxSync).observe(document.documentElement,{attributes:true, attributeFilter:["data-skin"]});
+setTimeout(fxSync,0);
 function applySkin(){ const k=G.skin||""; const th=THEMES.find(t=>t.k===k); if(k && th && themeOpen(th)) document.documentElement.dataset.skin=k; else delete document.documentElement.dataset.skin; }
 applySkin();
 
