@@ -2676,6 +2676,9 @@ const TERMS = (()=>{
     main.toLowerCase().split(/[\s-]+/).filter(w=>w.length>=4 && !/^(theory|memory|effect|study|system|state|area|group|data|question|test|scale|design|model|explanation)$/.test(w)).forEach(w=>{
       const st=w.replace(/'s$/,"").slice(0, w.length>=7?5:4).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
       def=def.replace(new RegExp("\\b(?:non-|un|in)?"+st+"[a-z-]*(?:'s)?","gi"), m=>/^(stud|stat|stor|inte|info|inde|impo|indi|inst)/i.test(m)&&!m.toLowerCase().startsWith(w.slice(0,5))?m:"_____"); });
+    // abbreviations: accept the full name too, and hide it in the clue (otherwise "galvanic skin response" was marked wrong for GSR)
+    const FULL={"GSR":["Galvanic skin response"], "BPS guidelines":["British Psychological Society guidelines","British Psychological Society"], "MZ twins":["Monozygotic twins","Identical twins","Monozygotic","Identical"], "DZ twins":["Dizygotic twins","Non-identical twins","Fraternal twins","Dizygotic","Non-identical","Fraternal"]}[main];
+    if(FULL){ FULL.forEach(f=>alts.push(f)); FULL.slice().sort((x,y)=>y.length-x.length).forEach(f=>{ def=def.replace(new RegExp("\\(?"+f.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\)?","gi"),"_____"); }); }
     def=def.replace(/_____(?:[\s-]+_____)+/g,"_____");
     out.push({id:d.id, t:d.t, term:main, alts, def, q:"Key term: "+main, a:d.a});
   });

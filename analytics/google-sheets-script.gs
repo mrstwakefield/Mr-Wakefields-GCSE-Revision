@@ -39,6 +39,7 @@ function setup() {
     sh.getRange(1, 1, 1, head.length).setValues([head]).setFontWeight("bold");
     sh.setFrozenRows(1);
   });
+  renameGames_();
   const old = ss.getSheetByName("Hardest cards");   // replaced by the Summary tab
   if (old) ss.deleteSheet(old);
   const first = ss.getSheetByName("Sheet1");
@@ -67,7 +68,7 @@ function doPost(e) {
     }), (row, a) => { row[1] += a[0]; row[2] += a[1]; row[3] = row[1] + row[2]; row[4] = pct_(row[1], row[3]); });
 
     let games = 0;
-    upsert_("Games", 1, Object.entries(p.plays || {}).slice(0, 40).map(([g, n]) => { const k = num(n); games += k; return { key: [clean_(g, 40)], add: [k] }; }),
+    upsert_("Games", 1, Object.entries(p.plays || {}).slice(0, 40).map(([g, n]) => { const k = num(n); games += k; return { key: [clean_(gameName_(g), 40)], add: [k] }; }),
       (row, a) => { row[1] += a[0]; row[2] = date; });
 
     upsert_("Daily", 2, [{ key: [date, year], add: [answered, right, games, active, fresh] }],
@@ -143,6 +144,19 @@ function buildSummary_() {
   out.forEach(([row, col, vals, bold]) => { const g = sh.getRange(row, col, vals.length, vals[0].length); g.setValues(vals.map(v => v.map(x => String(x)))); if (bold) g.setFontWeight("bold"); });
   sh.getRange(1, 1).setFontSize(16);
   [[1, 200], [2, 170], [3, 360], [4, 80], [5, 80], [6, 30], [7, 220], [8, 110], [9, 80]].forEach(([c, w]) => sh.setColumnWidth(c, w));
+}
+
+/** Older versions stored games by short code (e.g. "arcade:daily"): rename them and merge duplicates. */
+function renameGames_() {
+  const sh = SpreadsheetApp.getActive().getSheetByName("Games"); if (!sh || sh.getLastRow() < 2) return;
+  const rows = sh.getRange(2, 1, sh.getLastRow() - 1, 3).getValues(), merged = {}, order = [];
+  let changed = false;
+  rows.forEach(([g, n, last]) => { const name = gameName_(g); if (name !== g) changed = true;
+    if (!merged[name]) { merged[name] = [name, 0, last]; order.push(name); } else changed = true;
+    merged[name][1] += Number(n) || 0; if (String(last) > String(merged[name][2])) merged[name][2] = last; });
+  if (!changed) return;
+  sh.getRange(2, 1, rows.length, 3).clearContent();
+  sh.getRange(2, 1, order.length, 3).setValues(order.map(k => merged[k]));
 }
 
 /** Add to existing rows (matched on the first `keyCols` columns) or append new ones, in one write. */
