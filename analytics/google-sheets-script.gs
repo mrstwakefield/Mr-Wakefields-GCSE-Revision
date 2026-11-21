@@ -23,7 +23,12 @@ const TABS = {
 };
 const TEXT_COLS = ["Topic", "Question", "Last played", "AO"];
 const MIN_ANSWERS = 10;
-const SITE_CODE = "fount-gcse";   // the revision site sends this with every batch; anything without it is ignored   // a card needs this many answers before it counts as hardest/easiest
+const SITE_CODE = "fount-gcse";
+/** Friendly names for the games in the Summary (the Games tab keeps the short codes). */
+const GAME_NAMES = {"arcade:daily":"Daily 10","arcade:blitz":"Blitz","arcade:surv":"Survival","arcade:exam":"Exam Skills","arcade:maths":"RM Maths","arcade:terms":"Key Terms",
+  "arcade:fix":"Fix my mistakes","arcade:boss":"Boss Battles","flaw":"Spot the Flaw","order":"Put in Order","swipe":"Swipe Sort","which-study":"Which Study?","truths":"Two Truths and a Lie",
+  "odd":"Odd One Out","examiner":"Be the Examiner","tdee":"TDEE Builder","synoptic":"Synoptic Links","psychle":"Psychle","9-mark":"9-mark answers"};
+const gameName_ = k => GAME_NAMES[k] || (String(k).startsWith("match:") ? "Study Matcher" : String(k).startsWith("lab:") ? "Psych Lab" : String(k));   // the revision site sends this with every batch; anything without it is ignored   // a card needs this many answers before it counts as hardest/easiest
 
 /** Makes the tabs (and updates their headings). Runs itself whenever data arrives. */
 function setup() {
@@ -95,12 +100,16 @@ function buildSummary_() {
   const week = []; for (let i = 0; i < 7; i++) { const d = new Date(); d.setDate(d.getDate() - i); week.push(Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd")); }
   const byDay = {}; daily.forEach(r => { const k = dayKey(r[0]); byDay[k] = (byDay[k] || 0) + (Number(r[6]) || 0); });
   const busiest = Object.entries(byDay).sort((a, b) => b[1] - a[1])[0];
-  const topGame = games.slice().sort((a, b) => b[1] - a[1])[0];
+  const gameTotals = {}; games.forEach(r => { const n = gameName_(r[0]); gameTotals[n] = (gameTotals[n] || 0) + (Number(r[1]) || 0); });
+  const gameList = Object.entries(gameTotals).sort((a, b) => b[1] - a[1]), topGame = gameList[0];
 
   const enough = cards.filter(r => Number(r[5]) >= MIN_ANSWERS);
   const cardRow = r => ["#" + r[0], r[1], r[2], r[5], r[6] + "%"];
-  const hardest = enough.slice().sort((a, b) => a[6] - b[6] || b[5] - a[5]).slice(0, 10).map(cardRow);
-  const easiest = enough.slice().sort((a, b) => b[6] - a[6] || b[5] - a[5]).slice(0, 10).map(cardRow);
+  // with only a few cards answered 10+ times, split them so no card shows up as both hardest and easiest
+  const byHard = enough.slice().sort((a, b) => a[6] - b[6] || b[5] - a[5]), nHard = Math.min(10, Math.ceil(byHard.length / 2));
+  const hardRows = byHard.slice(0, nHard), hardIds = new Set(hardRows.map(r => r[0]));
+  const hardest = hardRows.map(cardRow);
+  const easiest = enough.filter(r => !hardIds.has(r[0])).sort((a, b) => b[6] - a[6] || b[5] - a[5]).slice(0, 10).map(cardRow);
   const group = i => { const g = {}; cards.forEach(r => { const k = r[i] || "(unknown)"; g[k] = g[k] || [0, 0]; g[k][0] += Number(r[3]) || 0; g[k][1] += Number(r[5]) || 0; });
     return Object.entries(g).filter(([, v]) => v[1] > 0).map(([k, v]) => [k, v[1], pct_(v[0], v[1]) + "%", pct_(v[0], v[1])]).sort((a, b) => a[3] - b[3]).map(r => r.slice(0, 3)); };
   const topics = group(1), aos = group(7);
@@ -123,13 +132,17 @@ function buildSummary_() {
   let r = 13;
   r = table(r, 1, "😬 Hardest cards (at least " + MIN_ANSWERS + " answers)", ["Card", "Topic", "Question", "Answers", "% right"], hardest, "Not enough answers yet");
   r = table(r, 1, "😎 Easiest cards (at least " + MIN_ANSWERS + " answers)", ["Card", "Topic", "Question", "Answers", "% right"], easiest, "Not enough answers yet");
-  let r2 = table(3, 4, "📚 Topics, weakest first", ["Topic", "Answers", "% right"], topics, "No answers yet");
-  table(r2, 4, "🎯 Assessment objectives, weakest first", ["AO", "Answers", "% right"], aos, "No answers yet");
+  // right-hand tables start in column G, clear of the five-column card tables
+  let r2 = table(3, 7, "📚 Topics, weakest first", ["Topic", "Answers", "% right"], topics, "No answers yet");
+  r2 = table(r2, 7, "🎯 Assessment objectives, weakest first", ["AO", "Answers", "% right"], aos, "No answers yet");
+  table(r2, 7, "🎮 Games, most played", ["Game", "Times started", ""], gameList.slice(0, 8).map(([g, n]) => [g, n, ""]), "No games yet");
 
-  sh.clear();
-  out.forEach(([row, col, vals, bold]) => { const g = sh.getRange(row, col, vals.length, vals[0].length); g.setValues(vals); if (bold) g.setFontWeight("bold"); });
+  sh.clear(); sh.clearFormats();
+  const maxRow = Math.max(...out.map(([row, , vals]) => row + vals.length)), maxCol = 9;
+  sh.getRange(1, 1, maxRow, maxCol).setNumberFormat("@").setFontWeight("normal");   // plain text, so "76%" stays as written
+  out.forEach(([row, col, vals, bold]) => { const g = sh.getRange(row, col, vals.length, vals[0].length); g.setValues(vals.map(v => v.map(x => String(x)))); if (bold) g.setFontWeight("bold"); });
   sh.getRange(1, 1).setFontSize(16);
-  sh.setColumnWidth(1, 220); sh.setColumnWidth(3, 380); sh.setColumnWidth(4, 230);
+  [[1, 200], [2, 170], [3, 360], [4, 80], [5, 80], [6, 30], [7, 220], [8, 110], [9, 80]].forEach(([c, w]) => sh.setColumnWidth(c, w));
 }
 
 /** Add to existing rows (matched on the first `keyCols` columns) or append new ones, in one write. */
