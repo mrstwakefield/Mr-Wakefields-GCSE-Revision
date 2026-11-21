@@ -22,7 +22,8 @@ const TABS = {
   "Cards": ["Card #", "Topic", "Question", "Right", "Wrong", "Answers", "% right", "AO"],
 };
 const TEXT_COLS = ["Topic", "Question", "Last played", "AO"];
-const MIN_ANSWERS = 10;   // a card needs this many answers before it counts as hardest/easiest
+const MIN_ANSWERS = 10;
+const SITE_CODE = "fount-gcse";   // the revision site sends this with every batch; anything without it is ignored   // a card needs this many answers before it counts as hardest/easiest
 
 /** Makes the tabs (and updates their headings). Runs itself whenever data arrives. */
 function setup() {
@@ -48,7 +49,7 @@ function doPost(e) {
   lock.waitLock(20000);
   try {
     const p = JSON.parse((e && e.postData && e.postData.contents) || "{}");
-    if (!p || p.v !== 1) return done_();
+    if (!p || p.v !== 1 || p.k !== SITE_CODE) return done_();   // only the revision site sends this code
     setup();
     const date = safeDate_(p.d), year = ["y10", "y11"].includes(p.y) ? p.y : "";
     const num = v => Math.max(0, Math.min(500, Math.floor(Number(v) || 0)));   // ignore silly numbers

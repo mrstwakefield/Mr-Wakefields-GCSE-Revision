@@ -1970,7 +1970,9 @@ function renderQuiz(){
       <p style="text-align:right;margin-top:10px"><button class="linkbtn" id="qQuit">Quit quiz</button></p>`;
     $("#qQuit").onclick=()=>{quiz.phase="setup";renderQuiz();};
     if(quiz.shown){
-      const next=ok=>{ quiz.marks[quiz.i]=ok; const wasDue=isDue(d.id); mark(d.id, ok?"k":"l"); trackMistake(d.id, ok); answer({ok, el:$(ok?"#qYes":"#qNo"), mode:"quiz", review:wasDue&&ok, topic:d.t}); quiz.i++; quiz.shown=false; if(quiz.i>=quiz.items.length){ quiz.phase="done"; quizDone(); } renderQuiz(); const ta=$("#qAns"); if(ta) ta.focus(); };
+      const next=ok=>{ quiz.marks[quiz.i]=ok; const wasDue=isDue(d.id), unv = ok && checkTyped(quiz.answers[quiz.i]||"", d).score<0.5;
+        if(unv) toast("✍️","Marked as right, but small XP","Your answer didn't match the model answer closely, so it earns the XP of a miss. Use the key words from the mark scheme for full XP.",true);
+        mark(d.id, ok?"k":"l"); trackMistake(d.id, ok); answer({ok, el:$(ok?"#qYes":"#qNo"), mode:"quiz", review:wasDue&&ok&&!unv, topic:d.t, unverified:unv}); quiz.i++; quiz.shown=false; if(quiz.i>=quiz.items.length){ quiz.phase="done"; quizDone(); } renderQuiz(); const ta=$("#qAns"); if(ta) ta.focus(); };
       $("#qYes").onclick=()=>{ if(!(quiz.answers[quiz.i]||"").trim()){ toast("✍️","Write an answer first","A blank answer can't be marked as right. Tap Not quite instead.",true); return; } next(true); }; $("#qNo").onclick=()=>next(false);
       $("#qYes").focus({preventScroll:true});
     } else {
@@ -2055,7 +2057,7 @@ function anFlush(beacon){
   if(!anOn() || (!AN.n && !Object.keys(AN.plays).length && !Object.keys(AN.cards).length)) return;
   // one-off flags instead of an ID: "first batch ever from this device" and "first batch today" let the sheet count students without tracking anyone
   const u={}; try{ if(!localStorage.getItem("fount-an-ever")){ u.n=1; localStorage.setItem("fount-an-ever","1"); } if(localStorage.getItem("fount-an-day")!==today()){ u.d=1; localStorage.setItem("fount-an-day",today()); } }catch(e){}
-  const body=JSON.stringify({v:1, d:today(), y:YEAR||"", u, plays:AN.plays, modes:AN.modes,
+  const body=JSON.stringify({v:1, k:"fount-gcse", d:today(), y:YEAR||"", u, plays:AN.plays, modes:AN.modes,
     cards:Object.entries(AN.cards).slice(0,300).map(([id,[r,w]])=>{ const d=BY_ID[id]; return [+id, r, w, d?d.t:"", d?String(d.q).slice(0,90):"", d?anAO(d):""]; })});
   AN={plays:{}, modes:{}, cards:{}, n:0}; anSave();
   try{ if(beacon && navigator.sendBeacon) navigator.sendBeacon(ANALYTICS_URL, new Blob([body],{type:"text/plain"}));
@@ -2226,16 +2228,16 @@ function goalMet(){
   addXP(50,false);
   if(G.streak%7===0 && G.freeze<2){ G.freeze++; setTimeout(()=>toast("🧊","Streak freeze earned","It saves your streak if you miss a day."),1200); }
 }
-function answer({ok, el, mode, gold, x2, review, topic, boss, typed}){
+function answer({ok, el, mode, gold, x2, review, topic, boss, typed, unverified}){
   checkStreak(); anAnswer(mode, ok);
   const t=today();
   G.st.cards++; if(ok) G.st.right++;
   if(!ok && combo===7) G.flags.miller=1;
   if(t==="2026-12-03"||t==="2026-12-10") G.flags.nightbefore=1;
   if(t.slice(5)==="12-25") G.flags.festive=1;
-  if(ok){ combo++; if(combo>G.st.combo) G.st.combo=combo; } else combo=0;
-  const base = (mode==="quiz" ? (ok?15:4) : mode==="arcade" ? (ok?6:1) : (ok?10:3)) * (typed && ok ? 2 : 1);   // typed answers earn double
-  let mult = (ok ? comboMult() : 1) * ((x2 || topic==="Exam skills") ? 2 : 1) * eventMult(topic, boss);   // exam skills always earn double XP
+  if(ok && !unverified){ combo++; if(combo>G.st.combo) G.st.combo=combo; } else if(!ok) combo=0;
+  const base = unverified ? 4 : (mode==="quiz" ? (ok?15:4) : mode==="arcade" ? (ok?6:1) : (ok?10:3)) * (typed && ok ? 2 : 1);   // unverified: self-marked right but the written answer didn't match   // typed answers earn double
+  let mult = (ok && !unverified ? comboMult() : 1) * ((x2 || topic==="Exam skills") ? 2 : 1) * eventMult(topic, boss);   // exam skills always earn double XP
   if(gold && ok){ mult*=5; G.st.gold++; }
   if(mode==="arcade") mult*=gotdMult();   // game of the day: double XP
   const xp=Math.round(base*mult)+(review?5:0);
@@ -2473,8 +2475,12 @@ function fxStart(kind){
   if(kind==="fount"){ el.remove(); FX.el=null; FX.kind="fount"; fountStart(); return; }
   if(kind==="petalien"){   // a mini UFO drifting around, now and then switching on its tractor beam
     el.className="fx-ufo"; el.innerHTML='<span class="beam"></span><span class="u">🛸</span>';
-    const hop=()=>{ if(!FX.el || document.hidden) return; const w=innerWidth-60, hh=innerHeight-140;
-      el.style.transform=`translate(${Math.round(20+Math.random()*w)}px,${Math.round(60+Math.random()*hh)}px)`;
+    const hop=()=>{ if(!FX.el || document.hidden) return;
+      const main=document.querySelector("main")||document.querySelector(".wrap")||document.body.firstElementChild, r=main.getBoundingClientRect();
+      const gutL=r.left, gutR=innerWidth-r.right; let x, y;
+      if(Math.max(gutL,gutR)>=70){ const left=gutL>=70 && (gutR<70 || Math.random()<.5); x=left ? 10+Math.random()*(gutL-60) : r.right+10+Math.random()*(gutR-60); y=60+Math.random()*(innerHeight-160); }
+      else { x=10+Math.random()*(innerWidth-60); y=8+Math.random()*30; }   // narrow screens: hover along the top
+      el.style.transform=`translate(${Math.round(x)}px,${Math.round(y)}px)`;
       if(Math.random()<.4) setTimeout(()=>{ if(!FX.el) return; el.classList.add("beaming"); setTimeout(()=>el.classList.remove("beaming"),1800); }, 7200); };
     el.style.transform=`translate(${innerWidth-90}px,90px)`; setTimeout(hop,400); FX.timer=setInterval(hop, 10000); return;
   }
@@ -2875,6 +2881,8 @@ function startArc(mode){ anPlay("arcade:"+mode);
   if(mode==="daily"){
     const rng=rngFrom("daily-"+today()), core=DATA.filter(d=>d.id<5000 && taught(d.t));
     const items=taught("RM") ? shuffleR(core,rng).slice(0,6).concat(shuffleR(EXAM_ITEMS(),rng).slice(0,2), [genRM(rng,"maths"), genRM(rng,"rm")]) : shuffleR(core,rng).slice(0,7).concat(shuffleR(EXAM_ITEMS(),rng).slice(0,3));
+    { const L=stageInfo().locked; if(L.size){ const used=new Set(items.map(x=>x.id)), spare=shuffleR(core.filter(d=>!L.has(d.t) && !used.has(d.id)), rngFrom("daily-spare-"+today()));
+        for(let i=0;i<items.length;i++) if(items[i] && L.has(items[i].t) && spare.length) items[i]=spare.shift(); } }   // locked topics stay locked, even in the Daily 10
     arc.items=shuffleR(items,rng); arc.rng=rng;
     G.daily[today()]={started:true, done:false, score:0, time:0, log:[], items:arc.items.map(slim)}; save();
   } else if(mode==="exam"){
