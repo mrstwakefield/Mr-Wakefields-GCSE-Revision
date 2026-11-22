@@ -1063,8 +1063,21 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
 :root[data-skin="neon"] .btn.good{color:#0B0B14}
 
 :root[data-skin="wakefield"]{--paper:#0D2A1E;--card:#123826;--ink:#F6F0DC;--muted:#C8BE98;--line:#24563D;--soft:#1A4630;--good:#E6C35C;--good-bg:#3A3618;--warn:#F39A63;--warn-bg:#3E2616;color-scheme:dark}
-:root[data-skin="wakefield"] h1{background:linear-gradient(90deg,#E6C35C,#F6F0DC 60%,#E6C35C);-webkit-background-clip:text;background-clip:text;color:transparent}
-:root[data-skin="wakefield"] h1::before{content:"✦ ";-webkit-text-fill-color:#E6C35C}
+:root[data-skin="wakefield"] h1{cursor:pointer}
+:root[data-skin="wakefield"] h1 .h1t{background:linear-gradient(100deg,#B8902C 0%,#FFF3C4 20%,#E6C35C 40%,#FFFFFF 50%,#E6C35C 60%,#FFF3C4 80%,#B8902C 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:fountShine 4s linear infinite;filter:drop-shadow(0 0 14px rgba(230,195,92,.45))}
+:root[data-skin="wakefield"] h1::before{content:"✦";display:inline-block;margin-right:.25em;color:#E6C35C;-webkit-text-fill-color:#E6C35C;animation:mbSpin 6s linear infinite;text-shadow:0 0 16px rgba(230,195,92,.9)}
+:root[data-skin="wakefield"] body{background:repeating-linear-gradient(135deg,rgba(230,195,92,.07) 0 2px,transparent 2px 26px),radial-gradient(ellipse at 50% 0%,#1B5A3C 0%,#0D2A1E 55%,#071810 100%);background-size:200% 200%,100% 100%;background-attachment:fixed;animation:wmStripes 30s linear infinite}
+@keyframes wmStripes{to{background-position:-260px 260px,0 0}}
+:root[data-skin="wakefield"] .box,:root[data-skin="wakefield"] .plan,:root[data-skin="wakefield"] .hud,:root[data-skin="wakefield"] .tabs,:root[data-skin="wakefield"] .card,:root[data-skin="wakefield"] .quiz-q{border-color:rgba(230,195,92,.5);box-shadow:0 0 0 1px rgba(230,195,92,.15),0 8px 30px rgba(0,0,0,.35);animation:wmGlow 5s ease-in-out infinite}
+@keyframes wmGlow{0%,100%{box-shadow:0 0 0 1px rgba(230,195,92,.15),0 8px 30px rgba(0,0,0,.35)}50%{box-shadow:0 0 0 1px rgba(230,195,92,.45),0 0 26px rgba(230,195,92,.22)}}
+:root[data-skin="wakefield"] .btn{background:linear-gradient(135deg,#FFE9A3,#E6C35C 45%,#B8902C);border-color:#E6C35C;color:#0D2A1E}
+:root[data-skin="wakefield"] .btn.ghost{background:transparent;color:#E6C35C}
+:root[data-skin="wakefield"] .plan-go{background:linear-gradient(120deg,#B8902C,#FFE9A3 30%,#E6C35C 55%,#B8902C);background-size:220% 100%;color:#0D2A1E;animation:fountShine 6s linear infinite}
+.fx-wakefield .wm-item{position:absolute;bottom:-60px;left:var(--x);font-size:var(--s);opacity:.55;animation:wmRise var(--t) linear forwards;filter:drop-shadow(0 0 6px rgba(230,195,92,.5))}
+@keyframes wmRise{0%{transform:translateY(0) rotate(0deg)}100%{transform:translateY(calc(-100vh - 120px)) rotate(var(--r))}}
+.wm-stamp{position:fixed;z-index:61;pointer-events:none;font-family:var(--display);font-weight:900;font-size:clamp(22px,4vw,40px);letter-spacing:.06em;color:#E6C35C;border:5px solid #E6C35C;border-radius:14px;padding:10px 20px;background:rgba(13,42,30,.55);text-shadow:0 0 12px rgba(230,195,92,.7);box-shadow:0 0 30px rgba(230,195,92,.4);transform:rotate(-12deg) scale(3);opacity:0;animation:wmStamp 3.4s ease-out forwards}
+@keyframes wmStamp{0%{opacity:0;transform:rotate(-12deg) scale(3)}12%{opacity:1;transform:rotate(-12deg) scale(1)}16%{transform:rotate(-12deg) scale(1.08)}20%{transform:rotate(-12deg) scale(1)}80%{opacity:1}100%{opacity:0;transform:rotate(-12deg) scale(1)}}
+@media (prefers-reduced-motion:reduce){:root[data-skin="wakefield"] body,:root[data-skin="wakefield"] h1 .h1t,:root[data-skin="wakefield"] h1::before,:root[data-skin="wakefield"] .box,:root[data-skin="wakefield"] .plan,:root[data-skin="wakefield"] .hud,:root[data-skin="wakefield"] .tabs,:root[data-skin="wakefield"] .card,:root[data-skin="wakefield"] .quiz-q,:root[data-skin="wakefield"] .plan-go{animation:none}}
 :root[data-skin="wakefield"] .btn.good{color:#0D2A1E}
 :root[data-skin="retro"]{--paper:#0A0A12;--card:#13131F;--ink:#E8FFE0;--muted:#8FB58A;--line:#2A2A44;--soft:#1C1C2E;--good:#39FF14;--good-bg:#12331A;--warn:#FF2BD6;--warn-bg:#3A1236;color-scheme:dark}
 :root[data-skin="retro"] .h1t{font-family:"Courier New",ui-monospace,monospace;color:#39FF14;text-shadow:3px 3px 0 #FF2BD6;letter-spacing:-.02em}
@@ -2503,7 +2516,7 @@ function fountStart(){ if(fountFx.c) return; const c=document.createElement("can
 function fountStop(){ if(!fountFx.c) return; cancelAnimationFrame(fountFx.raf); fountFx.c.remove(); fountFx.c=null; fountFx.p=[]; removeEventListener("resize",fountFx.size); removeEventListener("resize",fountFx.rj); document.removeEventListener("visibilitychange",fountFx.vis); }
 /* ---- animated theme layers: squirting fountains for The Fount, nerve impulses for Electrical Impulse ---- */
 const FX={kind:null, el:null, timer:null};
-function fxStop(){ clearInterval(FX.timer); FX.timer=null; if(FX.el) FX.el.remove(); FX.el=null; FX.kind=null; fountStop(); }
+function fxStop(){ clearInterval(FX.timer); FX.timer=null; clearInterval(FX.stamp); FX.stamp=null; document.querySelectorAll('.wm-stamp').forEach(e=>e.remove()); if(FX.el) FX.el.remove(); FX.el=null; FX.kind=null; fountStop(); }
 function fxStart(kind){
   fxStop(); if(TEACHER || (reduced() && kind!=="fount")) return;   // the fountains draw a still picture for reduced motion
   const el=document.createElement("div"); el.className="fx-layer fx-"+kind; el.setAttribute("aria-hidden","true"); document.body.appendChild(el); FX.el=el; FX.kind=kind;
@@ -2511,6 +2524,17 @@ function fxStart(kind){
   if(kind==="adrenaline"){   // heartbeat glow and ECG traces racing across the screen
     const beat=y=>{ let d=`M -60 ${y}`; for(let x=-60;x<1100;x+=200) d+=` L ${x+70} ${y} L ${x+85} ${y-12} L ${x+95} ${y+8} L ${x+105} ${y-70} L ${x+118} ${y+40} L ${x+130} ${y} L ${x+200} ${y}`; return d; };
     el.innerHTML=`<div class="pulse-bg"></div><svg viewBox="0 0 1000 1000" preserveAspectRatio="none"><path class="ecg" d="${beat(300)}"/><path class="ecg b" d="${beat(720)}"/></svg>`; return;
+  }
+  if(kind==="wakefield"){   // Mr W's things floating up, and now and then a WAKEFIELD APPROVED stamp
+    const ITEMS=["🖊️","🪪","☕","📜","✦","⭐","🎓","🧠","✦","📚"];
+    const rise=()=>{ if(!FX.el || document.hidden) return; const d=document.createElement("span"), t=14+Math.random()*10;
+      d.className="wm-item"; d.textContent=ITEMS[Math.floor(Math.random()*ITEMS.length)];
+      d.style.setProperty("--x",(Math.random()*96).toFixed(1)+"vw"); d.style.setProperty("--s",(18+Math.random()*22).toFixed(0)+"px"); d.style.setProperty("--t",t.toFixed(1)+"s"); d.style.setProperty("--r",((Math.random()<.5?-1:1)*(90+Math.random()*270)).toFixed(0)+"deg");
+      el.appendChild(d); setTimeout(()=>d.remove(), t*1000+200); };
+    for(let i=0;i<6;i++) setTimeout(rise, i*700); FX.timer=setInterval(rise, 1600);
+    const stamp=()=>{ if(!FX.el || document.hidden) return; const s=document.createElement("div"); s.className="wm-stamp"; s.textContent="✦ WAKEFIELD APPROVED ✦";
+      s.style.left=Math.round(8+Math.random()*Math.max(10,innerWidth-420))+"px"; s.style.top=Math.round(90+Math.random()*Math.max(10,innerHeight-260))+"px"; document.body.appendChild(s); setTimeout(()=>s.remove(),3500); };
+    FX.stamp=setInterval(stamp, 45000); setTimeout(stamp, 5000); return;
   }
   if(kind==="mindblown"){ el.innerHTML='<div class="spiral"></div><div class="rings"></div>'; return; }   // a giant spinning, colour-shifting illusion
   if(kind==="petalien"){   // a mini UFO drifting around, now and then switching on its tractor beam
@@ -2540,7 +2564,9 @@ function fxStart(kind){
     el.innerHTML=s+"</svg>";
   }
 }
-function fxSync(){ const k=document.documentElement.dataset.skin||"", want=["fount","retro","petalien","adrenaline","mindblown"].includes(k)?k:null; if(want!==FX.kind){ if(want) fxStart(want); else fxStop(); } }
+const WM_SAYINGS=["Keep right on! 💙","Gold star ✦","Did you TDEE that?","Name it, explain it, give an example.","That's a GRAVE point.","Quote the numbers!","Is that SPACER or GRAVE?","Basically Mr Wakefield.","Correlation isn't causation!","Who's revising? You are."];
+document.addEventListener("click",e=>{ if(document.documentElement.dataset.skin!=="wakefield" || !e.target.closest("h1")) return; confetti(140,["#E6C35C","#FFF3C4","#0D2A1E","#F6F0DC"]); toast("✦", WM_SAYINGS[Math.floor(Math.random()*WM_SAYINGS.length)], "— Mr W", true); });
+function fxSync(){ const k=document.documentElement.dataset.skin||"", want=["fount","retro","petalien","adrenaline","mindblown","wakefield"].includes(k)?k:null; if(want!==FX.kind){ if(want) fxStart(want); else fxStop(); } }
 new MutationObserver(fxSync).observe(document.documentElement,{attributes:true, attributeFilter:["data-skin"]});
 setTimeout(fxSync,0);
 function applySkin(){ const k=G.skin||""; const th=THEMES.find(t=>t.k===k); if(k && th && themeOpen(th)) document.documentElement.dataset.skin=k; else delete document.documentElement.dataset.skin; }
