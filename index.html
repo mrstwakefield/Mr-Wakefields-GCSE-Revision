@@ -892,6 +892,40 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
 .fx-retro .dend{fill:none;stroke:rgba(57,255,20,.22);stroke-width:1.6;stroke-linecap:round}
 .fx-retro .soma{fill:rgba(57,255,20,.12);stroke:rgba(57,255,20,.35);stroke-width:1.5}
 .fx-retro .pulse{filter:url(#fxGlow)}
+/* ---- 500 in a row: Adrenaline Rush (fight or flight) ---- */
+:root[data-skin="adrenaline"]{--paper:#1A0306;--card:rgba(40,6,12,.88);--ink:#FFE9E6;--muted:#E7A9A3;--line:rgba(255,45,61,.35);--soft:rgba(70,10,20,.7);--good:#FFB020;--good-bg:#3D2508;--warn:#FF5A6A;--warn-bg:#3D0C14;color-scheme:dark}
+:root[data-skin="adrenaline"] body{background:radial-gradient(ellipse at 50% 120%,#5A0A14 0%,#1A0306 60%);background-attachment:fixed}
+:root[data-skin="adrenaline"] .h1t{background:linear-gradient(90deg,#FF2D3D,#FFB020,#FF2D3D);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:fountShine 3s linear infinite, adrGlowT 1.1s ease-in-out infinite}
+@keyframes adrGlowT{0%,100%{filter:drop-shadow(0 0 0 rgba(255,45,61,0))}12%{filter:drop-shadow(0 0 16px rgba(255,45,61,.9))}24%{filter:drop-shadow(0 0 2px rgba(255,45,61,.3))}36%{filter:drop-shadow(0 0 10px rgba(255,45,61,.7))}}
+:root[data-skin="adrenaline"] h1::before{content:"💓 ";display:inline-block;animation:adrBeat 1.1s ease-in-out infinite}
+@keyframes adrBeat{0%,100%{transform:scale(1)}12%{transform:scale(1.06)}24%{transform:scale(1)}36%{transform:scale(1.04)}48%{transform:scale(1)}}
+:root[data-skin="adrenaline"] .box,:root[data-skin="adrenaline"] .plan,:root[data-skin="adrenaline"] .hud,:root[data-skin="adrenaline"] .tabs{border-color:rgba(255,45,61,.45);box-shadow:0 0 22px rgba(255,45,61,.18)}
+:root[data-skin="adrenaline"] .btn{background:linear-gradient(135deg,#FF5A6A,#D0102A);border-color:#FF2D3D;color:#fff}
+:root[data-skin="adrenaline"] .btn.ghost{background:transparent;color:#FF8A95}
+:root[data-skin="adrenaline"] .plan-go{background:linear-gradient(120deg,#D0102A,#FF5A6A 40%,#FFB020 60%,#D0102A);background-size:220% 100%;animation:fountShine 4s linear infinite}
+.fx-adrenaline svg{width:100%;height:100%}
+.fx-adrenaline .ecg{fill:none;stroke:#FF2D3D;stroke-width:3;stroke-linejoin:round;filter:drop-shadow(0 0 6px #FF2D3D);stroke-dasharray:420 2600;animation:ecgRun 2.2s linear infinite;opacity:.55}
+.fx-adrenaline .ecg.b{stroke:#FFB020;animation-delay:-1.1s;opacity:.35}
+@keyframes ecgRun{from{stroke-dashoffset:3020}to{stroke-dashoffset:0}}
+.fx-adrenaline .pulse-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(255,45,61,.22),transparent 60%);animation:adrGlow 1.1s ease-in-out infinite}
+@keyframes adrGlow{0%,100%{opacity:.2}12%{opacity:.9}24%{opacity:.25}36%{opacity:.7}48%{opacity:.2}}
+/* ---- 1000 in a row: Mind Blown (a full-on visual illusion) ---- */
+:root[data-skin="mindblown"]{--paper:#0B0716;--card:rgba(14,10,30,.86);--ink:#FFFFFF;--muted:#CFC6F5;--line:rgba(255,255,255,.22);--soft:rgba(40,30,80,.7);--good:#3CFFB4;--good-bg:#0E3A2C;--warn:#FF7A9C;--warn-bg:#3D1426;color-scheme:dark}
+:root[data-skin="mindblown"] body{background:#0B0716}
+:root[data-skin="mindblown"] .h1t{background:linear-gradient(90deg,#FF3CAC,#FFD23C,#3CFFB4,#3CC8FF,#B43CFF,#FF3CAC);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:fountShine 4s linear infinite}
+:root[data-skin="mindblown"] h1::before{content:"🤯 ";display:inline-block;animation:mbWobble 2.6s ease-in-out infinite}
+:root[data-skin="mindblown"] .h1t::after{content:" 🌀";-webkit-text-fill-color:initial;color:initial;display:inline-block;animation:mbSpin 3s linear infinite}
+@keyframes mbWobble{0%,100%{transform:rotate(-8deg) scale(1)}50%{transform:rotate(8deg) scale(1.15)}}
+@keyframes mbSpin{to{transform:rotate(360deg)}}
+:root[data-skin="mindblown"] .box,:root[data-skin="mindblown"] .plan,:root[data-skin="mindblown"] .hud,:root[data-skin="mindblown"] .tabs,:root[data-skin="mindblown"] .card,:root[data-skin="mindblown"] .quiz-q{border-color:transparent;background-clip:padding-box;box-shadow:0 0 0 2px rgba(255,255,255,.08),0 0 28px rgba(180,60,255,.25);backdrop-filter:blur(8px)}
+:root[data-skin="mindblown"] .btn{background:linear-gradient(90deg,#FF3CAC,#B43CFF,#3CC8FF);background-size:200% 100%;animation:fountShine 3s linear infinite;border-color:transparent;color:#fff}
+:root[data-skin="mindblown"] .btn.ghost{background:transparent;color:#FFD23C;animation:none;border-color:rgba(255,255,255,.35)}
+:root[data-skin="mindblown"] .plan-go{background:linear-gradient(90deg,#FF3CAC,#FFD23C,#3CFFB4,#3CC8FF,#B43CFF,#FF3CAC);background-size:300% 100%;animation:fountShine 5s linear infinite;color:#0B0716}
+.fx-mindblown .spiral{position:absolute;left:50%;top:50%;width:180vmax;height:180vmax;margin:-90vmax 0 0 -90vmax;background:repeating-conic-gradient(from 0deg,#FF3CAC 0 10deg,#0B0716 10deg 20deg,#3CC8FF 20deg 30deg,#0B0716 30deg 40deg,#FFD23C 40deg 50deg,#0B0716 50deg 60deg);opacity:.16;animation:mbSpin 40s linear infinite, mbHue 12s linear infinite}
+.fx-mindblown .rings{position:absolute;left:50%;top:50%;width:140vmax;height:140vmax;margin:-70vmax 0 0 -70vmax;border-radius:50%;background:repeating-radial-gradient(circle,rgba(255,255,255,.07) 0 14px,transparent 14px 40px);animation:mbPulse 6s ease-in-out infinite}
+@keyframes mbHue{to{filter:hue-rotate(360deg)}}
+@keyframes mbPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+@media (prefers-reduced-motion:reduce){:root[data-skin="adrenaline"] .h1t,:root[data-skin="adrenaline"] h1::before,:root[data-skin="adrenaline"] .plan-go,:root[data-skin="mindblown"] .h1t,:root[data-skin="mindblown"] h1::before,:root[data-skin="mindblown"] .h1t::after,:root[data-skin="mindblown"] .btn,:root[data-skin="mindblown"] .plan-go{animation:none}}
 /* ---- level 100: The Fount (deliberately over the top) ---- */
 :root[data-skin="fount"]{--paper:#05201D;--card:rgba(10,46,42,.86);--ink:#F2FBF7;--muted:#A9D6C9;--line:rgba(242,193,78,.35);--soft:rgba(20,70,63,.7);--good:#F2C14E;--good-bg:#3A3214;--warn:#FF9B7A;--warn-bg:#3E2418;color-scheme:dark}
 :root[data-skin="fount"] body{background:linear-gradient(125deg,#04201C,#0B4A42 25%,#1B1450 50%,#0B4A42 75%,#04201C);background-size:400% 400%;background-attachment:fixed;animation:fountBg 22s ease-in-out infinite}
@@ -2234,7 +2268,7 @@ function answer({ok, el, mode, gold, x2, review, topic, boss, typed, unverified}
   if(!ok && combo===7) G.flags.miller=1;
   if(t==="2026-12-03"||t==="2026-12-10") G.flags.nightbefore=1;
   if(t.slice(5)==="12-25") G.flags.festive=1;
-  if(ok && !unverified){ combo++; if(combo>G.st.combo) G.st.combo=combo; } else if(!ok) combo=0;
+  if(ok && !unverified){ combo++; if(combo>G.st.combo){ G.st.combo=combo; const th=THEMES.find(x=>x.streak===combo); if(th) setTimeout(()=>{ toast("🔥",`${combo.toLocaleString()} right in a row!`,`New theme unlocked: ${th.name}. Switch it on in 🎨 Themes.`,true); confetti(250); sfx("badge"); },400); } } else if(!ok) combo=0;
   const base = unverified ? 4 : (mode==="quiz" ? (ok?15:4) : mode==="arcade" ? (ok?6:1) : (ok?10:3)) * (typed && ok ? 2 : 1);   // unverified: self-marked right but the written answer didn't match   // typed answers earn double
   let mult = (ok && !unverified ? comboMult() : 1) * ((x2 || topic==="Exam skills") ? 2 : 1) * eventMult(topic, boss);   // exam skills always earn double XP
   if(gold && ok){ mult*=5; G.st.gold++; }
@@ -2391,6 +2425,8 @@ const THEMES = [
   {k:"pinkpen", name:"Wakefield's Pink Pen", lvl:92, sw:["#FFF4F8","#3A0D22","#E0418A"]},
   {k:"bell", name:"Bell Curve", note:"Research methods: a normal distribution, with the mean, median and mode all in the middle", lvl:96, sw:["#F3F1FF","#1D1A3A","#5B4BD6"]},
   {k:"fount", name:"The Fount", note:"The very top: you've drunk from the Fount of Knowledge and Wisdom. Level 100: the showiest theme of all", lvl:100, sw:["#06221F","#EAF7F2","#F2C14E"]},
+  {k:"adrenaline", name:"💓 Adrenaline Rush", note:"Brain & neuro: fight or flight. Your heart races, and so does the screen", streak:500, lvl:0, sw:["#1A0306","#FFE9E6","#FF2D3D"]},
+  {k:"mindblown", name:"🤯 Mind Blown", note:"Perception: a full-on visual illusion. 1,000 right in a row, you legend", streak:1000, lvl:0, sw:["#0B0716","#FFFFFF","#FF3CAC"]},
   // year-group themes: only that year can unlock them
   {k:"y10sensory", name:"Sensory Register", lvl:7, year:"y10", sw:["#EAF7FF","#0B2A3D","#1FA2E0"]},
   {k:"y10sensorimotor", name:"Sensorimotor Stage", lvl:23, year:"y10", sw:["#FFF6E0","#2B1F0E","#E8442E"]},
@@ -2435,7 +2471,7 @@ const SEALS = {
 };
 const sealDone = k => { const s=SEALS[k]; if(!s) return true; const [a,b]=s.prog(); return a>=b; };
 const themeMine = th => !th.year || DEMO || th.year===YR;
-const themeOpen = th => DEMO ? true : !themeMine(th) ? false : th.pet ? (()=>{ try{ return petUnlocked(th.pet); }catch(e){ return true; } })() : th.scroll ? !!G.scrolls[th.scroll] && sealDone(th.k) : th.secret ? !!G.flags.keeper : lvlFor(G.xp)>=th.lvl;
+const themeOpen = th => DEMO ? true : !themeMine(th) ? false : th.streak ? (G.st.combo||0) >= th.streak : th.pet ? (()=>{ try{ return petUnlocked(th.pet); }catch(e){ return true; } })() : th.scroll ? !!G.scrolls[th.scroll] && sealDone(th.k) : th.secret ? !!G.flags.keeper : lvlFor(G.xp)>=th.lvl;
 function checkSeals(){
   if(typeof TEACHER!=="undefined" && TEACHER) return; G.seals=G.seals||{};
   THEMES.filter(t=>t.scroll && G.scrolls[t.scroll] && !G.seals[t.k] && sealDone(t.k)).forEach((t,i)=>{
@@ -2472,6 +2508,11 @@ function fxStart(kind){
   fxStop(); if(TEACHER || (reduced() && kind!=="fount")) return;   // the fountains draw a still picture for reduced motion
   const el=document.createElement("div"); el.className="fx-layer fx-"+kind; el.setAttribute("aria-hidden","true"); document.body.appendChild(el); FX.el=el; FX.kind=kind;
   if(kind==="fount"){ el.remove(); FX.el=null; FX.kind="fount"; fountStart(); return; }
+  if(kind==="adrenaline"){   // heartbeat glow and ECG traces racing across the screen
+    const beat=y=>{ let d=`M -60 ${y}`; for(let x=-60;x<1100;x+=200) d+=` L ${x+70} ${y} L ${x+85} ${y-12} L ${x+95} ${y+8} L ${x+105} ${y-70} L ${x+118} ${y+40} L ${x+130} ${y} L ${x+200} ${y}`; return d; };
+    el.innerHTML=`<div class="pulse-bg"></div><svg viewBox="0 0 1000 1000" preserveAspectRatio="none"><path class="ecg" d="${beat(300)}"/><path class="ecg b" d="${beat(720)}"/></svg>`; return;
+  }
+  if(kind==="mindblown"){ el.innerHTML='<div class="spiral"></div><div class="rings"></div>'; return; }   // a giant spinning, colour-shifting illusion
   if(kind==="petalien"){   // a mini UFO drifting around, now and then switching on its tractor beam
     el.className="fx-ufo"; el.innerHTML='<span class="beam"></span><span class="u">🛸</span>';
     const hop=()=>{ if(!FX.el || document.hidden) return;
@@ -2499,7 +2540,7 @@ function fxStart(kind){
     el.innerHTML=s+"</svg>";
   }
 }
-function fxSync(){ const k=document.documentElement.dataset.skin||"", want=(k==="fount"||k==="retro"||k==="petalien")?k:null; if(want!==FX.kind){ if(want) fxStart(want); else fxStop(); } }
+function fxSync(){ const k=document.documentElement.dataset.skin||"", want=["fount","retro","petalien","adrenaline","mindblown"].includes(k)?k:null; if(want!==FX.kind){ if(want) fxStart(want); else fxStop(); } }
 new MutationObserver(fxSync).observe(document.documentElement,{attributes:true, attributeFilter:["data-skin"]});
 setTimeout(fxSync,0);
 function applySkin(){ const k=G.skin||""; const th=THEMES.find(t=>t.k===k); if(k && th && themeOpen(th)) document.documentElement.dataset.skin=k; else delete document.documentElement.dataset.skin; }
@@ -5317,7 +5358,7 @@ function scrollBoxHTML(){
     </div>`;
 }
 function themeCard(th){ const open=themeOpen(th), on=(G.skin||"")===th.k;
-  return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b>${th.year?`<span class="th-year">${th.year==="y10"?"Year 10 only":"Year 11 only"}</span>`:""}<span>${open?(on?"✓ In use":"Tap to use"):th.pet?`🔒 Unlock ${esc(PETS[th.pet].title)} (${esc(petNeed(th.pet))})`:th.scroll?"🔒 "+esc(SEALS[th.k].text):"🔒 Level "+th.lvl}</span></button>`; }
+  return `<button class="theme ${on?"on":""}" data-skin="${th.k}" ${open?"":"disabled"} aria-pressed="${on}"><span class="sw">${th.sw.map(c=>`<i style="background:${c}"></i>`).join("")}</span><b>${esc(th.name)}</b>${th.year?`<span class="th-year">${th.year==="y10"?"Year 10 only":"Year 11 only"}</span>`:""}<span>${open?(on?"✓ In use":"Tap to use"):th.streak?`🔒 Get ${th.streak.toLocaleString()} right in a row (best so far: ${(G.st.combo||0).toLocaleString()})`:th.pet?`🔒 Unlock ${esc(PETS[th.pet].title)} (${esc(petNeed(th.pet))})`:th.scroll?"🔒 "+esc(SEALS[th.k].text):"🔒 Level "+th.lvl}</span></button>`; }
 function themesHTML(){
   const mine=THEMES.filter(th=>themeOpen(th)), sealed=THEMES.filter(th=>th.scroll && G.scrolls[th.scroll] && !themeOpen(th)), next=THEMES.filter(th=>!th.secret && themeMine(th) && !themeOpen(th));
   const hiddenSecrets=THEMES.filter(th=>th.secret && !themeOpen(th) && !(th.scroll && G.scrolls[th.scroll])).length;
