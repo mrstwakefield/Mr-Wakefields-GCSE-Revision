@@ -1911,7 +1911,7 @@ function renderMcCard(){
       <div class="tag">${gold?'<span class="goldtag">✨ Golden card · 5× XP</span>':esc(t.name)+(due?' <span class="pill k" style="margin-left:6px">Review</span>':"")} <span class="muted">Card ${pos+1} of ${deck.length}</span> ${stLabel}</div>
       ${scHTML(d)}<div class="q ${d.sc?"has-sc":""}">${esc(d.q)}</div>
       <div class="opts">${mcCur.opts.map((o,i)=>`<button class="opt ${done?(i===mcCur.correct?"right":i===mcPicked?"wrong":"dim"):""}" data-mc="${i}" ${done?"disabled":""}><span class="k">${"ABCDEF"[i]}</span><span>${esc(o)}</span></button>`).join("")}</div>
-      ${done?(ok?`<div class="gapfb"><b style="color:var(--good)">✓ Correct!</b></div>${whyHTML(d)}`:`<div class="gapfb"><b style="color:var(--warn)">Not quite.</b> <span class="muted">Added to still learning.</span></div>${d.wrong?"":`<div class="why" style="background:var(--good-bg)"><b>Answer:</b> ${esc(d.a)}</div>`}${whyHTML(d)}`):""}
+      ${done?(ok?`<div class="gapfb"><b style="color:var(--good)">✓ Correct!</b></div>${whyHTML(d)}`:`<div class="gapfb"><b style="color:var(--warn)">Not quite.</b> <span class="muted">Added to still learning.</span></div>${mcExplainHTML(d, mcCur.opts[mcPicked])}`):""}
     </div>
     <div class="card-actions">
       <div class="nav"><button id="prevC" aria-label="Previous card" ${pos===0?"disabled":""}>‹</button><button id="nextC" aria-label="Skip to next card">›</button></div>
@@ -2721,6 +2721,22 @@ function mcFor(d, rng=Math.random){
 }
 const EXAM_ITEMS = () => DATA.filter(d=>d.t==="Exam skills" && !notYetText(d.q+" "+d.a));
 const whyHTML = d => d && d.why ? `<div class="why">💡 ${esc(d.why)}</div>` : "";
+/* ---- explaining a wrong multiple-choice answer: the right answer, why the pick was tempting, and the card's explanation ---- */
+let MC_ANS_IDX=null;
+function mcExplainHTML(d, picked){
+  if(!d) return "";
+  const full=BY_ID[d.id]||d, right=full.opt||full.a, norm=s=>String(s||"").toLowerCase().replace(/[^a-z0-9%.]+/g," ").trim();
+  let why="";
+  if(picked && picked!==right){
+    // a near miss: one key word swapped for its opposite (proactive/retroactive, field/lab…)
+    const has=(s,w)=>new RegExp("(^|[^a-z'-])"+w.replace(/[-']/g,m=>"\\"+m)+"(?=$|[^a-z'-])","i").test(s);
+    for(const [x,y] of MC_SWAP){ for(const [r,w] of [[x,y],[y,x]]){ if(has(right,r) && has(picked,w) && !has(right,w)){ why=`Careful: it's <b>${esc(r)}</b>, not <b>${esc(w)}</b>.`; break; } } if(why) break; }
+    // the pick is the right answer to a different question
+    if(!why){ if(!MC_ANS_IDX){ MC_ANS_IDX={}; DATA.forEach(x=>{ if(x.id>=5000&&x.id<6000) return; [x.a,x.opt].filter(Boolean).forEach(a=>{ const k=norm(a); if(k && !MC_ANS_IDX[k]) MC_ANS_IDX[k]=x; }); }); }
+      const src=MC_ANS_IDX[norm(picked)]; if(src && src.id!==full.id) why=`What you picked is the answer to a different question: <i>${esc(src.q)}</i>`; }
+  }
+  return `<div class="why" style="background:var(--good-bg)"><b>✓ Answer:</b> ${esc(right)}${full.opt && full.a!==full.opt ? `<div class="muted" style="margin-top:4px">${esc(full.a)}</div>`:""}${why?`<div style="margin-top:6px">${why}</div>`:""}</div>${whyHTML(full)}`;
+}
 const scHTML = d => d.sc ? `<div class="sc">${esc(d.sc)}</div>` : "";
 const optsHTML = d => d.wrong && /^which/i.test(d.q) ? `<ol class="optlist">${mcFor(d, rngFrom("opts-"+d.id)).opts.map(o=>`<li>${esc(o)}</li>`).join("")}</ol>` : "";
 
@@ -3012,8 +3028,8 @@ function arcPick(i){
     if(arc.mode==="boss"){ const say=$("#bossSay"); if(say) say.textContent=`“${bossLine(BOSSES[arc.boss])}”`; const a=$("#arcArea"); a.classList.remove("hurt"); void a.offsetWidth; a.classList.add("hurt"); const hs=document.querySelector(".bossbar .hearts"); if(hs) hs.textContent="❤️".repeat(Math.max(0,arc.lives))+"🖤".repeat(3-Math.max(0,arc.lives)); }
     if(i===-1) floater("Time's up!", btns[arc.cur.correct], "meh");
   }
-  const full=BY_ID[d.id]; if(!ok && full && full.why){ const qq=document.querySelector("#arcArea .quiz-q"); if(qq) qq.insertAdjacentHTML("beforeend", whyHTML(full)); }
-  const wait = ok ? 380 : ((d.sc || (full && full.why)) ? 2400 : 1300);
+  const full=BY_ID[d.id]; if(!ok){ const qq=document.querySelector("#arcArea .quiz-q"); if(qq) qq.insertAdjacentHTML("beforeend", full ? mcExplainHTML(full, i>=0 ? arc.cur.opts[i] : "") : `<div class="why" style="background:var(--good-bg)"><b>✓ Answer:</b> ${esc(arc.cur.opts[arc.cur.correct])}</div>`); }
+  const wait = ok ? 380 : arc.mode==="blitz" ? 1600 : 2800;   // time to read the explanation (Blitz keeps it short: the clock is running)
   setTimeout(arcAdvance, wait);
 }
 function arcAdvance(){
