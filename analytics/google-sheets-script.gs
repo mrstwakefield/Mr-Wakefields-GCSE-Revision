@@ -54,6 +54,11 @@ function setup() {
   if (first && first.getLastRow() === 0 && ss.getSheets().length > 1) ss.deleteSheet(first);
 }
 
+/** Adds a "Fount" menu to the sheet with a button to refresh everything by hand. */
+function onOpen() {
+  SpreadsheetApp.getUi().createMenu("Fount").addItem("Refresh summary and charts", "buildCharts").addToUi();
+}
+
 function doGet() {
   return ContentService.createTextOutput("The Fount analytics endpoint is working.");
 }
@@ -172,13 +177,14 @@ function buildSummary_() {
   sh.getRange(1, 1, maxRow, maxCol).setNumberFormat("@").setFontWeight("normal");   // plain text, so "76%" stays as written
   out.forEach(([row, col, vals, bold]) => { const g = sh.getRange(row, col, vals.length, vals[0].length); g.setValues(vals.map(v => v.map(x => String(x)))); if (bold) g.setFontWeight("bold"); });
   sh.getRange(1, 1).setFontSize(16);
-  try { buildCharts_({ daily, games: gameList, topics, aos, hardRows, evs, dayKey, tz: Session.getScriptTimeZone() }); } catch (err) { console.log("charts: " + err); }
+  try { buildCharts_({ daily, games: gameList, topics, aos, hardRows, evs, dayKey, tz: Session.getScriptTimeZone() }); }
+  catch (err) { const c = ss.getSheetByName("Charts"); if (c) c.getRange(2, 1).setValue("⚠️ Charts couldn't update: " + err); }
   [[1, 200], [2, 170], [3, 360], [4, 80], [5, 80], [6, 30], [7, 220], [8, 110], [9, 80]].forEach(([c, w]) => sh.setColumnWidth(c, w));
 }
 
 /** The Charts tab: each section is a small table, with its graph beside it. */
 const CHART_GAP = 20;   // rows per section
-function buildCharts() { setup(); buildSummary_(); }
+function buildCharts() { PropertiesService.getDocumentProperties().deleteProperty("chartSig"); setup(); buildSummary_(); }
 function buildCharts_(x) {
   const sh = SpreadsheetApp.getActive().getSheetByName("Charts"); if (!sh) return;
   const short = d => Utilities.formatDate(new Date(d + "T12:00:00"), x.tz, "d MMM");
@@ -203,6 +209,7 @@ function buildCharts_(x) {
   // tables: rewritten every time (the graphs read them, so they update by themselves)
   sh.getRange(1, 1, sections.length * CHART_GAP + 2, 3).clearContent();
   sh.getRange(1, 1).setValue("📈 Fount charts").setFontWeight("bold").setFontSize(16);
+  sh.getRange(1, 2).setValue("Updated " + Utilities.formatDate(new Date(), x.tz, "d MMM yyyy, HH:mm")).setFontWeight("normal");
   sections.forEach((s, i) => {
     const r = 3 + i * CHART_GAP;
     sh.getRange(r, 1).setValue(s.title).setFontWeight("bold");
