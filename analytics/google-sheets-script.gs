@@ -7,7 +7,8 @@
  *
  * Updating the script later: paste the new version, save, then
  * Deploy → Manage deployments → ✏️ Edit → Version: "New version" → Deploy.
- * That keeps the same web address. Then run "setup" once from the editor.
+ * That keeps the same web address. Then run "buildCharts" once from the editor
+ * (it sets up every tab, the Summary and the Charts tab).
  *
  * The revision site only ever sends totals: games started, right/wrong per
  * mode and per card, the date, the year group, and two one-off flags
@@ -40,6 +41,7 @@ const gameName_ = k => GAME_NAMES[k] || (String(k).startsWith("match:") ? "Study
 function setup() {
   const ss = SpreadsheetApp.getActive();
   if (!ss.getSheetByName("Summary")) ss.insertSheet("Summary", 0);
+  if (!ss.getSheetByName("Charts")) ss.insertSheet("Charts", 1);
   Object.entries(TABS).forEach(([name, head]) => {
     const sh = ss.getSheetByName(name) || ss.insertSheet(name);
     sh.getRange(1, 1, 1, head.length).setValues([head]).setFontWeight("bold");
@@ -170,7 +172,60 @@ function buildSummary_() {
   sh.getRange(1, 1, maxRow, maxCol).setNumberFormat("@").setFontWeight("normal");   // plain text, so "76%" stays as written
   out.forEach(([row, col, vals, bold]) => { const g = sh.getRange(row, col, vals.length, vals[0].length); g.setValues(vals.map(v => v.map(x => String(x)))); if (bold) g.setFontWeight("bold"); });
   sh.getRange(1, 1).setFontSize(16);
+  try { buildCharts_({ daily, games: gameList, topics, aos, hardRows, evs, dayKey, tz: Session.getScriptTimeZone() }); } catch (err) { console.log("charts: " + err); }
   [[1, 200], [2, 170], [3, 360], [4, 80], [5, 80], [6, 30], [7, 220], [8, 110], [9, 80]].forEach(([c, w]) => sh.setColumnWidth(c, w));
+}
+
+/** The Charts tab: each section is a small table, with its graph beside it. */
+const CHART_GAP = 20;   // rows per section
+function buildCharts() { setup(); buildSummary_(); }
+function buildCharts_(x) {
+  const sh = SpreadsheetApp.getActive().getSheetByName("Charts"); if (!sh) return;
+  const short = d => Utilities.formatDate(new Date(d + "T12:00:00"), x.tz, "d MMM");
+  const days = n => { const out = []; for (let i = n - 1; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); out.push(Utilities.formatDate(d, x.tz, "yyyy-MM-dd")); } return out; };
+  const perDay = (n, col) => { const m = {}; x.daily.forEach(r => { const k = x.dayKey(r[0]); m[k] = (m[k] || 0) + (Number(r[col]) || 0); }); return days(n).map(d => [short(d), m[d] || 0]); };
+  const visitsDay = {}, devDay = {};
+  x.evs.forEach(e => { const d = String(e[0] instanceof Date ? x.dayKey(e[0]) : e[0]).slice(0, 10); if (e[1]) (visitsDay[d] = visitsDay[d] || new Set()).add(e[1]); if (e[2]) (devDay[d] = devDay[d] || new Set()).add(e[2]); });
+  const evCount = {}; x.evs.forEach(e => { if (e[3] && e[3] !== "time" && e[3] !== "pageview") evCount[e[3]] = (evCount[e[3]] || 0) + 1; });
+  const num = s => Number(String(s).replace("%", "")) || 0;
+  const sections = [
+    { title: "👥 Students active per day (last 30 days)", head: ["Day", "Students"], rows: perDay(30, 6), type: "LINE" },
+    { title: "✏️ Questions answered per day (last 30 days)", head: ["Day", "Questions"], rows: perDay(30, 2), type: "COLUMN" },
+    { title: "📱 Visits and devices per day (last 7 days)", head: ["Day", "Visits", "Devices"], rows: days(7).map(d => [short(d), (visitsDay[d] || new Set()).size, (devDay[d] || new Set()).size]), type: "COLUMN", legend: true },
+    { title: "📚 % right by topic", head: ["Topic", "% right"], rows: x.topics.map(r => [r[0], num(r[2])]), type: "BAR", pct: true },
+    { title: "🎯 % right by assessment objective", head: ["AO", "% right"], rows: x.aos.map(r => [r[0], num(r[2])]), type: "COLUMN", pct: true },
+    { title: "😬 Hardest cards (% right)", head: ["Card", "% right"], rows: x.hardRows.map(r => ["#" + r[0] + " " + String(r[2]).slice(0, 40), Number(r[6]) || 0]), type: "BAR", pct: true },
+    { title: "🎮 Games, most played", head: ["Game", "Times started"], rows: x.games.slice(0, 12), type: "BAR" },
+    { title: "⚡ Actions, last 7 days", head: ["Action", "Times"], rows: Object.entries(evCount).sort((a, b) => b[1] - a[1]).slice(0, 12), type: "BAR" },
+  ];
+  sections.forEach(s => { if (!s.rows.length) s.rows = [["No data yet"].concat(new Array(s.head.length - 1).fill(0))]; s.rows = s.rows.slice(0, CHART_GAP - 3); });
+
+  // tables: rewritten every time (the graphs read them, so they update by themselves)
+  sh.getRange(1, 1, sections.length * CHART_GAP + 2, 3).clearContent();
+  sh.getRange(1, 1).setValue("📈 Fount charts").setFontWeight("bold").setFontSize(16);
+  sections.forEach((s, i) => {
+    const r = 3 + i * CHART_GAP;
+    sh.getRange(r, 1).setValue(s.title).setFontWeight("bold");
+    sh.getRange(r + 1, 1, 1, s.head.length).setValues([s.head]).setFontWeight("bold");
+    sh.getRange(r + 2, 1, s.rows.length, 1).setNumberFormat("@");
+    sh.getRange(r + 2, 1, s.rows.length, s.head.length).setValues(s.rows.map(row => row.map((v, j) => j ? Number(v) || 0 : String(v)))).setFontWeight("normal");
+  });
+  sh.setColumnWidth(1, 260); sh.setColumnWidth(2, 90); sh.setColumnWidth(3, 90);
+
+  // graphs: only remade when a table changes size (quick otherwise)
+  const sig = JSON.stringify(sections.map(s => [s.head.length, s.rows.length])), props = PropertiesService.getDocumentProperties();
+  if (props.getProperty("chartSig") === sig && sh.getCharts().length === sections.length) return;
+  sh.getCharts().forEach(c => sh.removeChart(c));
+  sections.forEach((s, i) => {
+    const r = 3 + i * CHART_GAP;
+    let b = sh.newChart().setChartType(Charts.ChartType[s.type]).addRange(sh.getRange(r + 1, 1, s.rows.length + 1, s.head.length))
+      .setNumHeaders(1).setPosition(r, 5, 0, 0)
+      .setOption("title", s.title).setOption("width", 640).setOption("height", 380)
+      .setOption("legend", { position: s.legend ? "top" : "none" });
+    if (s.pct) b = b.setOption(s.type === "BAR" ? "hAxis" : "vAxis", { viewWindow: { min: 0, max: 100 } });
+    sh.insertChart(b.build());
+  });
+  props.setProperty("chartSig", sig);
 }
 
 /** Older versions stored games by short code (e.g. "arcade:daily"): rename them and merge duplicates. */
@@ -225,4 +280,7 @@ function wipeData() {
   });
   const summary = ss.getSheetByName("Summary");
   if (summary) summary.clear();
+  const charts = ss.getSheetByName("Charts");
+  if (charts) { charts.getCharts().forEach(c => charts.removeChart(c)); charts.clear(); }
+  PropertiesService.getDocumentProperties().deleteProperty("chartSig");
 }
