@@ -1912,7 +1912,7 @@ function renderMcCard(){
       <div class="tag">${gold?'<span class="goldtag">✨ Golden card · 5× XP</span>':esc(t.name)+(due?' <span class="pill k" style="margin-left:6px">Review</span>':"")} <span class="muted">Card ${pos+1} of ${deck.length}</span> ${stLabel}</div>
       ${scHTML(d)}<div class="q ${d.sc?"has-sc":""}">${esc(d.q)}</div>
       <div class="opts">${mcCur.opts.map((o,i)=>`<button class="opt ${done?(i===mcCur.correct?"right":i===mcPicked?"wrong":"dim"):""}" data-mc="${i}" ${done?"disabled":""}><span class="k">${"ABCDEF"[i]}</span><span>${esc(o)}</span></button>`).join("")}</div>
-      ${done?(ok?`<div class="gapfb"><b style="color:var(--good)">✓ Correct!</b></div>${d.whyAuto?"":whyHTML(d)}`:`<div class="gapfb"><b style="color:var(--warn)">Not quite.</b> <span class="muted">Added to still learning.</span></div>${mcExplainHTML(d, mcCur.opts[mcPicked])}`):""}
+      ${done?(ok?`<div class="gapfb"><b style="color:var(--good)">✓ Correct!</b></div>${whyHTML(d)}`:`<div class="gapfb"><b style="color:var(--warn)">Not quite.</b> <span class="muted">Added to still learning.</span></div>${mcExplainHTML(d, mcCur.opts[mcPicked])}`):""}
     </div>
     <div class="card-actions">
       <div class="nav"><button id="prevC" aria-label="Previous card" ${pos===0?"disabled":""}>‹</button><button id="nextC" aria-label="Skip to next card">›</button></div>
@@ -1935,7 +1935,7 @@ function mcPick(i){
   deckXP+=answer({ok, el, mode:"cards", gold:golds.has(id), review:wasDue&&ok, topic:BY_ID[id].t});
   deckCombo = ok ? deckCombo+1 : 0; if(deckCombo>deckBest) deckBest=deckCombo;
   renderCard();
-  if(ok && (!BY_ID[id].why || BY_ID[id].whyAuto)) setTimeout(()=>{ if(cardMode==="mc" && mcPicked!==null && deck[pos]===id) mcNext(); }, 900);
+  if(ok && (!BY_ID[id].why || BY_ID[id].whyAuto)) setTimeout(()=>{ if(cardMode==="mc" && mcPicked!==null && deck[pos]===id) mcNext(); }, BY_ID[id].why ? 2600 : 900);   // time to read the explanation; Next / Enter skips
 }
 function mcNext(){ if(mcPicked===null) return; pos++; mcPicked=null; renderCard(); }
 function actionsHTML(){ return flipped
@@ -3030,7 +3030,8 @@ function arcPick(i){
     if(i===-1) floater("Time's up!", btns[arc.cur.correct], "meh");
   }
   const full=BY_ID[d.id]; if(!ok){ const qq=document.querySelector("#arcArea .quiz-q"); if(qq) qq.insertAdjacentHTML("beforeend", full ? mcExplainHTML(full, i>=0 ? arc.cur.opts[i] : "") : `<div class="why" style="background:var(--good-bg)"><b>✓ Answer:</b> ${esc(arc.cur.opts[arc.cur.correct])}</div>`); }
-  const wait = ok ? 380 : arc.mode==="blitz" ? 1600 : 2800;   // time to read the explanation (Blitz keeps it short: the clock is running)
+  if(ok && full && full.why && arc.mode!=="blitz"){ const qq=document.querySelector("#arcArea .quiz-q"); if(qq) qq.insertAdjacentHTML("beforeend", whyHTML(full)); }   // explain right answers too (not in Blitz: the clock is running)
+  const wait = ok ? (full && full.why && arc.mode!=="blitz" ? 1800 : 380) : arc.mode==="blitz" ? 1600 : 2800;   // time to read the explanation (Blitz keeps it short: the clock is running)
   setTimeout(arcAdvance, wait);
 }
 function arcAdvance(){
