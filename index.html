@@ -881,6 +881,8 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
 :root[data-skin="bell"] .h1t::after{content:" 🔔"}
 /* ---- animated theme layers (behind the page, never clickable) ---- */
 .fx-layer{position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden}
+.fx-snow{position:fixed;inset:0;pointer-events:none;z-index:40}.fx-snow canvas{width:100%;height:100%;display:block}
+:root[data-skin="snowdome"] .h1t{cursor:pointer}
 #fountFx{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
 .fx-retro svg{width:100%;height:100%;opacity:.75}
 .fx-ufo{position:fixed;left:0;top:0;z-index:60;pointer-events:none;transition:transform 7s cubic-bezier(.45,.05,.55,.95)}
@@ -2531,7 +2533,7 @@ function fountStart(){ if(fountFx.c) return; const c=document.createElement("can
 function fountStop(){ if(!fountFx.c) return; cancelAnimationFrame(fountFx.raf); fountFx.c.remove(); fountFx.c=null; fountFx.p=[]; removeEventListener("resize",fountFx.size); removeEventListener("resize",fountFx.rj); document.removeEventListener("visibilitychange",fountFx.vis); }
 /* ---- animated theme layers: squirting fountains for The Fount, nerve impulses for Electrical Impulse ---- */
 const FX={kind:null, el:null, timer:null};
-function fxStop(){ clearInterval(FX.timer); FX.timer=null; clearInterval(FX.stamp); FX.stamp=null; document.querySelectorAll('.wm-stamp').forEach(e=>e.remove()); if(FX.el) FX.el.remove(); FX.el=null; FX.kind=null; fountStop(); }
+function fxStop(){ cancelAnimationFrame(FX.raf); clearInterval(FX.timer); FX.timer=null; clearInterval(FX.stamp); FX.stamp=null; document.querySelectorAll('.wm-stamp').forEach(e=>e.remove()); if(FX.el) FX.el.remove(); FX.el=null; FX.kind=null; fountStop(); }
 function fxStart(kind){
   fxStop(); if(TEACHER || (reduced() && kind!=="fount")) return;   // the fountains draw a still picture for reduced motion
   const el=document.createElement("div"); el.className="fx-layer fx-"+kind; el.setAttribute("aria-hidden","true"); document.body.appendChild(el); FX.el=el; FX.kind=kind;
@@ -2550,6 +2552,21 @@ function fxStart(kind){
     const stamp=()=>{ if(!FX.el || document.hidden) return; const s=document.createElement("div"); s.className="wm-stamp"; s.textContent="✦ WAKEFIELD APPROVED ✦";
       s.style.left=Math.round(8+Math.random()*Math.max(10,innerWidth-420))+"px"; s.style.top=Math.round(90+Math.random()*Math.max(10,innerHeight-260))+"px"; document.body.appendChild(s); setTimeout(()=>s.remove(),3500); };
     FX.stamp=setInterval(stamp, 45000); setTimeout(stamp, 5000); return;
+  }
+  if(kind==="snowdome"){   // lots of tiny snowflakes drifting down; tap the title to shake the dome
+    el.className="fx-snow"; const c=document.createElement("canvas"); el.appendChild(c); const x=c.getContext("2d"); let W=0,H=0,dpr=1,flakes=[];
+    const mk=top=>({x:Math.random()*W, y:top?-5-Math.random()*H*.2:Math.random()*H, r:1+Math.random()*Math.random()*3.2, vy:0, vx:0, ph:Math.random()*6.28, sw:.3+Math.random()*.9});
+    const size=()=>{ dpr=Math.min(2,devicePixelRatio||1); W=innerWidth; H=innerHeight; c.width=W*dpr; c.height=H*dpr; x.setTransform(dpr,0,0,dpr,0,0);
+      const n=Math.round(Math.min(480, Math.max(140, W*H/2600))); while(flakes.length<n) flakes.push(mk(false)); flakes.length=n; };
+    size(); addEventListener("resize", size);
+    el.shake=()=>flakes.forEach(f=>{ f.vy=-(2+Math.random()*7)*(1+f.r/2); f.vx=(Math.random()-.5)*8; });
+    let t=0; const tick=()=>{ if(FX.el!==el){ removeEventListener("resize", size); return; } FX.raf=requestAnimationFrame(tick); if(document.hidden) return; t+=.016;
+      x.clearRect(0,0,W,H);
+      for(const f of flakes){ const fall=.25+f.r*.42; f.vy+=(fall-f.vy)*.03; f.vx*=.96;
+        f.y+=f.vy; f.x+=f.vx+Math.sin(t*f.sw+f.ph)*.35*f.sw;
+        if(f.y>H+6){ Object.assign(f, mk(true)); } if(f.x<-6) f.x=W+5; else if(f.x>W+6) f.x=-5;
+        x.beginPath(); x.arc(f.x,f.y,f.r,0,6.283); x.fillStyle="#fff"; x.shadowColor="rgba(30,70,170,.75)"; x.shadowBlur=2+f.r*1.6; x.fill(); } };
+    tick(); return;
   }
   if(kind==="mindblown"){ el.innerHTML='<div class="spiral"></div><div class="rings"></div>'; return; }   // a giant spinning, colour-shifting illusion
   if(kind==="petalien"){   // a mini UFO drifting around, now and then switching on its tractor beam
@@ -2581,7 +2598,8 @@ function fxStart(kind){
 }
 const WM_SAYINGS=["Keep right on! 💙","Gold star ✦","Did you TDEE that?","Name it, explain it, give an example.","That's a GRAVE point.","Quote the numbers!","Is that SPACER or GRAVE?","Basically Mr Wakefield.","Correlation isn't causation!","Who's revising? You are."];
 document.addEventListener("click",e=>{ if(document.documentElement.dataset.skin!=="wakefield" || !e.target.closest("h1")) return; confetti(140,["#E6C35C","#FFF3C4","#0D2A1E","#F6F0DC"]); toast("✦", WM_SAYINGS[Math.floor(Math.random()*WM_SAYINGS.length)], "— Mr W", true); });
-function fxSync(){ const k=document.documentElement.dataset.skin||"", want=["fount","retro","petalien","adrenaline","mindblown","wakefield"].includes(k)?k:null; if(want!==FX.kind){ if(want) fxStart(want); else fxStop(); } }
+document.addEventListener("click",e=>{ if(FX.kind==="snowdome" && FX.el && FX.el.shake && e.target.closest(".h1t")) FX.el.shake(); });
+function fxSync(){ const k=document.documentElement.dataset.skin||"", want=["fount","retro","petalien","adrenaline","mindblown","wakefield","snowdome"].includes(k)?k:null; if(want!==FX.kind){ if(want) fxStart(want); else fxStop(); } }
 new MutationObserver(fxSync).observe(document.documentElement,{attributes:true, attributeFilter:["data-skin"]});
 setTimeout(fxSync,0);
 function applySkin(){ const k=G.skin||""; const th=THEMES.find(t=>t.k===k); if(k && th && themeOpen(th)) document.documentElement.dataset.skin=k; else delete document.documentElement.dataset.skin; }
