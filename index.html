@@ -881,6 +881,10 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
 :root[data-skin="bell"] .h1t::after{content:" 🔔"}
 /* ---- animated theme layers (behind the page, never clickable) ---- */
 .fx-layer{position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden}
+.fx-quiet .fx-layer,.fx-quiet .fx-snow,.fx-quiet .fx-ufo,.fx-quiet #fountFx,.fx-quiet .pf-canvas,.fx-quiet .volt-dial,.fx-quiet .pv-bell,.fx-quiet .mri-scan,.fx-quiet .kro-tick,.fx-quiet .wm-stamp{opacity:0!important;visibility:hidden;transition:opacity .6s,visibility 0s .6s}
+.fx-quiet .fx-layer *,.fx-quiet .mri-scan,.fx-quiet .kro-tick *{animation-play-state:paused!important}
+.fx-quiet body.fx-tickpad{padding-bottom:0}
+.fx-layer,.fx-snow,.fx-ufo,#fountFx,.pf-canvas,.volt-dial,.pv-bell,.mri-scan,.kro-tick{transition:opacity .8s,visibility 0s}
 .pf-canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:45}
 .fx-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
 .fx-rise{opacity:.6;filter:none}
@@ -1745,7 +1749,7 @@ function topicsChanged(){ newDeck(); if(quiz.phase!=="run") renderQuiz(); render
 
 /* ---------- tabs ---------- */
 let tab="cards";
-function goTab(name, tp){
+function goTab(name, tp){ try{ if(name==="trophies"||name==="browse"){ FXQ.until=0; fxQuietSync(); } }catch(e){}
   if(name==="trophies" && tp) G.tpage=tp;
   if(tab==="arcade" && name!=="arcade" && arc.phase==="play"){ arc.quit=true; arcFinish(); }
   if(name!==tab) resetCombo();
@@ -2173,7 +2177,7 @@ function track(name, detail, secs){ if(!anOn()) return; AN.ev.push([String(name)
 function anSave(){ try{ localStorage.setItem(AN_KEY, JSON.stringify(AN)); }catch(e){} }
 // assessment objective of a card, roughly: scenario/application cards are AO2, strengths and weaknesses AO3, the rest AO1
 function anAO(d){ if(d.t==="Exam skills") return "Exam skills"; if((d.id>=7001 && d.id<7500) || d.sc) return "AO2"; const k=qKind(d.q); return k==="eval" ? "AO3" : k==="apply" ? "AO2" : "AO1"; }
-function anPlay(game){ if(!anOn()) return; AN.plays[game]=(AN.plays[game]||0)+1; track("game_start", game); }
+function anPlay(game){ try{ fxStudy(); }catch(e){} if(!anOn()) return; AN.plays[game]=(AN.plays[game]||0)+1; track("game_start", game); }
 function anAnswer(mode, ok){ if(!anOn()) return; const m=AN.modes[mode||"other"]=AN.modes[mode||"other"]||[0,0]; m[ok?0:1]++; AN.n++; if(AN.n>=25) anFlush(false); else anSave(); }
 function anCard(id, ok){ if(!anOn() || !BY_ID[id] || (id>=5000 && id<6000)) return; const c=AN.cards[id]=AN.cards[id]||[0,0]; c[ok?0:1]++; anSave(); }
 function anFlush(beacon){
@@ -2599,9 +2603,23 @@ function fountStop(){ if(!fountFx.c) return; cancelAnimationFrame(fountFx.raf); 
 /* ---- theme effects: a shared particle canvas (bursts on right answers, sparkles, confetti) and a scene for each theme ---- */
 const PF={c:null, x:null, p:[], raf:0, pile:[], lx:0, ly:0, lt:0};
 document.addEventListener("pointerdown", e=>{ PF.lx=e.clientX; PF.ly=e.clientY; PF.lt=Date.now(); }, true);
+/* Calm mode: theme effects only play on the "home" view. They fade out while a student is working: for a minute after
+   their last answer, during an arcade game, or once they've scrolled the title off screen. Progress / Browse tabs bring them back. */
+const FXQ={until:0, on:false};
+const FX_GAME_PHASES=["game","swipe","which","nx","match","lab","psychle","play","boss"];
+function fxStudy(){ FXQ.until=Date.now()+60000; fxQuietSync(); }
+function fxQuietSync(){
+  const ph=(typeof arc!=="undefined" && arc && arc.phase)||"";
+  const t=document.querySelector(".h1t"), off=t && t.getBoundingClientRect().bottom<0;
+  const q=Date.now()<FXQ.until || FX_GAME_PHASES.includes(ph) || off;
+  if(q!==FXQ.on){ FXQ.on=q; document.documentElement.classList.toggle("fx-quiet", q); if(q && typeof PF!=="undefined") PF.p=PF.p.filter(p=>p.pile); }
+}
+document.addEventListener("pointerdown", e=>{ if(e.target.closest && e.target.closest("#p-cards, #p-quiz, #p-arcade, #extArea, [id^=mock], textarea")) fxStudy(); }, true);
+document.addEventListener("keydown", e=>{ if(e.target.closest && e.target.closest("#p-cards, #p-quiz, #p-arcade, #extArea, [id^=mock], textarea") || (document.activeElement===document.body && ["Enter"," ","ArrowLeft","ArrowRight","1","2","3","4"].includes(e.key) && !$("#p-cards").hidden)) fxStudy(); }, true);
+setInterval(fxQuietSync, 1000); addEventListener("scroll", ()=>{ if(!FXQ.st){ FXQ.st=1; requestAnimationFrame(()=>{ FXQ.st=0; fxQuietSync(); }); } }, {passive:true});
 function pfSize(){ if(!PF.c) return; const d=Math.min(2,devicePixelRatio||1); PF.c.width=innerWidth*d; PF.c.height=innerHeight*d; PF.x.setTransform(d,0,0,d,0,0); PF.pile=new Array(Math.ceil(innerWidth/24)+1).fill(0); }
 function pfCanvas(){ if(PF.c) return; const c=document.createElement("canvas"); c.className="pf-canvas"; c.setAttribute("aria-hidden","true"); document.body.appendChild(c); PF.c=c; PF.x=c.getContext("2d"); pfSize(); addEventListener("resize", pfSize); }
-function pfAdd(o){ if(reduced() || TEACHER) return; pfCanvas();
+function pfAdd(o){ if(reduced() || TEACHER || (FXQ.on && !o.pile)) return; pfCanvas();
   PF.p.push(Object.assign({vx:0, vy:0, g:0, drag:1, life:0, max:60, size:3, rot:0, vr:0, shape:"dot", col:"#fff", fade:true, delay:0}, o));
   if(PF.p.length>900) PF.p.splice(0, PF.p.length-900); if(!PF.raf) PF.raf=requestAnimationFrame(pfTick); }
 function pfStar(x, s){ x.beginPath(); for(let i=0;i<8;i++){ const r=i%2?s*.32:s, a=i*Math.PI/4; x.lineTo(Math.cos(a)*r, Math.sin(a)*r); } x.closePath(); x.fill(); }
@@ -2645,7 +2663,7 @@ const BURST={snowdome:["snow"], gold:["star"], spark:["spark"], volts:["spark"],
   greens:["text",["🥦","🫛","🥬"],7], pavlov:["text",["🦴","🐾"],7], petbee:["text",["🐝","🍯"],7], bullring:["text",["🛍️","💙"],7], pinkpen:["text",["✓","✓","✓"],9]};
 /** Called on every right answer. */
 function fxRight(){
-  if(TEACHER || reduced()) return;
+  fxStudy(); if(TEACHER || reduced() || FXQ.on) return;
   const th=themeOf(); let x=innerWidth/2, y=innerHeight/2;
   if(Date.now()-PF.lt<2500){ x=PF.lx; y=PF.ly; }
   else { const a=document.querySelector("#card, #mcArea, #arcArea, .panel.on"); if(a){ const r=a.getBoundingClientRect(); if(r.width && r.bottom>0 && r.top<innerHeight){ x=r.left+r.width/2; y=Math.min(innerHeight-60, Math.max(60, r.top+Math.min(r.height/2,200))); } } }
@@ -2659,9 +2677,9 @@ function fxCanvas(el, scene){
   const c=document.createElement("canvas"); c.className="fx-cv"; el.appendChild(c); const x=c.getContext("2d"); let W=0, H=0;
   const sz=()=>{ const d=Math.min(2,devicePixelRatio||1); W=innerWidth; H=innerHeight; c.width=W*d; c.height=H*d; x.setTransform(d,0,0,d,0,0); if(scene.init) scene.init(W,H); };
   sz(); addEventListener("resize", sz); FX.cleanup.push(()=>removeEventListener("resize", sz));
-  let t=0; const tick=()=>{ if(FX.el!==el) return; FX.raf=requestAnimationFrame(tick); if(document.hidden) return; t++; scene.draw(x,W,H,t); }; tick();
+  let t=0; const tick=()=>{ if(FX.el!==el) return; FX.raf=requestAnimationFrame(tick); if(document.hidden || FXQ.on) return; t++; scene.draw(x,W,H,t); }; tick();
 }
-const fxEvery=(ms, f)=>FX.timers.push(setInterval(()=>{ if(FX.el && !document.hidden) f(); }, ms));
+const fxEvery=(ms, f)=>FX.timers.push(setInterval(()=>{ if(FX.el && !document.hidden && !FXQ.on) f(); }, ms));
 const fxLater=(ms, f)=>FX.timers.push(setTimeout(()=>{ if(FX.el) f(); }, ms));
 const fxFront=el=>{ el.style.zIndex="39"; };
 const fxExtra=html=>{ const d=document.createElement("div"); d.setAttribute("aria-hidden","true"); d.innerHTML=html; const n=d.firstElementChild; document.body.appendChild(n); FX.extra.push(n); return n; };
@@ -2778,7 +2796,7 @@ function fxStart(kind){
       const n=Math.round(Math.min(480, Math.max(140, W*H/2600))); while(flakes.length<n) flakes.push(mk(false)); flakes.length=n; };
     size(); addEventListener("resize", size);
     el.shake=()=>flakes.forEach(f=>{ f.vy=-(2+Math.random()*7)*(1+f.r/2); f.vx=(Math.random()-.5)*8; });
-    let t=0; const tick=()=>{ if(FX.el!==el){ removeEventListener("resize", size); return; } FX.raf=requestAnimationFrame(tick); if(document.hidden) return; t+=.016;
+    let t=0; const tick=()=>{ if(FX.el!==el){ removeEventListener("resize", size); return; } FX.raf=requestAnimationFrame(tick); if(document.hidden || FXQ.on) return; t+=.016;
       x.clearRect(0,0,W,H);
       for(const f of flakes){ const fall=.25+f.r*.42; f.vy+=(fall-f.vy)*.03; f.vx*=.96;
         f.y+=f.vy; f.x+=f.vx+Math.sin(t*f.sw+f.ph)*.35*f.sw;
