@@ -2625,6 +2625,7 @@ document.addEventListener("keydown", e=>{ if(e.target.closest && e.target.closes
 function themeMarkSync(){
   let m=document.getElementById("themeMark"); const t=document.querySelector(".h1t");
   let e=""; if(t && !TEACHER){ for(const [el,ps] of [[t,"::after"],[t,"::before"],[t.closest("h1"),"::before"],[t.closest("h1"),"::after"]]){ if(!el) continue; const c=getComputedStyle(el,ps).content; if(c && c!=="none" && c!=="normal"){ e=c.replace(/^["']|["']$/g,"").trim(); if(e) break; } } }
+  if(e.startsWith("·")) e="🎓";   // Class of 2027 / 2028
   const show=!!e && FXQ.off && !document.querySelector(".pv-bell");
   if(!m){ if(!show) return; m=document.createElement("div"); m.id="themeMark"; m.setAttribute("aria-hidden","true"); document.body.appendChild(m); }
   if(m.textContent!==e) m.textContent=e; m.classList.toggle("on", show);
