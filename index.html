@@ -4233,7 +4233,8 @@ const rareNorm = s => String(s||"").toLowerCase().normalize("NFD").replace(/[̀-
 function rareRound(dt){ const d=new Date((dt||today())+"T12:00:00"), sinceMon=(d.getDay()+6)%7, back=sinceMon>=3?sinceMon-3:sinceMon;
   const s=new Date(d); s.setDate(d.getDate()-back); const start=`${s.getFullYear()}-${String(s.getMonth()+1).padStart(2,"0")}-${String(s.getDate()).padStart(2,"0")}`;
   const nx=new Date(s); nx.setDate(s.getDate()+(sinceMon>=3?4:3));
-  return {n:Math.round((dayNum(start)-dayNum("2026-11-23"))*2/7)+1, key:start, next:nx.toLocaleDateString("en-GB",{weekday:"long"})}; }
+  if(dayNum(start)<dayNum("2026-11-30")) return {n:1, key:"2026-11-23", next:"Monday"};   // round 1 runs from launch until Monday 30 November
+  return {n:Math.round((dayNum(start)-dayNum("2026-11-30"))*2/7)+2, key:start, next:nx.toLocaleDateString("en-GB",{weekday:"long"})}; }
 function rarePrompts(){ const r=rareRound(), out=[], L=RARE_ORDER.length, lock=stageInfo().locked;
   for(let j=0; out.length<7 && j<L; j++){ const p=RARE[RARE_ORDER[((r.n*7+j)%L+L)%L]]; if(!NOT_YET.has(p.t) && !lock.has(p.t)) out.push(p); }
   return out; }
