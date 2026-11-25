@@ -3257,7 +3257,7 @@ function renderArcade(){
   if(arc.mode==="daily"){
     const dd=G.daily[today()];
     head=`<p class="score">${dd.score}/10</p><p class="muted">Daily 10 #${dailyNo()} · ${fmtTime(dd.time)}</p>`;
-    extra=`<div class="share" id="shareTxt">${esc(shareText())}</div><br><button class="btn ghost" id="copyShare">Copy result</button> `;
+    extra=`<div class="share" id="shareTxt">${esc(shareText())}</div><br><button class="btn ghost" id="copyShare">Copy result</button> ${navigator.share?'<button class="btn ghost" id="nativeShare">Share…</button> ':""}`;
   }
   if(arc.mode==="boss"){ const B=BOSSES[arc.boss], win=arc.hp<=0;
     head = win ? `<div class="boss-ico big">${B.icon}</div><p class="score" style="font-size:48px">Victory!</p><p class="muted">You defeated ${esc(B.name)}${arc.hard?" on 🔥 hard mode":""}${arc.lives===3?" without losing a life 👑":` with ${arc.lives} li${arc.lives>1?"ves":"fe"} left`}.</p>`
@@ -3270,10 +3270,14 @@ function renderArcade(){
   const hb=$("#arcHard"); if(hb) hb.onclick=()=>startBoss(arc.boss, true);
   $("#arcMenu").onclick=()=>{ arc.phase = arc.mode==="boss" ? "bossmenu" : "menu"; renderArcade(); };
   const c=$("#copyShare"); if(c) c.onclick=()=>{ navigator.clipboard && navigator.clipboard.writeText(shareText()).then(()=>{ c.textContent="Copied ✓"; }).catch(()=>{}); };
+  const ns=$("#nativeShare"); if(ns) ns.onclick=()=>{ navigator.share({text:shareText()}).catch(()=>{}); };
 }
 function fmtTime(ms){ const s=Math.round(ms/1000); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
 function untilMidnight(){ const n=new Date(), m=new Date(n); m.setHours(24,0,0,0); const h=Math.floor((m-n)/36e5), mi=Math.floor((m-n)%36e5/6e4); return h?`${h}h ${mi}m`:`${mi}m`; }
-function shareText(){ const dd=G.daily[today()]; return `Fount of Knowledge Daily 10 #${dailyNo()}\n${dd.score}/10 · ${fmtTime(dd.time)}\n${dd.log.map(x=>x?"🟩":"🟥").join("")}`; }
+/** Share card: one emoji per question, the topic's emoji if right and ❌ if wrong, in two rows of five. */
+const TOPIC_EMOJI={"Memory":"💭","Perception":"👁️","Development":"🧸","RM":"🔬","Social influence":"👥","Language, thought & communication":"💬","Brain & neuropsychology":"🧠","Psychological problems":"💊","Exam skills":"📝"};
+function shareText(){ const dd=G.daily[today()], e=dd.log.map((ok,i)=>ok?(TOPIC_EMOJI[(dd.items[i]||{}).t]||"⭐"):"❌");
+  return `Fount Daily 10 #${dailyNo()}\n${e.slice(0,5).join("")}\n${e.slice(5,10).join("")}\n${dd.score}/10${dd.score===10?" 🏆":""} · ${fmtTime(dd.time)}`; }
 const slim = d => ({id:d.id, t:d.t, q:d.q, a:d.a, sc:d.sc, def:d.def, term:d.term});
 function streamItem(){
   if(arc.mode==="boss"){ if(arc.boss==="RM" && Math.random()<.4) return genRM(Math.random); if(arc.bi>=arc.base.length){ arc.base=shuffle(arc.base); arc.bi=0; } return arc.base[arc.bi++]; }
