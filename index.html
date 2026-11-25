@@ -458,6 +458,21 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .rep-btn{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;padding:4px 6px;border-radius:8px;margin-left:auto}
 .rep-btn:hover,.rep-btn:focus-visible{color:var(--ink);background:color-mix(in srgb,var(--line) 60%,transparent)}
 .rep-row{display:flex;justify-content:flex-end;margin-top:6px}
+.rare-wrap{display:grid;grid-template-columns:92px minmax(0,1fr);gap:18px;align-items:start}
+.rare-main{min-width:0}.rare-q{font-family:var(--display);font-weight:800;font-size:24px;margin:6px 0 12px;line-height:1.25}
+.rare-in{display:flex;gap:10px;flex-wrap:wrap}.rare-in input{flex:1 1 220px;font-size:18px}
+.rare-time{height:8px;border-radius:4px;background:var(--soft);overflow:hidden;margin-top:12px}.rare-time i{display:block;height:100%;width:100%;background:#5B3FD6;transition:width .1s linear}.rare-time i.low{background:var(--warn)}
+.rare-gauge{display:grid;justify-items:center;gap:4px;text-align:center;position:sticky;top:90px}
+.rg-water{position:relative;width:46px;height:240px;border-radius:14px;background:linear-gradient(#BFE3FF,#3A6FD8 40%,#1B2A6B 75%,#120A2E);overflow:hidden;border:2px solid var(--line)}
+.rg-water i{position:absolute;left:0;right:0;top:0;border-bottom:3px solid #FFD54A;box-shadow:0 2px 10px #FFD54A;transition:height .8s cubic-bezier(.3,.7,.2,1)}
+.rg-water span{position:absolute;left:0;right:0;font-size:13px;transform:translateY(2px)}
+.rare-gauge b{font-family:var(--display);font-size:16px;font-variant-numeric:tabular-nums}.rare-gauge small{font-size:11px;color:var(--muted);line-height:1.2}
+.rare-fb{padding:12px 14px;border-radius:12px;background:var(--soft)}.rare-fb.ok{background:var(--good-bg)}.rare-fb.no{background:var(--warn-bg)}
+.rare-tier{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--tc);color:#fff;font-size:13px;font-weight:700;margin:0 6px}
+.rare-chips{display:flex;flex-wrap:wrap;gap:6px}.rare-chip{border:2px solid var(--tc);border-radius:999px;padding:4px 10px;font-size:14px;background:var(--card)}
+.rare-chip small{color:var(--muted);margin-left:4px;font-variant-numeric:tabular-nums}.rare-chip.mine{background:var(--tc);color:#fff}.rare-chip.mine small{color:rgba(255,255,255,.85)}
+@media (max-width:560px){.rare-wrap{grid-template-columns:1fr}.rare-gauge{position:static;grid-template-columns:auto auto auto;align-items:center;justify-content:start;gap:10px}.rg-water{width:150px;height:18px;background:linear-gradient(90deg,#BFE3FF,#3A6FD8 40%,#1B2A6B 75%,#120A2E)}.rg-water span{display:none}.rg-water i{bottom:0;height:auto!important;width:var(--w);border-bottom:0;border-right:3px solid #FFD54A}}
+
 .learn-card{background:var(--card);color:var(--ink);border-radius:20px;max-width:520px;width:100%;padding:20px 22px;box-shadow:0 24px 70px rgba(0,0,0,.4);border-top:7px solid var(--c);display:grid;gap:10px;max-height:calc(100vh - 32px);overflow:auto;animation:lcPop .25s ease-out}
 .learn-card h3{margin:0;font-family:var(--display);font-size:20px}.lc-top{display:flex;justify-content:space-between;align-items:center;font-size:13px}
 .lc-tag{font-weight:700;color:var(--c);text-transform:uppercase;letter-spacing:.06em;font-size:12px}
@@ -2657,7 +2672,7 @@ document.addEventListener("pointerdown", e=>{ PF.lx=e.clientX; PF.ly=e.clientY; 
    on top of the page drop behind it, so nothing covers the flashcards; background effects carry on as normal.
    Things that pile up at the bottom (the vegetables) also stop once the title is scrolled off screen. */
 const FXQ={until:0, on:false};
-const FX_GAME_PHASES=["game","swipe","which","nx","match","lab","psychle","play","boss"];
+const FX_GAME_PHASES=["game","swipe","which","nx","match","lab","psychle","play","boss","rare"];
 function fxStudy(){ FXQ.until=Date.now()+60000; fxQuietSync(); }
 function fxQuietSync(){
   const ph=(typeof arc!=="undefined" && arc && arc.phase)||"";
@@ -3119,6 +3134,7 @@ const MODES = {
   boss:{icon:"🐉", name:"Boss Battles", c:"#B91C1C", desc:"Face the boss of each topic. 15 HP, 3 lives, 15 seconds a question. Combos of 5+ deal double damage."},
   surv:{icon:"❤️", name:"Survival", c:"#7B5BE0", desc:"Three lives and 12 seconds per question. How far can you get? Includes exam-skills bonus questions."},
   flaw:{icon:"🔍", name:"Spot the Flaw", c:"#9A6324", hot:"2× XP", desc:"Read a short study, find what's wrong with it, then pick the best fix. 8 studies, 2 points each."},
+  rare:{icon:"💎", name:"Rare Find", c:"#5B3FD6", desc:"7 prompts, 20 seconds each. Type any right answer: the rarer it is, the deeper you dig. New round every Monday and Thursday."},
   psychle:{icon:"🔤", name:"Psychle", c:"#1C8A5E", desc:"Today's mystery key term. Six guesses, Wordle-style, with a clue after three. Same word for everyone. Share your result."},
   swipe:{icon:"👉", name:"Swipe Sort", c:"#9A6324", hot:"2× XP", desc:"Theory or study? Strength or weakness? Nature or nurture? AO1 or AO3? S or C? Swipe as many as you can in 45 seconds."},
   which:{icon:"🕵️", name:"Which Study?", c:"#9A6324", hot:"2× XP", desc:"Clues appear one at a time. Name the study as early as you can: 5 points on the first clue, 1 on the last."},
@@ -3161,6 +3177,7 @@ function bestLabel(k){
     : k==="exam" ? (st.exam?`Best: ${st.exam}/10`:"No score yet")
     : k==="terms" ? (st.terms?`Best: ${st.terms}/30 points`:"No score yet")
     : k==="maths" ? (st.mathsBest?`Best: ${st.mathsBest}/10`:"No score yet")
+    : k==="rare" ? (G.rare && G.rare.k===rareRound().key && G.rare.done ? `Done: ${rareMetres(G.rare).toLocaleString()} m · next round ${rareRound().next}` : G.rare && G.rare.k===rareRound().key && G.rare.res.length ? `Round #${rareRound().n} in progress` : `Round #${rareRound().n} is ready`)
     : k==="psychle" ? (G.psychle&&G.psychle[today()]&&G.psychle[today()].done ? (G.psychle[today()].won?`Done today: ${G.psychle[today()].g.length}/6 ✓`:"Done today: X/6") : `Psychle #${psyNo()} is ready`)
     : k==="swipe" ? (Object.keys(G.st.swipe||{}).length?`Best: ${Math.max(...Object.values(G.st.swipe))}`:"No score yet")
     : k==="which" ? (G.st.whichBest?`Best: ${G.st.whichBest}/40`:"No score yet")
@@ -3286,6 +3303,7 @@ function startArc(mode){ anPlay("arcade:"+mode);
   if(mode==="swipe") return swStart();
   if(mode==="which") return wsStart();
   if(mode==="psychle") return psyStart();
+  if(mode==="rare") return rareStart();
   if(mode==="boss"){ clearInterval(arc.timer); arc.phase="bossmenu"; arc.mode="boss"; renderArcade(); arcToTop(); return; }
   if(mode==="daily"){
     const dd=G.daily[today()];
@@ -4121,6 +4139,192 @@ function psyMarks(guess, ans){
   g.forEach((ch,i)=>{ if(res[i]!=="g" && left[ch]){ res[i]="y"; left[ch]--; } });
   return res;
 }
+/* ---- Rare Find: a new round every Monday and Thursday. 7 prompts; type any right answer; rarer answers dig deeper ---- */
+// each answer: "main|other accepted spellings"
+const RARE = [
+  // Memory
+  {t:"Memory", q:"Name a type of encoding", a:["visual","acoustic","semantic"]},
+  {t:"Memory", q:"Name a type of long-term memory", a:["episodic","semantic","procedural"]},
+  {t:"Memory", q:"Name a store in the multi-store model of memory", a:["sensory register|sensory memory|sensory store","short-term memory|stm|short term store","long-term memory|ltm|long term store"]},
+  {t:"Memory", q:"Name one of the three processes of memory", a:["encoding","storage","retrieval"]},
+  {t:"Memory", q:"Name a researcher from the Memory topic", a:["Murdock","Bartlett","Atkinson|atkinson and shiffrin","Shiffrin","Miller","Godden|godden and baddeley","Baddeley","Tulving","Loftus|loftus and palmer"]},
+  {t:"Memory", q:"Name a factor that affects the accuracy of memory", a:["interference","context|context dependent|context dependent memory","false memories|false memory","schemas|schema","leading questions|leading question"]},
+  {t:"Memory", q:"Name a type of interference", a:["proactive|proactive interference","retroactive|retroactive interference"]},
+  {t:"Memory", q:"Name something you'd see in a serial position curve", a:["primacy effect|primacy","recency effect|recency","asymptote"]},
+  {t:"Memory", q:"Name a change Bartlett found in how stories were recalled", a:["shortening|shorter|shortened","rationalisation|rationalization|rationalised","familiarisation|anglicisation|anglicised|westernised|familiar","omission|omissions|left out details","confabulation"]},
+  // Perception
+  {t:"Perception", q:"Name a monocular depth cue", a:["height in plane|height in the visual field|relative height","relative size","occlusion|overlap|superimposition","linear perspective","texture gradient","motion parallax"]},
+  {t:"Perception", q:"Name a binocular depth cue", a:["retinal disparity|binocular disparity","convergence"]},
+  {t:"Perception", q:"Name a visual illusion", a:["Muller-Lyer|muller lyer|mueller lyer","Ponzo|ponzo illusion","Ames room","Kanizsa triangle|kanizsa","Rubin's vase|rubin vase|rubins vase","Necker cube","Ebbinghaus|ebbinghaus illusion","Fraser spiral"]},
+  {t:"Perception", q:"Name a cause of visual illusions", a:["ambiguity|ambiguous figures","misinterpreted depth cues|misinterpreted depth|misleading depth cues","fiction","size constancy","context"]},
+  {t:"Perception", q:"Name a factor that affects perceptual set", a:["expectation|expectations","motivation","emotion|emotions","culture"]},
+  {t:"Perception", q:"Name a researcher from the Perception topic", a:["Gibson","Gregory","Bruner|bruner and minturn","Minturn","Gilchrist|gilchrist and nesberg","Nesberg","Hudson","Walk|gibson and walk"]},
+  {t:"Perception", q:"Name a term from Gibson's direct theory of perception", a:["motion parallax","optic flow|optic flow patterns","affordances|affordance","texture gradient","height in the visual field|height in plane","invariants"]},
+  {t:"Perception", q:"Name a type of perceptual constancy", a:["size constancy|size","shape constancy|shape","colour constancy|color constancy|colour","brightness constancy|lightness constancy"]},
+  // Development
+  {t:"Development", q:"Name one of Piaget's stages of development", a:["sensorimotor","pre-operational|preoperational","concrete operational|concrete","formal operational|formal"]},
+  {t:"Development", q:"Name a key idea from Piaget's theory", a:["schema|schemas","assimilation","accommodation","equilibrium|equilibration","object permanence","conservation","egocentrism|egocentric","reversibility","centration","animism"]},
+  {t:"Development", q:"Name a researcher from the Development topic", a:["Piaget","Dweck","Willingham","McGarrigle|mcgarrigle and donaldson","Donaldson","Hughes","Gunderson","Hebb"]},
+  {t:"Development", q:"Name a part of the developing brain", a:["brain stem|brainstem","thalamus","cerebellum","cortex|cerebral cortex","neurons"]},
+  {t:"Development", q:"Name something Piaget tested children's conservation of", a:["number","volume|liquid","mass","length","area"]},
+  {t:"Development", q:"Name an idea linked to Dweck's mindset theory", a:["growth mindset","fixed mindset","effort","praise|process praise|praising effort","self-efficacy|self efficacy","ability","learning from mistakes|mistakes"]},
+  // Research methods
+  {t:"RM", q:"Name a type of experiment", a:["laboratory|lab|laboratory experiment","field|field experiment","natural|natural experiment","quasi|quasi experiment"]},
+  {t:"RM", q:"Name an experimental design", a:["independent groups|independent measures","repeated measures","matched pairs"]},
+  {t:"RM", q:"Name a sampling method", a:["random","opportunity","systematic","stratified","volunteer|self-selected|self selected"]},
+  {t:"RM", q:"Name a type of variable", a:["independent variable|independent|iv","dependent variable|dependent|dv","extraneous variable|extraneous","confounding variable|confounding","co-variable|covariable|co variable"]},
+  {t:"RM", q:"Name an ethical issue in psychology research", a:["informed consent|consent","deception","right to withdraw|withdrawal|withdraw","confidentiality","protection from harm|harm","debriefing|debrief","privacy"]},
+  {t:"RM", q:"Name a measure of central tendency", a:["mean","median","mode"]},
+  {t:"RM", q:"Name a measure of dispersion", a:["range","standard deviation|sd"]},
+  {t:"RM", q:"Name a way of displaying data", a:["bar chart|bar graph","histogram","scatter diagram|scattergram|scatter graph|scatter plot","frequency table|tally chart","line graph","pie chart","normal distribution|bell curve"]},
+  {t:"RM", q:"Name a research method that isn't an experiment", a:["interview|interviews","questionnaire|questionnaires|survey","observation|observations","case study|case studies","correlation|correlational study","content analysis"]},
+  {t:"RM", q:"Name a type of data", a:["quantitative","qualitative","primary","secondary"]},
+  {t:"RM", q:"Name a type of hypothesis", a:["null|null hypothesis","alternative|experimental|alternative hypothesis","directional|one-tailed|one tailed","non-directional|two-tailed|two tailed|nondirectional"]},
+  {t:"RM", q:"Name a type of observation", a:["naturalistic","controlled","covert","overt","participant","non-participant|non participant"]},
+  {t:"RM", q:"Name a type of correlation", a:["positive","negative","no correlation|zero correlation|zero|none"]},
+  {t:"RM", q:"Name a type of question or interview", a:["open|open question|open questions","closed|closed question|closed questions","structured","unstructured","semi-structured|semi structured"]},
+  {t:"RM", q:"Name a way researchers control a study", a:["counterbalancing","randomisation|randomization","standardisation|standardised procedures|standardization","random allocation","control group","single blind","double blind"]},
+  {t:"RM", q:"Name a source of bias in research", a:["researcher bias|experimenter bias|investigator effects|investigator bias","demand characteristics","social desirability|social desirability bias","sampling bias|sample bias|biased sample","order effects","observer bias"]},
+  {t:"RM", q:"Name a type of reliability or validity", a:["test-retest|test retest","inter-rater|inter rater|inter-observer|inter observer","ecological validity|ecological","internal validity|internal","external validity|external","population validity|population","face validity"]},
+  // Social influence
+  {t:"Social influence", q:"Name a factor that affects conformity", a:["group size","anonymity","task difficulty|difficulty of task","unanimity","personality","expertise","culture","self-esteem|self esteem","locus of control"]},
+  {t:"Social influence", q:"Name a factor that affects obedience", a:["uniform","proximity|distance","location|setting|surroundings","legitimacy of authority|legitimate authority|authority|status","authoritarian personality|personality","culture","agentic state"]},
+  {t:"Social influence", q:"Name a researcher from the Social influence topic", a:["Asch","Milgram","Adorno","Bickman","Piliavin","Zimbardo","Darley|darley and latane","Latane","Le Bon|lebon","Reicher","Mann","Rotter","Hofling"]},
+  {t:"Social influence", q:"Name a factor that affects bystander intervention", a:["presence of others|number of bystanders|bystanders","diffusion of responsibility","cost of helping|cost","similarity to the victim|similarity","competence|expertise","mood","culture"]},
+  {t:"Social influence", q:"Name a factor that affects crowd or collective behaviour", a:["deindividuation","social loafing","culture","personality","morality|moral strength","anonymity"]},
+  {t:"Social influence", q:"Name a type of conformity or social influence", a:["normative|normative social influence","informational|informational social influence","compliance","internalisation|internalization","identification","obedience","minority influence"]},
+  {t:"Social influence", q:"Name an explanation of obedience", a:["agency theory|agency","agentic state","autonomous state","legitimacy of authority|legitimate authority","authoritarian personality","social impact theory"]},
+  // Language
+  {t:"Language, thought & communication", q:"Name a function of animal communication", a:["survival","reproduction|attracting a mate|mating","territory|defending territory","food|finding food|food sources"]},
+  {t:"Language, thought & communication", q:"Name something human language has that animal communication doesn't", a:["displacement","creativity|productivity","multi-channel|multichannel","open system|open","planning ahead|plan ahead"]},
+  {t:"Language, thought & communication", q:"Name a type of non-verbal communication", a:["eye contact","body language","posture","gestures|gesture","touch","personal space","facial expressions|facial expression","paralinguistics|tone of voice"]},
+  {t:"Language, thought & communication", q:"Name a factor that affects personal space", a:["culture","status","gender","personality","familiarity"]},
+  {t:"Language, thought & communication", q:"Name a researcher from the Language topic", a:["Piaget","Sapir|sapir whorf|sapir-whorf","Whorf","von Frisch|frisch|karl von frisch","Yuki","Darwin","Kendon","Fisher","Argyle","Sommer","Bowlby"]},
+  {t:"Language, thought & communication", q:"Name a function of eye contact", a:["regulating conversation|regulate conversation|turn-taking|turn taking","signalling attraction|attraction","expressing emotion|emotion|emotions"]},
+  {t:"Language, thought & communication", q:"Name a bee dance von Frisch described", a:["round dance|round","waggle dance|waggle"]},
+  {t:"Language, thought & communication", q:"Name an example of body language", a:["open posture","closed posture","postural echo|mirroring","crossed arms|folded arms","gestures|gesture","touch"]},
+  // Brain
+  {t:"Brain & neuropsychology", q:"Name a lobe of the brain", a:["frontal","parietal","temporal","occipital"]},
+  {t:"Brain & neuropsychology", q:"Name a type of neuron", a:["sensory","relay","motor"]},
+  {t:"Brain & neuropsychology", q:"Name a part of a neuron", a:["dendrites|dendrite","cell body|soma","axon","myelin sheath|myelin","nucleus","axon terminal|axon terminals|terminal buttons|terminal button","nodes of ranvier|node of ranvier"]},
+  {t:"Brain & neuropsychology", q:"Name a specialised area of the brain", a:["Broca's area|broca|brocas area","Wernicke's area|wernicke|wernickes area","motor area|motor cortex","somatosensory area|somatosensory cortex","visual area|visual cortex","auditory area|auditory cortex","interpretive cortex"]},
+  {t:"Brain & neuropsychology", q:"Name a type of brain scan", a:["CT|ct scan|cat scan|cat","PET|pet scan","fMRI|fmri scan","MRI|mri scan"]},
+  {t:"Brain & neuropsychology", q:"Name a part of the nervous system", a:["central nervous system|cns","peripheral nervous system|pns","somatic|somatic nervous system","autonomic|autonomic nervous system","sympathetic|sympathetic nervous system","parasympathetic|parasympathetic nervous system","spinal cord","brain"]},
+  {t:"Brain & neuropsychology", q:"Name a change in the body during fight or flight", a:["increased heart rate|faster heart rate|heart rate","faster breathing|increased breathing|breathing rate","dilated pupils|pupils dilate|pupil dilation","sweating","digestion slows|slower digestion|reduced digestion","muscles tense|muscle tension","dry mouth|less saliva","adrenaline released|adrenaline"]},
+  {t:"Brain & neuropsychology", q:"Name a researcher from the Brain & neuro topic", a:["Penfield","Tulving","Hebb","James|james lange|james-lange","Lange","Broca","Wernicke"]},
+  {t:"Brain & neuropsychology", q:"Name a neurotransmitter", a:["serotonin","dopamine","adrenaline","noradrenaline","GABA","acetylcholine","glutamate"]},
+  {t:"Brain & neuropsychology", q:"Name something involved in synaptic transmission", a:["synapse","vesicles|vesicle","neurotransmitter|neurotransmitters","receptor sites|receptor site|receptors","synaptic gap|synaptic cleft","action potential","excitation","inhibition","summation"]},
+  // Psychological problems
+  {t:"Psychological problems", q:"Name a symptom of depression", a:["low mood|sadness","loss of interest|anhedonia","fatigue|tiredness|low energy","sleep problems|insomnia|sleeping too much","change in appetite|appetite|weight change","low self-esteem|low self esteem","suicidal thoughts","poor concentration|concentration","guilt","worthlessness"]},
+  {t:"Psychological problems", q:"Name a characteristic of addiction", a:["cravings|craving","tolerance","withdrawal","loss of control","continued use despite harm|persisting despite harm","neglecting other activities"]},
+  {t:"Psychological problems", q:"Name a treatment for depression", a:["antidepressants|ssris|ssri|drugs","CBT|cognitive behavioural therapy|cognitive behavioral therapy","exercise"]},
+  {t:"Psychological problems", q:"Name a treatment for addiction", a:["aversion therapy","self-management|self management","self-help groups|self help groups|self-help group","12-step programme|12 step|twelve step","alcoholics anonymous|aa"]},
+  {t:"Psychological problems", q:"Name an explanation of depression", a:["low serotonin|serotonin","negative triad","negative schemas|schemas","negative attributional style|attributional style","genetics|genes"]},
+  {t:"Psychological problems", q:"Name an explanation of addiction", a:["genetic vulnerability|genetics|genes|heredity","peer influence|peers","diathesis-stress|diathesis stress","social learning"]},
+  {t:"Psychological problems", q:"Name one of Jahoda's criteria for ideal mental health", a:["positive self-attitude|positive attitude to self|self-attitudes|self attitude","self-actualisation|self actualisation|personal growth|growth","integration|resistance to stress","autonomy","accurate perception of reality|perception of reality","environmental mastery|mastery of the environment|mastery"]},
+  {t:"Psychological problems", q:"Name a researcher from the Psychological problems topic", a:["Wiles","Kaij","Beck","Jahoda","Seligman","Kendler","Walsh","McCrone"]},
+  {t:"Psychological problems", q:"Name one part of Beck's negative triad", a:["self|the self","world|the world","future|the future"]},
+  {t:"Psychological problems", q:"Name an effect of mental health problems on a person or on society", a:["relationships","coping","physical health","social care|cost of social care","crime","economy|economic cost|cost","isolation","stigma"]},
+];
+const RARE_ORDER = shuffleR(RARE.map((p,i)=>i), rngFrom("rare-order-v1"));
+const RARE_SECS = 20;
+const rareNorm = s => String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/'s\b/g,"s").replace(/\bet al\b/g," ").replace(/[^a-z0-9]+/g," ").replace(/\b(the|a|an|and)\b/g," ").replace(/\s+/g,"");
+/** Which round today belongs to: rounds start on Mondays and Thursdays. */
+function rareRound(dt){ const d=new Date((dt||today())+"T12:00:00"), sinceMon=(d.getDay()+6)%7, back=sinceMon>=3?sinceMon-3:sinceMon;
+  const s=new Date(d); s.setDate(d.getDate()-back); const start=`${s.getFullYear()}-${String(s.getMonth()+1).padStart(2,"0")}-${String(s.getDate()).padStart(2,"0")}`;
+  const nx=new Date(s); nx.setDate(s.getDate()+(sinceMon>=3?4:3));
+  return {n:Math.round((dayNum(start)-dayNum("2026-11-23"))*2/7)+1, key:start, next:nx.toLocaleDateString("en-GB",{weekday:"long"})}; }
+function rarePrompts(){ const r=rareRound(), out=[], L=RARE_ORDER.length, lock=stageInfo().locked;
+  for(let j=0; out.length<7 && j<L; j++){ const p=RARE[RARE_ORDER[((r.n*7+j)%L+L)%L]]; if(!NOT_YET.has(p.t) && !lock.has(p.t)) out.push(p); }
+  return out; }
+let RARE_FREQ=null;
+/** How rare an answer is: the less our own cards mention it, the more it's worth (10 to 100 points). */
+function rareScores(p){
+  if(!RARE_FREQ) RARE_FREQ=" "+DATA.map(d=>((d.q||"")+" "+(d.a||"")).toLowerCase()).join(" \n ")+" ";
+  const text=RARE_FREQ;
+  const f=p.a.map(a=>{ let m=0; a.split("|").forEach(v=>{ const w=v.toLowerCase().trim(); if(w.length<2) return; const re=new RegExp("(^|[^a-z])"+w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"([^a-z]|$)","g"); m=Math.max(m,(text.match(re)||[]).length); }); return m; });
+  const lo=Math.min(...f), hi=Math.max(...f);
+  return f.map(x=> hi===lo ? 50 : Math.round(10+90*(1-Math.log(1+x-lo)/Math.log(1+hi-lo)))); }
+const rareMemo={};
+function rareScoresFor(p){ return rareMemo[p.q] || (rareMemo[p.q]=rareScores(p)); }
+const RARE_TIERS=[[80,"Ultra rare","💎","#7B2FF7"],[55,"Rare","🟣","#B04BD6"],[30,"Uncommon","🔵","#2563EB"],[0,"Common","⚪","#6B7280"]];
+const rareTier = pts => RARE_TIERS.find(t=>pts>=t[0]);
+const RARE_ZONES=[[0,"🌊 Conscious mind"],[700,"🌫️ Preconscious"],[1500,"🌑 Unconscious"],[2500,"🔥 The deepest depths"]];
+const rareZone = m => RARE_ZONES.filter(z=>m>=z[0]).pop()[1];
+function rareMatch(p, typed){
+  const t=rareNorm(typed); if(t.length<2) return -1;
+  for(let i=0;i<p.a.length;i++) for(const v of p.a[i].split("|")){ const n=rareNorm(v); if(!n) continue;
+    if(t===n) return i;
+    const tol=n.length>=8?2:n.length>=5?1:0; if(tol && Math.abs(t.length-n.length)<=tol && lev(t,n)<=tol) return i;
+    if(n.length>=5 && t.includes(n) && t.length<=n.length+10) return i; }
+  return -1; }
+function rareState(){ const r=rareRound(); if(!G.rare || G.rare.k!==r.key) G.rare={k:r.key, n:r.n, i:0, res:[], done:false, t0:0}; return G.rare; }
+function rareStart(){ anPlay("rare"); clearInterval(arc.timer); arc.phase="rare"; arc.mode="rare"; const st=rareState();
+  if(st.t0 && !st.done && st.res.length===st.i && Date.now()-st.t0>(RARE_SECS+2)*1000) rareSubmit(true, true);   // left mid-question: that one counts as missed
+  rareRender(); arcToTop(); }
+const rareMetres = st => st.res.reduce((t,r)=>t+r.pts*5,0);
+function rareGauge(m){ const pct=Math.min(100, m/3500*100);
+  return `<div class="rare-gauge" aria-label="Depth ${m} metres"><div class="rg-water"><i style="height:${pct}%;--w:${pct}%"></i>${RARE_ZONES.map(z=>`<span style="top:${z[0]/3500*100}%">${z[1].split(" ")[0]}</span>`).join("")}</div><b>${m.toLocaleString()} m</b><small>${esc(rareZone(m).replace(/^\S+\s/,""))}</small></div>`; }
+function rareRender(){
+  const st=rareState(), ps=rarePrompts(), r=rareRound(), m=rareMetres(st);
+  clearInterval(arc.timer);
+  const head=`<div class="arc-top"><span class="big">💎 Rare Find #${r.n}</span><span class="spacer"></span><button class="btn ghost" id="arcMenu" style="padding:7px 14px">Back</button></div>`;
+  if(st.done || st.i>=ps.length){
+    if(!st.done) rareFinish(st, ps);
+    $("#arcArea").innerHTML=`${head}<div class="rare-wrap">${rareGauge(m)}<div class="rare-main">
+      <h3 style="margin:0">You dug ${m.toLocaleString()} metres!</h3><p class="muted" style="margin:4px 0 12px">Deepest zone: <b>${esc(rareZone(m))}</b>${G.st.rareBest?` · Your record: ${G.st.rareBest.toLocaleString()} m`:""}</p>
+      <ul class="results">${st.res.map((x,i)=>{ const p=ps[i]; if(!p) return ""; const tr=x.pts?rareTier(x.pts):null; return `<li class="${x.pts?"ok":"no"}"><b>${esc(p.q)}</b><div class="ans">${x.pts?`${esc(x.typed)} · ${tr[2]} ${tr[1]} · ${x.pts*5} m`:(x.typed?`“${esc(x.typed)}” wasn't on the list`:"No answer")}</div></li>`; }).join("")}</ul>
+      <div class="share">${esc(rareShare(st))}</div>
+      <div class="card-actions" style="justify-content:center"><button class="btn ghost" id="rareCopy">Copy result</button></div>
+      <p class="muted" style="text-align:center">New round on ${r.next}. Rounds start every Monday and Thursday.</p></div></div>`;
+    $("#arcMenu").onclick=()=>{ arc.phase="menu"; renderArcade(); };
+    const c=$("#rareCopy"); if(c) c.onclick=()=>{ navigator.clipboard && navigator.clipboard.writeText(rareShare(st)).then(()=>{ c.textContent="Copied ✓"; }).catch(()=>{}); };
+    return;
+  }
+  const p=ps[st.i], t=TMAP[p.t], answered=st.res.length>st.i;
+  let body;
+  if(!answered){
+    if(!st.t0) { st.t0=Date.now(); save(); }
+    body=`<p class="rare-q">${esc(p.q)}</p>
+      <div class="rare-in"><input id="rareIn" class="search" maxlength="40" autocomplete="off" placeholder="Type any right answer…" aria-label="Your answer"><button class="btn" id="rareGo">Dig<kbd>Enter</kbd></button></div>
+      <div class="rare-time"><i id="rareBar"></i></div>
+      <p class="muted" style="font-size:13px;margin:6px 0 0">One answer only. The rarer it is, the deeper you dig. Spelling slips are fine.</p>`;
+  } else {
+    const x=st.res[st.i], sc=rareScoresFor(p), order=p.a.map((a,i)=>i).sort((a,b)=>sc[b]-sc[a]), tr=x.pts?rareTier(x.pts):null;
+    body=`<p class="rare-q">${esc(p.q)}</p>
+      <div class="rare-fb ${x.pts?"ok":"no"}">${x.pts?`<b>✓ ${esc(p.a[x.hit].split("|")[0])}</b> <span class="rare-tier" style="--tc:${tr[3]}">${tr[2]} ${tr[1]}</span> <b>+${x.pts*5} m</b>`:(x.typed?`<b>“${esc(x.typed)}” isn't on our list.</b> No metres this time.`:`<b>⏰ Time's up!</b> No metres this time.`)}</div>
+      <p class="muted" style="margin:10px 0 6px;font-size:14px">All the answers we'd accept, rarest first:</p>
+      <div class="rare-chips">${order.map(i=>{ const tt=rareTier(sc[i]); return `<span class="rare-chip ${x.hit===i?"mine":""}" style="--tc:${tt[3]}" title="${tt[1]}">${tt[2]} ${esc(p.a[i].split("|")[0])} <small>${sc[i]*5} m</small></span>`; }).join("")}</div>
+      <div class="card-actions" style="justify-content:flex-end"><button class="btn" id="rareNext">${st.i<ps.length-1?"Next prompt":"See how deep you got"}<kbd>Enter</kbd></button></div>`;
+  }
+  $("#arcArea").innerHTML=`${head}<div class="rare-wrap">${rareGauge(m)}<div class="rare-main">
+    <div class="tag"><span style="color:${t.c};font-weight:700">${esc(t.name)}</span> <span class="muted">Prompt ${st.i+1} of ${ps.length}</span></div>${body}</div></div>`;
+  $("#arcMenu").onclick=()=>{ clearInterval(arc.timer); arc.phase="menu"; renderArcade(); };
+  if(!answered){
+    const inp=$("#rareIn"); inp.focus({preventScroll:true});
+    inp.onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); rareSubmit(false); } };
+    $("#rareGo").onclick=()=>rareSubmit(false);
+    const tick=()=>{ const left=RARE_SECS-(Date.now()-st.t0)/1000, b=$("#rareBar"); if(b) b.style.width=Math.max(0,left/RARE_SECS*100)+"%"; if(b) b.classList.toggle("low", left<6); if(left<=0) rareSubmit(true); };
+    tick(); arc.timer=setInterval(tick, 100);
+  } else { const nx=$("#rareNext"); nx.focus({preventScroll:true}); nx.onclick=()=>{ st.i++; st.t0=0; save(); rareRender(); }; }
+}
+function rareSubmit(timeout, quiet){
+  const st=rareState(), ps=rarePrompts(), p=ps[st.i]; if(!p || st.res.length>st.i) return; clearInterval(arc.timer);
+  const inp=$("#rareIn"), typed=(!quiet && inp ? inp.value : "").trim().slice(0,40);
+  if(!timeout && !typed){ if(inp){ inp.classList.remove("shake"); void inp.offsetWidth; inp.classList.add("shake"); } arc.timer=setInterval(()=>{ const left=RARE_SECS-(Date.now()-st.t0)/1000, b=$("#rareBar"); if(b) b.style.width=Math.max(0,left/RARE_SECS*100)+"%"; if(left<=0) rareSubmit(true); },100); return; }
+  const hit=rareMatch(p, typed), pts=hit>=0?rareScoresFor(p)[hit]:0;
+  st.res.push({typed, hit, pts}); save();
+  if(!quiet){ try{ fxStudy(); }catch(e){} anAnswer("rare", hit>=0); sfx(hit>=0?(pts>=80?"lvl":"ok"):"no"); if(pts>=80) confetti(90); rareRender(); }
+}
+function rareFinish(st, ps){
+  st.done=true; const m=rareMetres(st), got=st.res.filter(x=>x.pts).length;
+  G.st.rareRounds=(G.st.rareRounds||0)+1; if(m>(G.st.rareBest||0)) G.st.rareBest=m;
+  if(st.res.some(x=>x.pts>=80)) G.flags.rareGem=1;
+  addXP(10+Math.round(m/25), false); G.hist[today()]=(G.hist[today()]||0)+1;
+  track("game_finish", `rare find: ${m} m, ${got}/${ps.length}`); save(); checkBadges();
+}
+function rareShare(st){ return `💎 Rare Find #${rareRound().n} · ${rareMetres(st).toLocaleString()} m\n`+st.res.map(x=>x.pts?rareTier(x.pts)[2]:"⬛").join(""); }
+
 let psyCur="";
 function psyStart(){ anPlay("psychle"); clearInterval(arc.timer); arc.phase="psychle"; arc.mode="psychle"; psyCur=""; psyRender(); arcToTop(); }
 function psyRender(){

@@ -34,7 +34,7 @@ const SITE_CODE = "fount-gcse";
 /** Friendly names for the games in the Summary (the Games tab keeps the short codes). */
 const GAME_NAMES = {"arcade:daily":"Daily 10","arcade:blitz":"Blitz","arcade:surv":"Survival","arcade:exam":"Exam Skills","arcade:maths":"RM Maths","arcade:terms":"Key Terms",
   "arcade:fix":"Fix my mistakes","arcade:boss":"Boss Battles","flaw":"Spot the Flaw","order":"Put in Order","swipe":"Swipe Sort","which-study":"Which Study?","truths":"Two Truths and a Lie",
-  "odd":"Odd One Out","examiner":"Be the Examiner","tdee":"TDEE Builder","synoptic":"Synoptic Links","psychle":"Psychle","9-mark":"9-mark answers"};
+  "odd":"Odd One Out","examiner":"Be the Examiner","tdee":"TDEE Builder","synoptic":"Synoptic Links","psychle":"Psychle","rare":"Rare Find","9-mark":"9-mark answers"};
 const gameName_ = k => GAME_NAMES[k] || (String(k).startsWith("match:") ? "Study Matcher" : String(k).startsWith("lab:") ? "Psych Lab" : String(k));   // the revision site sends this with every batch; anything without it is ignored   // a card needs this many answers before it counts as hardest/easiest
 
 /** Makes the tabs (and updates their headings). Runs itself whenever data arrives. */
