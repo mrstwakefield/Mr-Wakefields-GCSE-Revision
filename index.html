@@ -458,6 +458,15 @@ mark{background:#FFE17A;color:#18203A;border-radius:3px;padding:0 1px}
 .rep-btn{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;padding:4px 6px;border-radius:8px;margin-left:auto}
 .rep-btn:hover,.rep-btn:focus-visible{color:var(--ink);background:color-mix(in srgb,var(--line) 60%,transparent)}
 .rep-row{display:flex;justify-content:flex-end;margin-top:6px}
+.learn-card{background:var(--card);color:var(--ink);border-radius:20px;max-width:520px;width:100%;padding:20px 22px;box-shadow:0 24px 70px rgba(0,0,0,.4);border-top:7px solid var(--c);display:grid;gap:10px;max-height:calc(100vh - 32px);overflow:auto;animation:lcPop .25s ease-out}
+.learn-card h3{margin:0;font-family:var(--display);font-size:20px}.lc-top{display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.lc-tag{font-weight:700;color:var(--c);text-transform:uppercase;letter-spacing:.06em;font-size:12px}
+.lc-sc{margin:0;color:var(--muted)}.lc-q{margin:0;font-weight:600}.lc-a{font-family:var(--display);font-weight:800;font-size:21px;line-height:1.3;background:var(--good-bg);color:var(--ink);border-radius:12px;padding:12px 14px}
+.lc-mine{margin:0;font-size:14px;text-decoration:line-through;text-decoration-color:var(--warn)}.lc-mine .muted{text-decoration:none;display:inline-block}
+.lc-note{margin:0;font-size:13px}.learn-card #lcGot{justify-self:end}.learn-card .why{margin:0}
+.learn-all{margin-top:20px}
+@keyframes lcPop{from{transform:translateY(12px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.learn-card{animation:none}}
 .rep-ov{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px}
 .rep-sheet{background:var(--card);color:var(--ink);border-radius:18px;max-width:420px;width:100%;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
 .rep-sheet h3{margin:0 0 4px;font-family:var(--display)} .rep-sheet .rep-q{font-size:14px;margin:0 0 12px}
@@ -1907,6 +1916,7 @@ function cgDone(ok){
   const nx=$("#cgNext"); nx.focus({preventScroll:true});
   let gone=false; const go=()=>{ if(gone) return; gone=true; rate(ok?"k":"l"); const n=$("#cgIn"); if(n) n.focus({preventScroll:true}); };
   nx.onclick=go; if(ok) setTimeout(()=>{ if($("#cgNext")===nx) go(); },1200);
+  else { const id=deck[pos], again=learnAgain(id); openLearn([BY_ID[id]], ()=>{ if($("#cgNext")===nx) go(); }, {again}); }
 }
 function newDeck(){
   let p = pool();
@@ -2008,6 +2018,7 @@ function mcPick(i){
   deckXP+=answer({ok, el, mode:"cards", gold:golds.has(id), review:wasDue&&ok, topic:BY_ID[id].t});
   deckCombo = ok ? deckCombo+1 : 0; if(deckCombo>deckBest) deckBest=deckCombo;
   renderCard();
+  if(!ok){ const again=learnAgain(id); openLearn([BY_ID[id]], ()=>{ if(cardMode==="mc" && mcPicked!==null && deck[pos]===id) mcNext(); }, {again, picked:mcCur.opts[i]}); }
   if(ok && (!BY_ID[id].why || BY_ID[id].whyAuto)) setTimeout(()=>{ if(cardMode==="mc" && mcPicked!==null && deck[pos]===id) mcNext(); }, BY_ID[id].why ? 2600 : 900);   // time to read the explanation; Next / Enter skips
 }
 let DECK_TRACKED=null;
@@ -2020,7 +2031,7 @@ function wireActions(){ if(flipped){ const n=$("#flipNext"); if(n) n.onclick=fli
 function flipRecord(id, ok){
   const wasDue=isDue(id); sessionRes[id]=ok?"k":"l";
   if(!ok){ G.st.learnMarks=(G.st.learnMarks||0)+1; G.lcount[id]=(G.lcount[id]||0)+1; } else if((G.lcount[id]||0)>=3) G.flags.finally=1;
-  mark(id, ok?"k":"l"); trackMistake(id, ok);
+  mark(id, ok?"k":"l"); trackMistake(id, ok); if(!ok) learnAgain(id);
   deckXP+=answer({ok, el:$("#card"), mode:"cards", gold:golds.has(id), review:wasDue&&ok, topic:BY_ID[id].t, typed:true});
   deckCombo = ok ? deckCombo+1 : 0; if(deckCombo>deckBest) deckBest=deckCombo;
 }
@@ -2093,7 +2104,8 @@ function renderQuiz(){
     if(quiz.shown){
       const next=ok=>{ quiz.marks[quiz.i]=ok; const wasDue=isDue(d.id), unv = ok && checkTyped(quiz.answers[quiz.i]||"", d).score<0.5;
         if(unv) toast("✍️","Marked as right, but small XP","Your answer didn't match the model answer closely, so it earns the XP of a miss. Use the key words from the mark scheme for full XP.",true);
-        mark(d.id, ok?"k":"l"); trackMistake(d.id, ok); answer({ok, el:$(ok?"#qYes":"#qNo"), mode:"quiz", review:wasDue&&ok&&!unv, topic:d.t, unverified:unv}); quiz.i++; quiz.shown=false; if(quiz.i>=quiz.items.length){ quiz.phase="done"; quizDone(); } renderQuiz(); const ta=$("#qAns"); if(ta) ta.focus(); };
+        mark(d.id, ok?"k":"l"); trackMistake(d.id, ok); answer({ok, el:$(ok?"#qYes":"#qNo"), mode:"quiz", review:wasDue&&ok&&!unv, topic:d.t, unverified:unv}); quiz.i++; quiz.shown=false; if(quiz.i>=quiz.items.length){ quiz.phase="done"; quizDone(); } renderQuiz(); const ta=$("#qAns"); if(ta) ta.focus();
+        if(!ok) openLearn([d], ()=>{ const t2=$("#qAns"); if(t2) t2.focus({preventScroll:true}); }); };
       $("#qYes").onclick=()=>{ if(!(quiz.answers[quiz.i]||"").trim()){ toast("✍️","Write an answer first","A blank answer can't be marked as right. Tap Not quite instead.",true); return; } next(true); }; $("#qNo").onclick=()=>next(false);
       $("#qYes").focus({preventScroll:true});
     } else {
@@ -2205,6 +2217,42 @@ const REP_BY_MODE={0:[1,4,5],1:[1,2,3,5],2:[1,4,5],3:[1,2,3,5],4:[1,4,5],5:[1,5]
 const canReport = id => id!=null && !!BY_ID[id] && !(id>=5000 && id<6000);   // made-up RM scenarios change every time, so they can't be reported by number
 const repBtnHTML = (id, m) => canReport(id) ? `<button type="button" class="rep-btn" data-rep="${id}" data-repm="${m}" aria-label="Report a problem with this card">${G.creps[id]?"⚑ Reported":"⚑ Report card"}</button>` : "";
 let repOpen=null;
+/* ---- "Learn this one": after a wrong answer, a flashcard with the answer and explanation pops up ---- */
+let learnOpen=null; const LEARN_BACK={};
+/** Put a missed card back into the deck a few cards later (at most twice per card per session). */
+function learnAgain(id){ LEARN_BACK[id]=(LEARN_BACK[id]||0)+1; if(LEARN_BACK[id]>2) return false; deck.splice(Math.min(deck.length, pos+4), 0, id); return true; }
+function closeLearn(){ if(!learnOpen) return; learnOpen.el.remove(); document.removeEventListener("keydown", learnOpen.key, true); learnOpen=null; }
+function openLearn(items, onDone, opts){
+  opts=opts||{}; items=(items||[]).filter(d=>d && d.q && d.a); if(!items.length){ if(onDone) onDone(); return; }
+  closeLearn(); let i=0; const el=document.createElement("div"); el.className="rep-ov learn-ov";
+  const next=()=>{ i++; if(i<items.length) draw(); else { closeLearn(); if(onDone) onDone(); } };
+  const draw=()=>{ const d=items[i], t=TMAP[d.t]||{c:"#7B5BE0", name:d.t||""}, real=d.id && BY_ID[d.id]===d;
+    el.innerHTML=`<div class="learn-card" role="dialog" aria-modal="true" aria-labelledby="lcH" style="--c:${t.c}">
+      <div class="lc-top"><span class="lc-tag">${esc(t.name||"")}</span>${items.length>1?`<span class="muted">${i+1} of ${items.length}</span>`:""}</div>
+      <h3 id="lcH">📖 Learn this one</h3>
+      ${d.sc?`<p class="lc-sc">${esc(d.sc)}</p>`:""}<p class="lc-q">${esc(d.q)}</p>
+      <div class="lc-a">${real?fmtAnswer(d.a,d.id):esc(d.a)}</div>
+      ${opts.picked?`<p class="lc-mine"><span class="muted">You picked:</span> ${esc(opts.picked)}</p>`:""}
+      ${d.why?`<div class="why">💡 ${esc(d.why)}</div>`:""}
+      ${opts.again?`<p class="muted lc-note">🔁 This one will come back in a few cards to check it's stuck.</p>`:""}
+      <button class="btn" id="lcGot">${i<items.length-1?"Got it · next":"Got it"}<kbd>Enter</kbd></button></div>`;
+    el.querySelector("#lcGot").onclick=next; el.querySelector("#lcGot").focus({preventScroll:true}); };
+  const key=e=>{ if(["Enter"," ","Escape"].includes(e.key)){ e.preventDefault(); e.stopPropagation(); next(); } else if(!e.metaKey && !e.ctrlKey && e.key.length===1) e.stopPropagation(); };
+  document.addEventListener("keydown", key, true);
+  document.body.appendChild(el); learnOpen={el, key}; draw();
+}
+/** Arcade end screens: a "Learn these as flashcards" button above each "Learn from these" list. */
+function learnListButtons(root){
+  root.querySelectorAll("ul.results").forEach(ul=>{
+    const head=ul.querySelector("li"); if(!head || !/Learn from these/.test(head.textContent) || ul.dataset.learn) return; ul.dataset.learn=1;
+    const items=[...ul.querySelectorAll("li.no")].map(li=>{ const q=li.querySelector("b"), a=li.querySelector(".ans:not(:first-child)")||[...li.querySelectorAll(".ans")].pop(), w=li.querySelector(".why");
+      return q && a ? {q:q.textContent.trim(), a:a.textContent.trim(), why:w?w.textContent.replace(/^💡\s*/,"").trim():""} : null; }).filter(Boolean);
+    if(!items.length) return;
+    const b=document.createElement("button"); b.className="btn learn-all"; b.textContent=`📖 Learn ${items.length>1?"these "+items.length:"this"} as flashcards`;
+    b.onclick=()=>openLearn(items); ul.before(b);
+  });
+}
+{ const pa=document.getElementById("p-arcade"); if(pa){ let q=0; new MutationObserver(()=>{ if(!q){ q=1; requestAnimationFrame(()=>{ q=0; learnListButtons(pa); }); } }).observe(pa,{childList:true, subtree:true}); } }
 function closeReport(){ if(!repOpen) return; repOpen.el.remove(); const f=repOpen.from; repOpen=null; if(f && document.body.contains(f)) f.focus({preventScroll:true}); }
 function openReport(id, m, from){
   closeReport(); const d=BY_ID[id]; if(!d) return; const cur=G.creps[id];
