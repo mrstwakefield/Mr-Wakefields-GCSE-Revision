@@ -63,6 +63,11 @@ h1 span b{font-weight:500}
 .tabs button[aria-selected="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 0 var(--line)}
 
 /* topics */
+.topics.folded .stagebar,.topics.folded .chips,.topics.folded .topics-acts{display:none!important}
+.topics.folded{padding:7px 12px;margin-bottom:14px}.topics.folded .topics-head{margin-bottom:0}.topics.folded h2{font-size:14px}
+.topics.folded .topics-tog{padding:3px 10px;font-size:12px;border-width:1px}
+.topics-sum{display:none;color:var(--muted);font-size:14px;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.topics.folded .topics-sum{display:block}
+.topics-tog{padding:5px 12px;font-size:13px;margin-left:auto}
 .topics{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 14px 10px;margin-bottom:22px}
 .topics-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 .topics-head h2{font-family:var(--display);font-size:18px;margin:0;font-weight:700}
@@ -1298,8 +1303,8 @@ body.fx-tickpad{padding-bottom:32px}
 
   <section class="topics" aria-labelledby="topicsTitle">
     <div class="topics-head">
-      <h2 id="topicsTitle">Topics to revise</h2>
-      <div><button class="linkbtn" id="mockTopics">🎯 Mock topics</button><button class="linkbtn" id="allTopics">Select all</button><button class="linkbtn" id="noTopics">Clear</button></div>
+      <h2 id="topicsTitle">Topics to revise</h2><span class="topics-sum" id="topicsSum"></span>
+      <div class="topics-acts"><button class="linkbtn" id="mockTopics">🎯 Mock topics</button><button class="linkbtn" id="allTopics">Select all</button><button class="linkbtn" id="noTopics">Clear</button></div><button class="btn ghost topics-tog" id="topicsTog" aria-expanded="true" aria-controls="chips">Hide topics ▴</button>
     </div>
     <div class="stagebar" id="stagebar" hidden></div>
     <div class="chips" id="chips"></div>
@@ -2272,6 +2277,16 @@ function learnListButtons(root){
   });
 }
 { const pa=document.getElementById("p-arcade"); if(pa){ let q=0; new MutationObserver(()=>{ if(!q){ q=1; requestAnimationFrame(()=>{ q=0; learnListButtons(pa); }); } }).observe(pa,{childList:true, subtree:true}); } }
+/* The topic picker folds away to one line once some topics are chosen, so the flashcards sit near the top. */
+function topicsFoldSync(){
+  const sec=document.querySelector("section.topics"); if(!sec) return;
+  const sel=(store.sel||[]), open = G.topicsOpen===true || !sel.length;
+  sec.classList.toggle("folded", !open);
+  const b=$("#topicsTog"); if(b){ b.textContent=open?"Hide topics ▴":"Change topics ▾"; b.setAttribute("aria-expanded", String(open)); b.hidden=!sel.length; }
+  const s=$("#topicsSum"); if(s){ const names=sel.map(k=>(TMAP[k]||{}).name||k); s.textContent = names.length>=TOPICS.length-1 ? "All topics" : names.join(", "); }
+}
+{ const b=document.getElementById("topicsTog"); if(b) b.onclick=()=>{ G.topicsOpen=!(G.topicsOpen===true || !(store.sel||[]).length); save(); topicsFoldSync(); };
+  const ch=document.getElementById("chips"); if(ch) new MutationObserver(topicsFoldSync).observe(ch,{childList:true, subtree:true, attributes:true, attributeFilter:["aria-pressed","class"]}); setTimeout(topicsFoldSync,0); }
 function closeReport(){ if(!repOpen) return; repOpen.el.remove(); const f=repOpen.from; repOpen=null; if(f && document.body.contains(f)) f.focus({preventScroll:true}); }
 function openReport(id, m, from){
   closeReport(); const d=BY_ID[id]; if(!d) return; const cur=G.creps[id];
